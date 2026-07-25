@@ -5,6 +5,7 @@ Wants=network-online.target
 
 [Service]
 Type=simple
+# setup.sh rewrites this to the actual deploy user (GCP has no default `ubuntu`).
 User=ubuntu
 WorkingDirectory=/opt/stocktest/web/backend
 ExecStart=/opt/stocktest/.venv/bin/uvicorn app:app --host 127.0.0.1 --port 8000

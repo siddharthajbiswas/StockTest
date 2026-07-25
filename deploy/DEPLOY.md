@@ -6,10 +6,15 @@ static files — the app is split:
 
 - **Frontend** → built static files committed to your Pages repo
   (`rahulbiswas.github.io`) at `sid/stocktest/`. Free; lives with your other projects.
-- **Backend** → the FastAPI engine on a free Oracle Cloud "Always Free" VM, at
+- **Backend** → the FastAPI engine on a **Google Cloud Compute Engine** VM, at
   **`stocktest-api.biswas.net`** over HTTPS. The frontend calls it cross-origin
   (CORS is already open in `app.py`). Price data is downloaded on the VM, so no
   stock data lives in any repo.
+
+> **Why a VM, not Cloud Run?** The app loads all price data into memory and
+> pre-warms it at startup, then keeps it warm and runs background validation
+> jobs on threads. That needs a long-running instance — Cloud Run's scale-to-zero
+> model would cold-start slowly and kill in-flight jobs.
 
 Order: stand up the backend (Part A), then deploy the frontend pointed at it
 (Part B). Names like `stocktest-api` are easy to change — just keep the DNS
@@ -17,26 +22,34 @@ record, the Caddyfile hostname, and the `VITE_API_BASE` build var in sync.
 
 ---
 
-# Part A — Backend on the Oracle VM
+# Part A — Backend on the Google Cloud VM
 
-## A1. Create the VM (Oracle Cloud Console)
+## A1. Create the VM (Google Cloud Console)
 
-1. Sign up at <https://cloud.oracle.com>. A credit card is required for identity
-   verification — "Always Free" resources are **not** charged. Pick a home region.
-2. **Compute → Instances → Create instance:**
-   - **Image:** Canonical Ubuntu 22.04 (or 24.04).
-   - **Shape:** *Ampere (ARM)* → `VM.Standard.A1.Flex`, **2 OCPU / 12 GB RAM**
-     (within Always Free). If ARM capacity is unavailable, retry later or use
-     `VM.Standard.E2.1.Micro` (AMD, 1 GB — tight).
-   - **SSH keys:** upload `~/.ssh/oracle_vm.pub`.
-   - Create, then note the **public IPv4 address**.
+1. At <https://console.cloud.google.com>: create/select a **project** and make
+   sure **billing is enabled** for it (Compute Engine requires it), then enable
+   the **Compute Engine API** when prompted.
+2. **Compute Engine → VM instances → Create instance:**
+   - **Name:** `stocktest`. **Region:** pick one near you (e.g. `us-central1`).
+   - **Machine type:** `e2-medium` (2 vCPU, **4 GB RAM**) — comfortable for the
+     in-memory data + pre-warm. Budget option: `e2-small` (2 GB) works but is
+     tight and may OOM during startup; bump up if so. (The Always-Free `e2-micro`
+     at 1 GB is too small.)
+   - **Boot disk:** Ubuntu 22.04 LTS, 20 GB standard is plenty.
+   - **Firewall:** check **Allow HTTP traffic** and **Allow HTTPS traffic**
+     (this creates the VPC rules for ports 80/443 — see A2 if you skip it here).
+   - **SSH key** (Advanced → Security → Manage Access → Add manually): paste the
+     contents of `~/.ssh/oracle_vm.pub`. The key's comment is just a label — it
+     works fine for GCP. GCP maps the key to the username in it; if unsure, use
+     `ssh -i ~/.ssh/oracle_vm <that-username>@<IP>` shown after creation.
+   - Create, then note the **External IP**. (Reserve it as a **static** IP under
+     VPC network → IP addresses so it can't change and break DNS.)
 
-## A2. Open ports 80 and 443 (VCN Security List)
+## A2. Open ports 80 and 443 (VPC firewall)
 
-Oracle blocks inbound in two places; this is the cloud firewall (`setup.sh` does
-the host firewall). Instance page → **Virtual Cloud Network → Subnet → Security
-List** → add two **Ingress Rules**: Source `0.0.0.0/0`, TCP, dest port `80`, then
-`443`.
+If you ticked "Allow HTTP/HTTPS traffic" in A1, this is already done. Otherwise:
+**VPC network → Firewall → Create firewall rule**, Ingress, targets = your VM's
+tag/all instances, source `0.0.0.0/0`, allow TCP `80` and `443`.
 
 ## A3. DNS: point stocktest-api.biswas.net at the VM
 
@@ -115,8 +128,9 @@ your `sid/index.html` landing page.)
 
 ## Notes
 
-- **Cost:** $0 on Always Free shapes. This VM runs a web server 24/7, so Oracle
-  won't reclaim it as idle.
+- **Cost:** a Compute Engine `e2-medium` runs ~$25/mo (24/7), `e2-small` ~$13/mo,
+  plus ~$1–2/mo for the disk and a static IP. Set a **budget alert** in Billing.
+  Frontend (Pages) and the data (from Yahoo) stay free.
 - **Public API:** anyone can reach `stocktest-api.biswas.net` and spend your VM's
   CPU/RAM. Fine for personal use; add auth or rate-limiting before promoting it.
   You can also tighten `allow_origins` in `app.py` to just your Pages origin.

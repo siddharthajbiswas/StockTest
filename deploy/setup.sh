@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# StockTest BACKEND setup for an Ubuntu 22.04+ Oracle "Always Free" VM.
+# StockTest BACKEND setup for an Ubuntu 22.04+ VM (GCP Compute Engine).
 # (The frontend is deployed separately to GitHub Pages — see DEPLOY.md.)
 #
 #   git clone <repo> /opt/stocktest
@@ -11,7 +11,9 @@
 set -euo pipefail
 
 APP_DIR=/opt/stocktest
-APP_USER=ubuntu
+# Run the service as the human who invoked `sudo` (GCP images have no default
+# `ubuntu` user — the login user comes from your SSH key). Falls back to ubuntu.
+APP_USER="${SUDO_USER:-ubuntu}"
 
 echo "==> [1/6] System packages"
 export DEBIAN_FRONTEND=noninteractive
@@ -30,14 +32,16 @@ if ! command -v caddy >/dev/null; then
 fi
 
 echo "==> [3/6] Open ports 80/443 in the host firewall (iptables)"
-# Oracle's Ubuntu image drops most inbound traffic by default. (You must ALSO
-# allow 80/443 in the VCN Security List / NSG from the Oracle console.)
+# GCP's default Ubuntu image does NOT block ports at the OS level (the VPC
+# firewall does), so these rules are usually a harmless no-op — kept so the
+# script also works on providers whose images ship a restrictive iptables.
+# You STILL must allow 80/443 in the GCP VPC firewall (see DEPLOY.md A2).
 for port in 80 443; do
 	if ! iptables -C INPUT -p tcp --dport "$port" -j ACCEPT 2>/dev/null; then
-		iptables -I INPUT 6 -m state --state NEW -p tcp --dport "$port" -j ACCEPT
+		iptables -I INPUT 6 -m state --state NEW -p tcp --dport "$port" -j ACCEPT 2>/dev/null || true
 	fi
 done
-netfilter-persistent save
+netfilter-persistent save 2>/dev/null || true
 
 echo "==> [4/6] Python venv + dependencies"
 cd "$APP_DIR"
@@ -53,8 +57,9 @@ else
 	echo "    data/ already populated — skipping (use download_data.py --force to refresh)"
 fi
 
-echo "==> [6/6] Install + start services"
-install -m 644 deploy/stocktest-backend.service /etc/systemd/system/stocktest-backend.service
+echo "==> [6/6] Install + start services (running backend as '$APP_USER')"
+sed "s/^User=ubuntu$/User=$APP_USER/" deploy/stocktest-backend.service \
+	> /etc/systemd/system/stocktest-backend.service
 install -m 644 deploy/Caddyfile /etc/caddy/Caddyfile
 systemctl daemon-reload
 systemctl enable --now stocktest-backend
