@@ -1,9 +1,12 @@
 # Caddy serves the built React app and reverse-proxies the API to uvicorn.
-# One origin (biswas.net) for both, so the frontend's relative /pickers,
-# /backtest, ... calls just work. Caddy fetches + renews HTTPS certs for
-# biswas.net automatically once DNS points here and ports 80/443 are open.
+# One origin (stocktest.biswas.net) for both, so the frontend's relative
+# /pickers, /backtest, ... calls just work. Caddy fetches + renews the HTTPS
+# cert automatically once DNS points here and ports 80/443 are open.
+#
+# Deliberately a SUBDOMAIN: biswas.net / www.biswas.net already serve a separate
+# GitHub Pages site — this leaves that untouched.
 
-biswas.net, www.biswas.net {
+stocktest.biswas.net {
 	encode zstd gzip
 
 	# API paths → FastAPI backend on localhost. Keep this list in sync with

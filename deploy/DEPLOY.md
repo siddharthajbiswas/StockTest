@@ -1,9 +1,10 @@
-# Deploying StockTest to biswas.net on a free Oracle Cloud VM
+# Deploying StockTest to stocktest.biswas.net on a free Oracle Cloud VM
 
 This runs the **whole app** (React frontend + FastAPI backend + price data) on a
 single Oracle Cloud "Always Free" VM, at **$0/month, permanently**, with HTTPS at
-`biswas.net`. The data is downloaded on the VM from Yahoo Finance, so nothing is
-uploaded and no stock data lives in this repo.
+`stocktest.biswas.net`. It uses a subdomain so the existing site at `biswas.net`
+stays untouched. The data is downloaded on the VM from Yahoo Finance, so nothing
+is uploaded and no stock data lives in this repo.
 
 Steps 1–3 are things only you can do (account, DNS). Step 4 is one script.
 
@@ -32,19 +33,25 @@ cloud firewall; `setup.sh` handles the host firewall.
 2. Add two **Ingress Rules**: Source `0.0.0.0/0`, IP Protocol TCP, Destination
    port `80`, then another for `443`.
 
-## 3. Point biswas.net at the VM (your registrar's DNS)
+## 3. Point stocktest.biswas.net at the VM (DNS)
 
-At whoever manages biswas.net's DNS, add:
+StockTest lives on a **subdomain** so it doesn't disturb the existing site at
+`biswas.net` / `www.biswas.net` (a separate GitHub Pages site). You add **one**
+new record and leave everything else alone.
 
-| Type | Host / Name | Value            | TTL  |
-|------|-------------|------------------|------|
-| A    | `@`         | *VM public IP*   | 3600 |
-| A    | `www`       | *VM public IP*   | 3600 |
+biswas.net's DNS is on Google Cloud nameservers (`ns-cloud-*.googledomains.com`),
+registrar **Squarespace**. Edit records at **<https://account.squarespace.com>
+→ Domains → biswas.net → DNS Settings** (Squarespace absorbed Google Domains).
+Add a custom record:
 
-Remove any conflicting old A/AAAA/CNAME records for `@` and `www`. Verify with
-`dig +short biswas.net` (should return the VM IP). **Do this before step 4** so
-Caddy can obtain the TLS certificate on its first attempt. DNS can take minutes
-to a few hours to propagate.
+| Type | Host / Name  | Value / Data    | TTL  |
+|------|--------------|-----------------|------|
+| A    | `stocktest`  | *VM public IP*  | 3600 |
+
+**Do not touch** the existing `@`/`www` records (the `185.199.x.x` GitHub Pages
+IPs). Verify with `dig +short stocktest.biswas.net` — it should return the VM IP.
+**Do this before step 4** so Caddy can get its TLS cert on the first attempt.
+Propagation takes minutes to a few hours.
 
 ## 4. Deploy (on the VM)
 
@@ -73,8 +80,9 @@ systemctl status stocktest-backend caddy   # both active (running)
 curl -s http://127.0.0.1:8000/health        # {"status":"ok","tickers_loaded":...}
 ```
 
-Open <https://biswas.net>. If the cert isn't issued yet, confirm DNS resolves to
-the VM and ports 80/443 are open (steps 2–3), then `sudo systemctl restart caddy`.
+Open <https://stocktest.biswas.net>. If the cert isn't issued yet, confirm DNS
+resolves to the VM and ports 80/443 are open (steps 2–3), then
+`sudo systemctl restart caddy`.
 
 ---
 

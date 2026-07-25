@@ -5,8 +5,8 @@
 #   cd /opt/stocktest && sudo bash deploy/setup.sh
 #
 # Idempotent: safe to re-run (e.g. after `git pull`) to rebuild + restart.
-# Point biswas.net at this VM's public IP BEFORE running, so Caddy can get a
-# TLS cert on the first try.
+# Point stocktest.biswas.net at this VM's public IP BEFORE running, so Caddy can
+# get a TLS cert on the first try.
 set -euo pipefail
 
 APP_DIR=/opt/stocktest
@@ -72,4 +72,4 @@ echo
 echo "Done. Backend + Caddy are running."
 echo "  systemctl status stocktest-backend caddy"
 echo "  curl -s http://127.0.0.1:8000/health"
-echo "Once DNS has propagated, https://biswas.net should serve the app."
+echo "Once DNS has propagated, https://stocktest.biswas.net should serve the app."
