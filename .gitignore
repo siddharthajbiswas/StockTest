@@ -1,0 +1,43 @@
+# ---- Python ----
+backend/.venv/
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.db
+*.sqlite3
+.env
+
+# ---- Node ----
+node_modules/
+frontend/dist/
+dist/
+dist-ssr/
+*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ---- Editor / OS ----
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+
+# ---- Data (NOT redistributed: large + provider ToS) ----
+# Regenerate locally with download_data.py / fetch_fundamentals.py.
+/data/
+*.csv
+
+# ---- Generated / runtime state ----
+/results/
+*.log
+web/backend/store/*.json
+
+# TS build cache
+*.tsbuildinfo
