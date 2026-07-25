@@ -1,0 +1,22 @@
+# Caddy serves the built React app and reverse-proxies the API to uvicorn.
+# One origin (biswas.net) for both, so the frontend's relative /pickers,
+# /backtest, ... calls just work. Caddy fetches + renews HTTPS certs for
+# biswas.net automatically once DNS points here and ports 80/443 are open.
+
+biswas.net, www.biswas.net {
+	encode zstd gzip
+
+	# API paths → FastAPI backend on localhost. Keep this list in sync with
+	# the prefixes in web/frontend/vite.config.ts.
+	@api path /pickers* /timers* /universe* /tickers* /backtest* /strategies* /validate* /health*
+	handle @api {
+		reverse_proxy 127.0.0.1:8000
+	}
+
+	# Everything else → the built single-page app.
+	handle {
+		root * /opt/stocktest/web/frontend/dist
+		try_files {path} /index.html
+		file_server
+	}
+}
