@@ -12,8 +12,16 @@ import type {
   ValidationResult,
 } from "./types";
 
+// Base URL for the backend API. Empty in dev, where Vite proxies same-origin
+// paths (see vite.config.ts) to localhost:8000. Set to the backend's absolute
+// URL at build time (VITE_API_BASE) when the frontend is served from a
+// different origin than the API — e.g. the app on GitHub Pages at
+// biswas.net/sid/stocktest and the backend on stocktest-api.biswas.net.
+const API_BASE = import.meta.env.VITE_API_BASE ?? "";
+const api = (path: string) => `${API_BASE}${path}`;
+
 async function getJSON<T>(url: string): Promise<T> {
-  const res = await fetch(url);
+  const res = await fetch(api(url));
   if (!res.ok) throw await toError(res);
   return res.json();
 }
@@ -62,7 +70,7 @@ export const searchTickers = (q: string, limit = 12) =>
   );
 
 export async function runBacktest(req: BacktestRequest): Promise<BacktestResponse> {
-  const res = await fetch("/backtest", {
+  const res = await fetch(api("/backtest"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(req),
@@ -75,7 +83,7 @@ export const listStrategies = () =>
   getJSON<{ strategies: SavedStrategy[] }>("/strategies/mine").then((d) => d.strategies);
 
 export async function saveStrategy(name: string, config: StrategyConfig): Promise<SavedStrategy> {
-  const res = await fetch("/strategies/mine", {
+  const res = await fetch(api("/strategies/mine"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name, config }),
@@ -85,14 +93,14 @@ export async function saveStrategy(name: string, config: StrategyConfig): Promis
 }
 
 export async function deleteStrategy(id: string): Promise<void> {
-  const res = await fetch(`/strategies/mine/${id}`, { method: "DELETE" });
+  const res = await fetch(api(`/strategies/mine/${id}`), { method: "DELETE" });
   if (!res.ok) throw await toError(res);
 }
 
 // ----- out-of-sample validation (submit a job, then poll for the result) -----
 
 async function startValidation(req: ValidateRequest): Promise<string> {
-  const res = await fetch("/validate", {
+  const res = await fetch(api("/validate"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(req),
@@ -122,7 +130,7 @@ export async function validateStrategy(
     if (signal?.aborted) throw new DOMException("Validation cancelled", "AbortError");
     await new Promise((r) => setTimeout(r, intervalMs));
     if (signal?.aborted) throw new DOMException("Validation cancelled", "AbortError");
-    const res = await fetch(`/validate/${jobId}`, { signal });
+    const res = await fetch(api(`/validate/${jobId}`), { signal });
     if (!res.ok) throw await toError(res);
     const job = (await res.json()) as ValidationJob;
     if (job.status === "done" && job.result) return job.result;

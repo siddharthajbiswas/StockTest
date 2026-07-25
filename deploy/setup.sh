@@ -1,30 +1,25 @@
 #!/usr/bin/env bash
-# StockTest one-shot server setup for an Ubuntu 22.04+ Oracle "Always Free" VM.
+# StockTest BACKEND setup for an Ubuntu 22.04+ Oracle "Always Free" VM.
+# (The frontend is deployed separately to GitHub Pages — see DEPLOY.md.)
 #
 #   git clone <repo> /opt/stocktest
 #   cd /opt/stocktest && sudo bash deploy/setup.sh
 #
-# Idempotent: safe to re-run (e.g. after `git pull`) to rebuild + restart.
-# Point stocktest.biswas.net at this VM's public IP BEFORE running, so Caddy can
-# get a TLS cert on the first try.
+# Idempotent: safe to re-run (e.g. after `git pull`) to reinstall + restart.
+# Point stocktest-api.biswas.net at this VM's public IP BEFORE running, so Caddy
+# can get a TLS cert on the first try.
 set -euo pipefail
 
 APP_DIR=/opt/stocktest
 APP_USER=ubuntu
 
-echo "==> [1/7] System packages"
+echo "==> [1/6] System packages"
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -y
 apt-get install -y python3 python3-venv python3-pip git curl ca-certificates \
 	iptables-persistent debian-keyring debian-archive-keyring apt-transport-https
 
-echo "==> [2/7] Node.js 20 (to build the frontend)"
-if ! command -v node >/dev/null || [ "$(node -v | cut -c2-3)" -lt 18 ]; then
-	curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-	apt-get install -y nodejs
-fi
-
-echo "==> [3/7] Caddy (auto-HTTPS reverse proxy)"
+echo "==> [2/6] Caddy (auto-HTTPS reverse proxy)"
 if ! command -v caddy >/dev/null; then
 	curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' \
 		| gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
@@ -34,7 +29,7 @@ if ! command -v caddy >/dev/null; then
 	apt-get install -y caddy
 fi
 
-echo "==> [4/7] Open ports 80/443 in the host firewall (iptables)"
+echo "==> [3/6] Open ports 80/443 in the host firewall (iptables)"
 # Oracle's Ubuntu image drops most inbound traffic by default. (You must ALSO
 # allow 80/443 in the VCN Security List / NSG from the Oracle console.)
 for port in 80 443; do
@@ -44,24 +39,21 @@ for port in 80 443; do
 done
 netfilter-persistent save
 
-echo "==> [5/7] Python venv + dependencies"
+echo "==> [4/6] Python venv + dependencies"
 cd "$APP_DIR"
 if [ ! -d .venv ]; then python3 -m venv .venv; fi
 .venv/bin/pip install --upgrade pip
 .venv/bin/pip install -r requirements.txt
 chown -R "$APP_USER":"$APP_USER" "$APP_DIR"
 
-echo "==> [6/7] Build frontend + download price data"
-sudo -u "$APP_USER" bash -c "cd '$APP_DIR/web/frontend' && npm ci && npm run build"
-# ~530 tickers from Yahoo; one-time, ~10-20 min. Skips tickers already present.
+echo "==> [5/6] Download price data (~530 tickers from Yahoo; one-time, ~10-20 min)"
 if [ ! -d "$APP_DIR/data" ] || [ -z "$(ls -A "$APP_DIR/data" 2>/dev/null)" ]; then
-	echo "    downloading price data (this takes a while)..."
 	sudo -u "$APP_USER" "$APP_DIR/.venv/bin/python" "$APP_DIR/download_data.py"
 else
-	echo "    data/ already populated — skipping download (use download_data.py --force to refresh)"
+	echo "    data/ already populated — skipping (use download_data.py --force to refresh)"
 fi
 
-echo "==> [7/7] Install + start services"
+echo "==> [6/6] Install + start services"
 install -m 644 deploy/stocktest-backend.service /etc/systemd/system/stocktest-backend.service
 install -m 644 deploy/Caddyfile /etc/caddy/Caddyfile
 systemctl daemon-reload
@@ -72,4 +64,4 @@ echo
 echo "Done. Backend + Caddy are running."
 echo "  systemctl status stocktest-backend caddy"
 echo "  curl -s http://127.0.0.1:8000/health"
-echo "Once DNS has propagated, https://stocktest.biswas.net should serve the app."
+echo "Once DNS has propagated: https://stocktest-api.biswas.net/health"
