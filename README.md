@@ -28,7 +28,7 @@ The frontend proxies API calls to the backend, so start the backend first.
 ```bash
 # 1. Install backend deps (once)
 python -m venv .venv
-.venv/bin/pip install -r web/backend/requirements.txt
+.venv/bin/pip install -r requirements-dev.txt
 
 # 2. Terminal A — backend API (from web/backend)
 cd web/backend
@@ -126,6 +126,8 @@ data/            # per-ticker price CSVs + fundamentals snapshot
 ```
 
 ## Tests
+
+Needs the dev deps: `.venv/bin/pip install -r requirements-dev.txt`.
 
 ```bash
 # backend

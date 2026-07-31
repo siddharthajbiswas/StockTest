@@ -1,0 +1,9 @@
+# Local dev/test deps: the full runtime plus what web/backend/tests needs.
+#   .venv/bin/pip install -r requirements-dev.txt
+# The server installs plain requirements.txt (see deploy/setup.sh) — test deps
+# are deliberately kept out of the deploy path.
+
+-r requirements.txt
+
+pytest>=8
+httpx2>=2.0            # transport for fastapi/starlette TestClient (see conftest.py)
