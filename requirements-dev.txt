@@ -8,3 +8,7 @@
 -r requirements.txt
 
 pytest>=8
+
+# Only for tools/make_tile.py, which regenerates the project tile used on
+# biswas.net/sid. Nothing else imports it and no test needs it.
+Pillow>=10
