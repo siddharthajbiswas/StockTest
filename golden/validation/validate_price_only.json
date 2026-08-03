@@ -1,0 +1,100 @@
+{
+  "config": {
+    "commission_pct": 0.0005,
+    "end": "2021-12-31",
+    "mode": "picker",
+    "picker_id": "momentum",
+    "picker_params": {},
+    "rebalance": "M",
+    "slippage_pct": 0.0005,
+    "start": "2016-01-01",
+    "tax": {
+      "enabled": true,
+      "long_term_days": 365,
+      "long_term_rate": 0.15,
+      "short_term_rate": 0.35
+    },
+    "timer_id": "ma_cross",
+    "timer_params": {
+      "fast": 50,
+      "slow": 200
+    },
+    "top_n": 15,
+    "universe": "sp500-pit"
+  },
+  "id": "validate_price_only",
+  "params": {
+    "price_only": true,
+    "split": null,
+    "step_years": 1,
+    "train_years": 3
+  },
+  "result": {
+    "holdout": {
+      "beats_spy_test": false,
+      "n_ranked": 30,
+      "rank_held": true,
+      "spearman": 0.1340022296544036,
+      "split": "2019-01-02",
+      "spy_test_cagr": 0.2597161344198424,
+      "spy_train_cagr": 0.09729322125717021,
+      "your_test_cagr": 0.20156272295770217,
+      "your_test_rank": 5,
+      "your_train_cagr": 0.06222617519883178,
+      "your_train_rank": 4
+    },
+    "meta": {
+      "n_baseline_combos": 30,
+      "period": {
+        "end": "2021-12-31",
+        "start": "2016-01-04"
+      },
+      "price_only": true,
+      "span_years": 6.0,
+      "step_years": 1,
+      "train_years": 3
+    },
+    "verdict": {
+      "beats_spy_out_of_sample": false,
+      "level": "mixed",
+      "rank_held": true,
+      "score": 1,
+      "walkforward_beats_spy": false
+    },
+    "walkforward": {
+      "adaptive_beats_spy": false,
+      "adaptive_oos_cagr": -0.10729747737015616,
+      "has_windows": true,
+      "most_picked": [
+        {
+          "combo": "random \u00d7 rsi",
+          "count": 1
+        },
+        {
+          "combo": "random \u00d7 bollinger",
+          "count": 1
+        }
+      ],
+      "spy_oos_cagr": 0.1541151586597984,
+      "windows": [
+        {
+          "combo_return": -0.08775855383632192,
+          "end": "2020-01-01",
+          "picked": "random \u00d7 rsi",
+          "spy_return": 0.3108751023617291,
+          "start": "2019-01-01"
+        },
+        {
+          "combo_return": -0.21996928442394081,
+          "end": "2021-01-01",
+          "picked": "random \u00d7 bollinger",
+          "spy_return": 0.17235273045660549,
+          "start": "2020-01-01"
+        }
+      ],
+      "your_oos_beats_spy": false,
+      "your_oos_cagr": 0.20156272295770217
+    }
+  },
+  "why": "The default validation path: 3 price-only pickers x 10 timers = 30 combos over a 6-year span, PIT universe. Exercises holdout ranking, Spearman persistence, and a multi-window walk-forward."
+}

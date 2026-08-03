@@ -1,11 +1,10 @@
-# StockTest full runtime — engine + web backend + data download.
-# Installed into .venv on the server (see deploy/setup.sh). ARM wheels exist
-# for all of these on Ubuntu, so no compiler toolchain is needed.
+# StockTest Python runtime — the engine, the reference implementation, and the
+# data tooling. There is no server: the app runs a TypeScript port of this
+# engine in the browser (see web/engine), so FastAPI and uvicorn are gone.
 
 pandas>=2.2
 numpy>=1.26
-scipy>=1.11            # Spearman corr in oos_validation
-fastapi>=0.110
-uvicorn[standard]>=0.27
+scipy>=1.11            # Spearman corr in reference/oos_validation.py
+pydantic>=2.0          # reference/models.py — request/config validation
 yfinance>=0.2          # download_data.py price source (Yahoo Finance)
 lxml>=5.0              # download_data.py: pandas.read_html of the S&P 500 list

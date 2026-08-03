@@ -1,9 +1,10 @@
-# Local dev/test deps: the full runtime plus what web/backend/tests needs.
+# Local dev/test deps: the runtime plus what the test suites need.
 #   .venv/bin/pip install -r requirements-dev.txt
-# The server installs plain requirements.txt (see deploy/setup.sh) — test deps
-# are deliberately kept out of the deploy path.
+#
+# httpx2 was here for the FastAPI TestClient. The HTTP API is gone, and the
+# tests that used it now call reference/service.py directly, so it is no longer
+# needed.
 
 -r requirements.txt
 
 pytest>=8
-httpx2>=2.0            # transport for fastapi/starlette TestClient (see conftest.py)

@@ -84,7 +84,7 @@ function yearsBetween(start: string, end: string): number {
  * Decide which honest caveats apply to THIS run, from metadata — not hardcoded
  * per result. Inputs are the picker that was used (with its `look_ahead_risk`
  * flag) and the universe option that was used (with its `bias_caveat` text),
- * both straight from the backend catalog.
+ * both straight from the shipped strategy catalog (build/webdata/catalog.json).
  */
 export function assessTrust(args: {
   mode: Mode;

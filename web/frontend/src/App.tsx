@@ -319,10 +319,15 @@ export default function App() {
       : `${prettyId(pickerId)} · ${prettyId(timerId)}`;
 
   if (loadError) {
+    // There is no server to be down: the engine runs in a Web Worker here, so
+    // a failure at this point means the worker couldn't start or the price
+    // bundle couldn't be fetched. Point at that instead of a dead API.
     return (
       <div className="container">
         <div className="error-banner">
-          Couldn’t reach the backtest API — is the backend running on port 8000? ({loadError})
+          Couldn’t start the backtest engine — the price data bundle may be missing.
+          Build it with <code>tools/build_web_data.py</code> and make sure it’s served
+          at <code>/data</code>. ({loadError})
         </div>
       </div>
     );

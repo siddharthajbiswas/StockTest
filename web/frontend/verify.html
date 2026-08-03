@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>StockTest — in-browser parity &amp; performance</title>
+    <style>
+      body { font: 14px/1.5 -apple-system, system-ui, sans-serif; margin: 32px auto; max-width: 1000px;
+             color: #e8eaf0; background: #12131a; }
+      h1 { font-size: 20px; } h2 { font-size: 16px; margin-top: 28px; }
+      table { border-collapse: collapse; width: 100%; margin-top: 8px; }
+      th, td { text-align: left; padding: 5px 10px; border-bottom: 1px solid #262a36; font-variant-numeric: tabular-nums; }
+      th { color: #98a2b3; font-weight: 600; font-size: 12px; text-transform: uppercase; }
+      .ok { color: #4ade9f; } .bad { color: #ff8b8b; }
+      tr.ok td:last-child { color: #4ade9f; font-weight: 600; }
+      tr.bad td { color: #ff8b8b; }
+      pre { white-space: pre-wrap; background: #1a1c25; padding: 12px; border-radius: 6px; }
+      .sub { color: #98a2b3; }
+    </style>
+  </head>
+  <body>
+    <h1>StockTest — in-browser parity &amp; performance</h1>
+    <p class="sub">
+      Runs the Phase 0 golden oracle through the shipped path: a real Web Worker,
+      in this browser, decoding the gzipped price bundle over HTTP. Tolerance
+      1e-9 relative; trade counts, dates, tickers and sides must match exactly.
+    </p>
+    <div id="out"></div>
+    <script type="module" src="/src/verify.ts"></script>
+  </body>
+</html>

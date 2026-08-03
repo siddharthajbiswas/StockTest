@@ -1,0 +1,86 @@
+{
+  "config": {
+    "commission_pct": 0.0005,
+    "end": "2021-12-31",
+    "mode": "picker",
+    "picker_id": "relative_strength",
+    "picker_params": {},
+    "rebalance": "M",
+    "slippage_pct": 0.0005,
+    "start": "2019-01-01",
+    "tax": {
+      "enabled": true,
+      "long_term_days": 365,
+      "long_term_rate": 0.15,
+      "short_term_rate": 0.35
+    },
+    "timer_id": "buy_hold",
+    "timer_params": {},
+    "top_n": 15,
+    "universe": "all"
+  },
+  "id": "validate_all_pickers",
+  "params": {
+    "price_only": false,
+    "split": "2020-07-01",
+    "step_years": 1,
+    "train_years": 1
+  },
+  "result": {
+    "holdout": {
+      "beats_spy_test": true,
+      "n_ranked": 100,
+      "rank_held": true,
+      "spearman": 0.33581373019683153,
+      "split": "2020-07-01",
+      "spy_test_cagr": 0.3465968537346762,
+      "spy_train_cagr": 0.17815298977071703,
+      "your_test_cagr": 0.37113098917015397,
+      "your_test_rank": 25,
+      "your_train_cagr": 0.21424945267592044,
+      "your_train_rank": 9
+    },
+    "meta": {
+      "n_baseline_combos": 100,
+      "period": {
+        "end": "2021-12-31",
+        "start": "2019-01-02"
+      },
+      "price_only": false,
+      "span_years": 3.0,
+      "step_years": 1,
+      "train_years": 1
+    },
+    "verdict": {
+      "beats_spy_out_of_sample": true,
+      "level": "held",
+      "rank_held": true,
+      "score": 3,
+      "walkforward_beats_spy": true
+    },
+    "walkforward": {
+      "adaptive_beats_spy": true,
+      "adaptive_oos_cagr": 0.1514821228904415,
+      "has_windows": true,
+      "most_picked": [
+        {
+          "combo": "small_cap \u00d7 rsi",
+          "count": 1
+        }
+      ],
+      "spy_oos_cagr": 0.08281135086692104,
+      "windows": [
+        {
+          "combo_return": 0.32565508810997645,
+          "end": "2021-01-01",
+          "picked": "small_cap \u00d7 rsi",
+          "spy_return": 0.17235273045660549,
+          "start": "2020-01-01"
+        }
+      ],
+      "your_oos_beats_spy": true,
+      "your_oos_cagr": 0.3868240823398619
+    }
+  },
+  "why": "The full 100-combo sweep (price_only=False), including the fundamental pickers, over a shorter window. This is the worst-case compute path the progress reporting exists for."
+}

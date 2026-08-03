@@ -17,32 +17,35 @@ want the full sweep (see [For power users](#for-power-users)).
 
 ## The web app (start here)
 
-A React UI over a FastAPI backend that wraps the engine as a library. It walks you
-through one decision at a time and surfaces the honest caveats instead of burying
-them.
+A React UI over the engine compiled to TypeScript and run in a Web Worker — no
+server, no API, nothing leaves your machine. It walks you through one decision at
+a time and surfaces the honest caveats instead of burying them.
 
 ### Run it
 
-The frontend proxies API calls to the backend, so start the backend first.
+There is no server. The engine is a TypeScript port of `backtester/` that runs
+in a Web Worker in the browser, so you only need the data bundle and Vite.
 
 ```bash
-# 1. Install backend deps (once)
+# 1. Python deps + price data (once)
 python -m venv .venv
 .venv/bin/pip install -r requirements-dev.txt
+.venv/bin/python download_data.py
+.venv/bin/python fetch_fundamentals.py
 
-# 2. Terminal A — backend API (from web/backend)
-cd web/backend
-../../.venv/bin/python -m uvicorn app:app --port 8000
+# 2. Build the browser data bundle (after any data refresh)
+.venv/bin/python tools/build_web_data.py
+.venv/bin/python tools/gen_web_metadata.py
 
-# 3. Terminal B — frontend (from web/frontend)
+# 3. Run the app
 cd web/frontend
 npm install
 npm run dev            # open http://localhost:5173
 ```
 
-The backend loads every price CSV in `data/` once at startup and pre-warms the
-market layout, so the first backtest is fast. Interactive API docs live at
-`http://localhost:8000/docs`.
+The dev server streams the bundle from `build/webdata/` at `/data`. The worker
+loads the ~13 MB universe only when you use strategy mode; picking your own
+stocks fetches ~190 kB per ticker.
 
 ### What you can do, entirely in the UI
 
@@ -119,7 +122,8 @@ for the strategy design notes.
 ```
 backtester/      # the engine: data, portfolio, tax, indicators, universe
 strategies/      # picker & timer implementations (the composable pieces)
-web/backend/     # FastAPI service wrapping the engine as a library
+web/engine/      # TypeScript port of the engine (runs in a Web Worker)
+reference/       # Python reference implementation — generates the golden oracle
 web/frontend/    # React + Vite + TypeScript UI
 data/            # per-ticker price CSVs + fundamentals snapshot
 *.py             # CLI tools (see "For power users")
@@ -130,8 +134,11 @@ data/            # per-ticker price CSVs + fundamentals snapshot
 Needs the dev deps: `.venv/bin/pip install -r requirements-dev.txt`.
 
 ```bash
-# backend
-cd web/backend && ../../.venv/bin/python -m pytest -q
+# Python: reference implementation + the golden oracle it generates
+.venv/bin/python -m pytest reference golden -q
+
+# TypeScript engine (parity against the oracle, worker, RNG, units)
+cd web/engine && npm test
 
 # frontend (typecheck + production build)
 cd web/frontend && npm run build

@@ -1,4 +1,7 @@
-// Mirrors the FastAPI backend response shapes (web/backend/models.py, catalog.py).
+// Response shapes produced by the in-browser engine worker. These originated
+// as the FastAPI models (now reference/models.py, catalog.py) and are kept
+// field-for-field identical to them, which is what the golden parity suite
+// checks — so the Python reference implementation stays the source of truth.
 
 export interface ParamSpec {
   name: string;
@@ -177,7 +180,7 @@ export interface SavedStrategy {
   config: StrategyConfig;
 }
 
-// ----- out-of-sample validation (web/backend/oos_validation.py) -----
+// ----- out-of-sample validation (ported: web/engine/src/validation.ts) -----
 
 export type VerdictLevel = "held" | "mixed" | "failed";
 

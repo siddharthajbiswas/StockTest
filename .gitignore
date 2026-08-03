@@ -23,6 +23,9 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# Local Claude Code state (settings.local.json is ignored globally).
+.claude/settings.local.json*
+
 # ---- Editor / OS ----
 .vscode/*
 !.vscode/extensions.json
@@ -33,6 +36,10 @@ pnpm-debug.log*
 # Regenerate locally with download_data.py / fetch_fundamentals.py.
 /data/
 *.csv
+
+# Browser data bundle — derived from /data/, so same ToS and size concerns.
+# Regenerate with tools/build_web_data.py.
+/build/
 
 # ---- Generated / runtime state ----
 /results/

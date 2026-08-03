@@ -1,26 +1,24 @@
 # StockTest Frontend
 
-A React + Vite + TypeScript UI for the backtest API, designed for **non-experts**:
+A React + Vite + TypeScript UI for the in-browser backtest engine, designed for
+**non-experts**:
 one clear decision at a time, generous whitespace, and the honest caveats
 surfaced (not buried).
 
 ## Run
 
-The frontend proxies API calls to the FastAPI backend, so start the backend first:
+There is no backend. Build the data bundle once (see the root README), then:
 
 ```bash
-# terminal 1 — backend (from web/backend)
-../../.venv/bin/python -m uvicorn app:app --port 8000
-
-# terminal 2 — frontend (from web/frontend)
 npm install
 npm run dev            # http://localhost:5173
 ```
 
-Vite proxies `/pickers`, `/timers`, `/universe`, `/tickers`, `/backtest`,
-`/strategies`, `/validate`, `/health` to `http://localhost:8000` (override with
-`VITE_BACKEND`). Production build: `npm run build` (runs `tsc` then `vite build`
-into `dist/`).
+The engine runs in a Web Worker (`web/engine`); `src/api.ts` posts messages to
+it instead of issuing `fetch` calls. The dev server streams the price bundle
+from `build/webdata/` at `/data` (see the middleware in `vite.config.ts`).
+Production build: `npm run build`, or `deploy/build-pages.sh` for the full
+static site including data.
 
 ## Flow (progressive disclosure — each step reveals the next)
 
@@ -47,9 +45,8 @@ status always reflects the picker actually run, not preset defaults.
 ## Saving & reusing strategies
 
 The run bar has a **★ Save strategy** action that names the current
-picker+params+timer+params (plus window/universe/tax) and POSTs it to
-`/strategies/mine` (a JSON-file store on the backend; validated as runnable
-before saving). Saved combos appear in a **My strategies** panel at the top of
+picker+params+timer+params (plus window/universe/tax) and stores it in the
+browser (IndexedDB, `src/storage.ts`). Saved combos appear in a **My strategies** panel at the top of
 the screen, each with **Re-run** (loads + runs immediately), **Edit** (loads
 into the wizard to tweak), and delete.
 4. **When & taxes** — a date-range picker and a tax section (“use sensible
@@ -73,7 +70,7 @@ into the wizard to tweak), and delete.
   `sp500-pit` flags missing delisted companies; the full dataset flags the stronger
   membership look-ahead; manual mode flags survivorship in the fixed universe.
 - **Trade log** — round-trip trades (entry/exit date, ticker, buy/sell price,
-  P&L \$ and %, holding period), reconstructed FIFO by the backend.
+  P&L \$ and %, holding period), reconstructed FIFO by the engine.
 
 All results copy — metric explanations and the trust/caveat logic — lives in one
 reviewable file, `src/content.ts`.
@@ -91,7 +88,8 @@ button lives in the header.
 
 ```
 src/
-  api.ts, types.ts        # typed client + backend shapes
+  api.ts, types.ts        # worker client + response shapes
+  storage.ts              # saved strategies + result cache (IndexedDB)
   App.tsx                 # flow orchestration, state, run, tour
   components/
     ModeCards, PickerGrid, TimerGrid, TickerPicker

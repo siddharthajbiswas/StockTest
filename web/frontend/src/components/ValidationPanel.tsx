@@ -1,7 +1,7 @@
 import type { ValidationResult, VerdictLevel } from "../types";
 import { pct, signedPct } from "../format";
 
-// Plain-language framing for each overall outcome. Keyed by the backend's
+// Plain-language framing for each overall outcome. Keyed by the engine's
 // verdict.level, which counts how many of the three checks below held.
 const HEADLINE: Record<VerdictLevel, string> = {
   held: "This strategy's edge held up out-of-sample",

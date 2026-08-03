@@ -3,7 +3,7 @@ import type { ParamSpec } from "../types";
 export type Params = Record<string, unknown>;
 
 /** Build the default params object for a set of specs (skips null defaults so
- *  the backend applies its own default, e.g. RandomPicker.fraction). */
+ *  the engine applies its own default, e.g. RandomPicker.fraction). */
 export function defaultParams(specs: ParamSpec[]): Params {
   const out: Params = {};
   for (const s of specs) {

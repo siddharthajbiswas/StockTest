@@ -474,3 +474,26 @@ button { font-family: inherit; font-size: inherit; cursor: pointer; }
   background: var(--surface); border-radius: 16px; box-shadow: var(--shadow-lg);
   padding: 24px; width: min(440px, 100%); align-self: center; margin: auto;
 }
+
+/* Out-of-sample validation progress. The sweep runs 30-100 backtests in the
+   engine worker and streams progress back, so this shows real completion
+   rather than an indeterminate spinner. */
+.oos-progress { margin-top: 14px; }
+.oos-progress .oos-loading { margin-top: 0; flex-wrap: wrap; }
+.oos-bar {
+  margin-top: 10px; height: 6px; border-radius: 999px; overflow: hidden;
+  background: var(--border-strong);
+}
+.oos-bar-fill {
+  height: 100%; background: var(--accent); border-radius: 999px;
+  transition: width 120ms linear;
+}
+.oos-current {
+  margin-top: 6px; font-size: 12px; color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.btn-link {
+  background: none; border: none; padding: 0; margin-left: auto;
+  color: var(--muted); font-size: 13px; text-decoration: underline; cursor: pointer;
+}
+.btn-link:hover { color: var(--text); }

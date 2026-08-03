@@ -145,7 +145,17 @@ class FundamentalPicker(Picker):
             col = col[col > 0]
         if col.empty:
             return []
-        ranked = col.sort_values(ascending=self.ascending)
+        # kind="stable" is required, not cosmetic. The default is quicksort,
+        # which is NOT stable, so names sharing a value come back in an order
+        # that depends on the sort's internal partitioning. Several of these
+        # columns are full of duplicates (dividendYield has 110 tie groups,
+        # revenueGrowth 113), and once a tie straddles the top-n cutoff the
+        # *selection* — not merely its order — becomes an artifact of the sort
+        # implementation. A stable sort makes ties resolve by snapshot row
+        # order, which is reproducible and portable to the TS engine.
+        # Verified: this leaves every existing golden byte-identical, because
+        # quicksort and stable agree above rank 11 for these columns.
+        ranked = col.sort_values(ascending=self.ascending, kind="stable")
         return list(ranked.index[:n])
 
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type {
   BacktestResponse,
   Mode,
@@ -8,7 +8,7 @@ import type {
   ValidationResult,
 } from "../types";
 import { assessTrust } from "../content";
-import { validateStrategy } from "../api";
+import { validateStrategy, type ValidationProgress } from "../api";
 import { money, pct, prettyId } from "../format";
 import { LineChart, type Series } from "./LineChart";
 import { DrawdownChart } from "./DrawdownChart";
@@ -26,23 +26,55 @@ interface Props {
   onClose: () => void;
 }
 
+/** Rough time-remaining text from the sweep's own elapsed/completed counters. */
+function etaText(p: ValidationProgress): string {
+  if (p.completed === 0) return "";
+  const remaining = ((p.elapsedMs / p.completed) * (p.total - p.completed)) / 1000;
+  if (remaining < 1) return "";
+  return remaining < 60
+    ? ` · about ${Math.ceil(remaining)}s left`
+    : ` · about ${Math.ceil(remaining / 60)} min left`;
+}
+
 export function Results({ data, config, mode, pickers, universeOptions, onClose }: Props) {
   const [validation, setValidation] = useState<ValidationResult | null>(null);
   const [validating, setValidating] = useState(false);
   const [validateError, setValidateError] = useState<string | null>(null);
+  const [progress, setProgress] = useState<ValidationProgress | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   async function runValidation() {
     if (!config) return;
+    const ctrl = new AbortController();
+    abortRef.current = ctrl;
     setValidating(true);
     setValidateError(null);
+    setProgress(null);
     try {
-      setValidation(await validateStrategy({ config }));
+      setValidation(
+        await validateStrategy(
+          { config },
+          { signal: ctrl.signal, onProgress: setProgress },
+        ),
+      );
     } catch (e: unknown) {
+      // Cancelling is a deliberate user action, not a failure to report.
+      if (e instanceof DOMException && e.name === "AbortError") return;
       setValidateError(e instanceof Error ? e.message : String(e));
     } finally {
+      abortRef.current = null;
       setValidating(false);
+      setProgress(null);
     }
   }
+
+  function cancelValidation() {
+    abortRef.current?.abort();
+  }
+
+  // Abandon an in-flight validation if the panel closes, so a cancelled run
+  // doesn't keep a worker busy chewing through 100 backtests.
+  useEffect(() => () => abortRef.current?.abort(), []);
 
   const m = data.metrics;
   const b = data.benchmark;
@@ -150,9 +182,41 @@ export function Results({ data, config, mode, pickers, universeOptions, onClose 
             </button>
           )}
           {validating && (
-            <div className="oos-loading" role="status">
-              <span className="spinner" aria-hidden="true" />
-              Rerunning the strategy across multiple out-of-sample windows…
+            <div className="oos-progress" role="status" aria-live="polite">
+              <div className="oos-loading">
+                <span className="spinner" aria-hidden="true" />
+                {progress && progress.phase === "curves" ? (
+                  <>
+                    Testing every strategy combination on this period —{" "}
+                    <strong>
+                      {progress.completed} of {progress.total}
+                    </strong>
+                    {etaText(progress)}
+                  </>
+                ) : (
+                  "Rerunning the strategy across multiple out-of-sample windows…"
+                )}
+                <button className="btn-link" onClick={cancelValidation}>
+                  Cancel
+                </button>
+              </div>
+              {progress && progress.total > 0 && (
+                <div
+                  className="oos-bar"
+                  role="progressbar"
+                  aria-valuemin={0}
+                  aria-valuemax={progress.total}
+                  aria-valuenow={progress.completed}
+                >
+                  <div
+                    className="oos-bar-fill"
+                    style={{ width: `${(progress.completed / progress.total) * 100}%` }}
+                  />
+                </div>
+              )}
+              {progress?.label && progress.phase === "curves" && (
+                <div className="oos-current">{progress.label.replace(" × ", " + ")}</div>
+              )}
             </div>
           )}
           {validateError && <div className="oos-error">Validation failed — {validateError}</div>}

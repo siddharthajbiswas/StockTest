@@ -1,9 +1,35 @@
+/**
+ * Frontend data layer — backed by the in-browser engine worker.
+ *
+ * Phase 5 replaced the FastAPI backend with the ported TypeScript engine
+ * running in a Web Worker. Every function below keeps the signature it had when
+ * it was a `fetch` call, so no component changed: `App.tsx`, `Results.tsx` and
+ * `TickerPicker.tsx` still import the same names.
+ *
+ * What actually changed:
+ *   * There is no network. Requests go to a worker thread, which loads the
+ *     binary price bundle and runs the engine locally.
+ *   * `validateStrategy` no longer submits a job and polls. The worker streams
+ *     progress, and cancellation is real — aborting terminates the thread
+ *     instead of leaving a server churning through 100 backtests.
+ *   * Saved strategies live in the browser (IndexedDB, see storage.ts). They
+ *     were per-user server state with no auth, so a local store is a closer
+ *     match to what they always were.
+ *   * Backtest results are cached locally, so re-running a saved strategy is
+ *     instant instead of a fresh 1-3s run.
+ */
+
+import { EngineClient, EngineError } from "../../engine/src/worker/client";
+import {
+  getCachedResult,
+  listStrategies as listSaved,
+  putCachedResult,
+  resultKey,
+} from "./storage";
 import type {
   BacktestRequest,
   BacktestResponse,
   Picker,
-  SavedStrategy,
-  StrategyConfig,
   TickerRecord,
   Timer,
   UniverseNote,
@@ -12,128 +38,146 @@ import type {
   ValidationResult,
 } from "./types";
 
-// Base URL for the backend API. Empty in dev, where Vite proxies same-origin
-// paths (see vite.config.ts) to localhost:8000. Set to the backend's absolute
-// URL at build time (VITE_API_BASE) when the frontend is served from a
-// different origin than the API — e.g. the app on GitHub Pages at
-// biswas.net/sid/stocktest and the backend on stocktest-api.biswas.net.
-const API_BASE = import.meta.env.VITE_API_BASE ?? "";
-const api = (path: string) => `${API_BASE}${path}`;
+/**
+ * Where the worker fetches the data bundle from. Defaults to `data/` relative
+ * to the app's base path, which works for both the dev server and the
+ * subfolder deploy at biswas.net/sid/stocktest.
+ */
+const DATA_BASE =
+  import.meta.env.VITE_DATA_BASE ?? new URL("data/", document.baseURI).href;
 
-async function getJSON<T>(url: string): Promise<T> {
-  const res = await fetch(api(url));
-  if (!res.ok) throw await toError(res);
-  return res.json();
-}
-
-async function toError(res: Response): Promise<Error> {
-  let detail: unknown;
-  try {
-    detail = (await res.json())?.detail;
-  } catch {
-    detail = res.statusText;
-  }
-  // The backend sends structured 404s for unknown tickers, etc.
-  if (detail && typeof detail === "object") {
-    const d = detail as { message?: string; unavailable?: string[] };
-    const parts = [d.message ?? "Request failed"];
-    if (d.unavailable?.length) parts.push(`Unavailable: ${d.unavailable.join(", ")}`);
-    return new Error(parts.join(" — "));
-  }
-  return new Error(typeof detail === "string" ? detail : `Request failed (${res.status})`);
-}
+const client = new EngineClient({
+  // This literal is load-bearing: Vite detects and bundles a worker only from
+  // exactly this `new Worker(new URL(..., import.meta.url), { type: "module" })`
+  // shape. Hoisting the URL into a variable, or building it inside the client,
+  // produces a build with no worker chunk that 404s at runtime.
+  createWorker: () =>
+    new Worker(new URL("../../engine/src/worker/worker.ts", import.meta.url), {
+      type: "module",
+    }),
+  dataBase: DATA_BASE,
+});
 
 export interface HealthInfo {
   status: string;
   tickers_loaded: number;
   data_start?: string;
   data_end?: string;
+  /** Price-bundle identity; see dataFingerprint below. */
+  data_fingerprint?: string;
 }
 
-export const fetchHealth = () => getJSON<HealthInfo>("/health");
-
-export const fetchPickers = () =>
-  getJSON<{ pickers: Picker[] }>("/pickers").then((d) => d.pickers);
-
-export const fetchTimers = () =>
-  getJSON<{ timers: Timer[] }>("/timers").then((d) => d.timers);
-
+export const fetchHealth = () => client.health() as Promise<HealthInfo>;
+export const fetchPickers = () => client.pickers() as Promise<Picker[]>;
+export const fetchTimers = () => client.timers() as Promise<Timer[]>;
 export const fetchUniverseOptions = () =>
-  getJSON<{ universes: UniverseOption[] }>("/universe/options").then((d) => d.universes);
+  client.universes() as Promise<UniverseOption[]>;
 
 export const fetchAllTickers = () =>
-  getJSON<{ universe: UniverseNote; tickers: TickerRecord[] }>("/tickers");
+  client.allTickers() as Promise<{ universe: UniverseNote; tickers: TickerRecord[] }>;
 
 export const searchTickers = (q: string, limit = 12) =>
-  getJSON<{ universe: UniverseNote; results: TickerRecord[] }>(
-    `/tickers/search?q=${encodeURIComponent(q)}&limit=${limit}`,
-  );
+  client.searchTickers(q, limit) as Promise<{
+    universe: UniverseNote;
+    results: TickerRecord[];
+  }>;
 
+/**
+ * Run a backtest, serving an identical previous run from the local cache.
+ *
+ * Re-running a saved strategy is the common path — you open a saved config and
+ * immediately backtest it again with the same parameters — and recomputing is
+ * 1-3s of CPU for a byte-identical answer. Cache entries are namespaced by the
+ * price bundle's fingerprint, so refreshing the data invalidates them all
+ * instead of serving numbers derived from prices that no longer exist.
+ */
 export async function runBacktest(req: BacktestRequest): Promise<BacktestResponse> {
-  const res = await fetch(api("/backtest"), {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(req),
-  });
-  if (!res.ok) throw await toError(res);
-  return res.json();
-}
+  const fingerprint = await dataFingerprint();
+  const key = resultKey(req, fingerprint);
 
-export const listStrategies = () =>
-  getJSON<{ strategies: SavedStrategy[] }>("/strategies/mine").then((d) => d.strategies);
+  const hit = await getCachedResult(key);
+  if (hit !== null) return hit;
 
-export async function saveStrategy(name: string, config: StrategyConfig): Promise<SavedStrategy> {
-  const res = await fetch(api("/strategies/mine"), {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, config }),
-  });
-  if (!res.ok) throw await toError(res);
-  return res.json();
-}
-
-export async function deleteStrategy(id: string): Promise<void> {
-  const res = await fetch(api(`/strategies/mine/${id}`), { method: "DELETE" });
-  if (!res.ok) throw await toError(res);
-}
-
-// ----- out-of-sample validation (submit a job, then poll for the result) -----
-
-async function startValidation(req: ValidateRequest): Promise<string> {
-  const res = await fetch(api("/validate"), {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(req),
-  });
-  if (!res.ok) throw await toError(res);
-  return (await res.json()).job_id as string;
-}
-
-interface ValidationJob {
-  status: "running" | "done" | "error";
-  result?: ValidationResult;
-  error?: string;
+  const res = await client.backtest<BacktestResponse>(req);
+  void putCachedResult(key, res); // fire-and-forget: never delay the result
+  return res;
 }
 
 /**
- * Run an out-of-sample validation end-to-end: submit the job, then poll until
- * it finishes. This is intentionally slower than a backtest (it reruns many
- * combos over many windows), so callers should show a loading state.
+ * Identifies the exact price bundle in use, for namespacing the result cache.
+ *
+ * Comes from the worker, which already parses the manifest. Fetching
+ * manifest.json from here instead would 404 in a deployed build: the published
+ * bundle ships only pre-compressed `.gz` artifacts, and the fingerprint would
+ * silently degrade to "unknown" — leaving cached results un-versioned and able
+ * to survive a data refresh.
+ */
+let fingerprintPromise: Promise<string> | null = null;
+function dataFingerprint(): Promise<string> {
+  if (fingerprintPromise === null) {
+    fingerprintPromise = client
+      .health()
+      .then((h) => (h as HealthInfo).data_fingerprint ?? "unknown")
+      .catch(() => "unknown");
+  }
+  return fingerprintPromise;
+}
+
+// ----- saved strategies (IndexedDB, see storage.ts) --------------------------
+export { listStrategies, saveStrategy, deleteStrategy } from "./storage";
+
+// ----- out-of-sample validation ---------------------------------------------
+export interface ValidationProgress {
+  phase: string;
+  completed: number;
+  total: number;
+  label: string;
+  elapsedMs: number;
+}
+
+/**
+ * Run an out-of-sample validation. Heavier than a backtest — it reruns every
+ * combo over the span — so it reports progress and supports cancellation.
+ *
+ * `opts.onProgress` is new; callers that ignore it behave exactly as before.
+ * `intervalMs` is accepted and ignored: it configured the old HTTP polling
+ * loop, which no longer exists.
  */
 export async function validateStrategy(
   req: ValidateRequest,
-  opts: { intervalMs?: number; signal?: AbortSignal } = {},
+  opts: {
+    intervalMs?: number;
+    signal?: AbortSignal;
+    onProgress?: (p: ValidationProgress) => void;
+  } = {},
 ): Promise<ValidationResult> {
-  const { intervalMs = 1500, signal } = opts;
-  const jobId = await startValidation(req);
-  for (;;) {
-    if (signal?.aborted) throw new DOMException("Validation cancelled", "AbortError");
-    await new Promise((r) => setTimeout(r, intervalMs));
-    if (signal?.aborted) throw new DOMException("Validation cancelled", "AbortError");
-    const res = await fetch(api(`/validate/${jobId}`), { signal });
-    if (!res.ok) throw await toError(res);
-    const job = (await res.json()) as ValidationJob;
-    if (job.status === "done" && job.result) return job.result;
-    if (job.status === "error") throw new Error(job.error || "Validation failed");
-  }
+  const cfg =
+    req.config ??
+    (await listSaved()).find((s) => s.id === req.strategy_id)?.config;
+  if (!cfg) throw new Error("Validation needs a strategy config.");
+
+  return client.validate<ValidationResult>(
+    {
+      picker_id: cfg.mode === "manual" ? null : cfg.picker_id,
+      picker_params: cfg.picker_params,
+      tickers: cfg.mode === "manual" ? cfg.tickers : null,
+      timer_id: cfg.timer_id,
+      timer_params: cfg.timer_params,
+      top_n: cfg.top_n,
+      rebalance: cfg.rebalance,
+      universe: cfg.universe,
+      start: cfg.start,
+      end: cfg.end,
+      commission_pct: cfg.commission_pct,
+      slippage_pct: cfg.slippage_pct,
+      tax: cfg.tax,
+      split: req.split ?? null,
+      train_years: req.train_years ?? 3,
+      step_years: req.step_years ?? 1,
+      price_only: req.price_only ?? true,
+    },
+    { signal: opts.signal, onProgress: opts.onProgress },
+  );
 }
+
+export { EngineError };

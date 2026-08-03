@@ -1,0 +1,284 @@
+{
+  "cases": [
+    {
+      "file": "manual_buyhold_tax.json",
+      "final_value": 377024.8908499812,
+      "id": "manual_buyhold_tax",
+      "n_days": 1511,
+      "n_trades": 5,
+      "portable": true,
+      "sha256": "e4d3823bb51fa646d74d24467a06092564837a9bb12c3198cbdd435418e8fcd6",
+      "total_tax": 41553.73362749719,
+      "why": "Baseline. Minimal churn, so the terminal liquidation tax on unrealized long-term gains dominates \u2014 isolates that path."
+    },
+    {
+      "file": "manual_buyhold_notax.json",
+      "final_value": 377024.8908499812,
+      "id": "manual_buyhold_notax",
+      "n_days": 1511,
+      "n_trades": 5,
+      "portable": true,
+      "sha256": "0b5c570324d08d0fa26c91e6ba8b227a8e913bde3534f43f3449b92e5ce16405",
+      "total_tax": null,
+      "why": "Same run with taxes off. Diffing it against manual_buyhold_tax isolates the entire tax engine; pretax and aftertax must agree."
+    },
+    {
+      "file": "manual_macross_tax.json",
+      "final_value": 281322.1091961989,
+      "id": "manual_macross_tax",
+      "n_days": 1511,
+      "n_trades": 116,
+      "portable": true,
+      "sha256": "a51dbe5afcb6939c91a138daabd74fa991435f85a0f3b42d395a0a8f194d099c",
+      "total_tax": 37688.78601499505,
+      "why": "High churn: in-and-out repeatedly, so realized short- vs long-term gains and the January annual settlement both fire."
+    },
+    {
+      "file": "manual_macross_gfc.json",
+      "final_value": 108040.52963267794,
+      "id": "manual_macross_gfc",
+      "n_days": 1008,
+      "n_trades": 84,
+      "portable": true,
+      "sha256": "8d3b41c05769545a20b1ea41ea81260927fc72efe3d4ce9749be94a2e329c3bb",
+      "total_tax": 2825.0032672845164,
+      "why": "Spans 2008. Net-loss years exercise the loss carryforward and the losses-against-short-term-gains-first netting order."
+    },
+    {
+      "file": "momentum_buyhold_m.json",
+      "final_value": 390906.77886298485,
+      "id": "momentum_buyhold_m",
+      "n_days": 1511,
+      "n_trades": 1374,
+      "portable": true,
+      "sha256": "2229f6e5c9ea1797ef4d18b94ccd13586fc6240bf9b5c5b3e47053d9ebc3ba62",
+      "total_tax": 123778.21111343181,
+      "why": "Picker mode: monthly rebalance ranking, equal-weight basket rewrites, and the order_target_percent sizing path."
+    },
+    {
+      "file": "momentum_macross_pit.json",
+      "final_value": 207674.24492804694,
+      "id": "momentum_macross_pit",
+      "n_days": 1511,
+      "n_trades": 1417,
+      "portable": true,
+      "sha256": "007e2b2332646e5a86bf9ead06b41e0a723c2889a065dd55d4bc822a42efaaaa",
+      "total_tax": 44365.630247641646,
+      "why": "Point-in-time S&P 500 universe \u2014 membership changes by date, the trickiest data-layout path to port."
+    },
+    {
+      "file": "relstr_rsi_q.json",
+      "final_value": 402995.2881573726,
+      "id": "relstr_rsi_q",
+      "n_days": 1511,
+      "n_trades": 177,
+      "portable": true,
+      "sha256": "164c812bd7c00e7ccd62a89436667391fff101e55b84a987cfacd26e7ceb8381",
+      "total_tax": 126967.79491425012,
+      "why": "Different picker+timer math (relative strength, RSI hysteresis) and the quarterly rebalance cadence."
+    },
+    {
+      "file": "value_trendstop_w.json",
+      "final_value": 110654.94961165938,
+      "id": "value_trendstop_w",
+      "n_days": 757,
+      "n_trades": 736,
+      "portable": true,
+      "sha256": "9dab74c643efa78dfb242e0e9eef109412f97d606297de4fdc410e07f146d3a7",
+      "total_tax": 3763.5441471150657,
+      "why": "Fundamental picker (snapshot lookup + look-ahead-flagged) and a timer that depends on entry_price, plus weekly cadence."
+    },
+    {
+      "file": "momentum_daily_covid.json",
+      "final_value": 174152.32385630498,
+      "id": "momentum_daily_covid",
+      "n_days": 505,
+      "n_trades": 3497,
+      "portable": true,
+      "sha256": "66c0b5bd7b4dfd4a6dd3d924b2068a90dfe0f6138c8fac1c502a7a40ed911300",
+      "total_tax": 25953.31334970675,
+      "why": "Daily rebalance across the COVID crash \u2014 max churn against a violent drawdown; stresses cash/no-leverage clamping."
+    },
+    {
+      "file": "random_seeded.json",
+      "final_value": 191091.42586496373,
+      "id": "random_seeded",
+      "n_days": 1511,
+      "n_trades": 1481,
+      "portable": true,
+      "sha256": "83b6fbba2bd32cc7f54ccdd897c6cec40176c54fc91749813601bff7e70beaa8",
+      "total_tax": 42345.55913831394,
+      "why": "RandomPicker(seed=42), which draws from random.Random.sample (Mersenne Twister). Phase 0 flagged this as unportable; Phase 3 made it portable by reimplementing MT19937, getrandbits, _randbelow and sample in web/engine/src/mt19937.ts, so the TS engine reproduces the stream exactly."
+    },
+    {
+      "file": "cover_timer_macd.json",
+      "final_value": 182359.664744931,
+      "id": "cover_timer_macd",
+      "n_days": 757,
+      "n_trades": 1604,
+      "portable": true,
+      "sha256": "abe0027ddb4ffaa94244281db1bf53324520518988ee4bb3d98c32a02de55aff",
+      "total_tax": 37108.47793797154,
+      "why": "Component coverage for the macd timer, which no other golden exercises."
+    },
+    {
+      "file": "cover_timer_bollinger.json",
+      "final_value": 151381.84098730097,
+      "id": "cover_timer_bollinger",
+      "n_days": 757,
+      "n_trades": 392,
+      "portable": true,
+      "sha256": "050c8fc9b9ed37ee7b1c9b534ff8a680f46acd0b4ef17bbf546b86cfc5b87bfa",
+      "total_tax": 48339.22480281942,
+      "why": "Component coverage for the bollinger timer, which no other golden exercises."
+    },
+    {
+      "file": "cover_timer_momentum12.json",
+      "final_value": 201740.24819857252,
+      "id": "cover_timer_momentum12",
+      "n_days": 757,
+      "n_trades": 523,
+      "portable": true,
+      "sha256": "16161a9c6b56880dfe99d18346ef7b96b2ecb66edc8c55a5d7838515f85a6ea5",
+      "total_tax": 43385.7309919525,
+      "why": "Component coverage for the momentum12 timer, which no other golden exercises."
+    },
+    {
+      "file": "cover_timer_dual_momentum.json",
+      "final_value": 207293.58011869722,
+      "id": "cover_timer_dual_momentum",
+      "n_days": 757,
+      "n_trades": 546,
+      "portable": true,
+      "sha256": "cc13f071df6ab93b660969f095c4234b50fbd5504c135da693f8dc602f94cb38",
+      "total_tax": 44221.550995805446,
+      "why": "Component coverage for the dual_momentum timer, which no other golden exercises."
+    },
+    {
+      "file": "cover_timer_turtle.json",
+      "final_value": 226561.77074509245,
+      "id": "cover_timer_turtle",
+      "n_days": 757,
+      "n_trades": 621,
+      "portable": true,
+      "sha256": "9b42065cc802f26c1b4a430371271dbcc5eb833d1ac13361a164ce43bb5a5ce2",
+      "total_tax": 54448.433543076724,
+      "why": "Component coverage for the turtle timer, which no other golden exercises."
+    },
+    {
+      "file": "cover_timer_vol_reversion.json",
+      "final_value": 118429.31478284195,
+      "id": "cover_timer_vol_reversion",
+      "n_days": 757,
+      "n_trades": 186,
+      "portable": true,
+      "sha256": "589ced34941fce7857a0a3b994c472b8816f6afcae2be39b28d5c8729a10a5e1",
+      "total_tax": 17358.621397457544,
+      "why": "Component coverage for the vol_reversion timer, which no other golden exercises."
+    },
+    {
+      "file": "cover_picker_high_dividend_topn25.json",
+      "final_value": 161398.7777345886,
+      "id": "cover_picker_high_dividend_topn25",
+      "n_days": 757,
+      "n_trades": 556,
+      "portable": true,
+      "sha256": "fc43edfbd7038ca279fa023357aea3aa660ddf4476964b7ed10ca5f52b2251df",
+      "total_tax": 10716.242167659244,
+      "why": "Deliberately pushes the top-n cutoff PAST the first tie divergence. dividendYield has 110 tie groups and pandas' default quicksort orders them differently from a stable sort starting at rank 11, so top_n=10 hides the problem and top_n=25 exposes it. This case exists to keep tie ordering pinned."
+    },
+    {
+      "file": "cover_picker_price_to_book.json",
+      "final_value": 147847.7389850524,
+      "id": "cover_picker_price_to_book",
+      "n_days": 757,
+      "n_trades": 10,
+      "portable": true,
+      "sha256": "7f5ca0530452e874c4b926f98e551e951982c17a9d341d1dbeb04d7c7de22acd",
+      "total_tax": 7177.160847757859,
+      "why": "Component coverage for the price_to_book picker, which no other golden exercises. Fundamental snapshot ranking \u2014 see the note about non-stable tie ordering."
+    },
+    {
+      "file": "cover_picker_small_cap.json",
+      "final_value": 298588.89311788924,
+      "id": "cover_picker_small_cap",
+      "n_days": 757,
+      "n_trades": 10,
+      "portable": true,
+      "sha256": "4ea160ee3fcca9e2ea6193be55bd07f70b0a56d438a7395e5574bf5b0665391a",
+      "total_tax": 29788.333967683393,
+      "why": "Component coverage for the small_cap picker, which no other golden exercises. Fundamental snapshot ranking \u2014 see the note about non-stable tie ordering."
+    },
+    {
+      "file": "cover_picker_quality_roe.json",
+      "final_value": 234312.02547659134,
+      "id": "cover_picker_quality_roe",
+      "n_days": 757,
+      "n_trades": 21,
+      "portable": true,
+      "sha256": "3d1dc076aba01abde8f419e8cd9e254f7e5383b9b9d8314b591e55562da792d4",
+      "total_tax": 21218.445609932918,
+      "why": "Component coverage for the quality_roe picker, which no other golden exercises. Fundamental snapshot ranking \u2014 see the note about non-stable tie ordering."
+    },
+    {
+      "file": "cover_picker_growth_revenue.json",
+      "final_value": 466804.289337059,
+      "id": "cover_picker_growth_revenue",
+      "n_days": 757,
+      "n_trades": 10,
+      "portable": true,
+      "sha256": "27b9e0f589666d3e2b9d3d3d4f30c20167ff76a5f9eb3582c5ad23ed700f6dcb",
+      "total_tax": 55020.64340055886,
+      "why": "Component coverage for the growth_revenue picker, which no other golden exercises. Fundamental snapshot ranking \u2014 see the note about non-stable tie ordering."
+    },
+    {
+      "file": "cover_picker_high_dividend.json",
+      "final_value": 158266.18151333558,
+      "id": "cover_picker_high_dividend",
+      "n_days": 757,
+      "n_trades": 173,
+      "portable": true,
+      "sha256": "fa5ff5ac17f2a443acac3cb3acb94739e83ec6c0490b0909c7b7c4f2ce1e6f87",
+      "total_tax": 10255.732866824801,
+      "why": "Component coverage for the high_dividend picker, which no other golden exercises. Fundamental snapshot ranking \u2014 see the note about non-stable tie ordering."
+    },
+    {
+      "file": "cover_picker_earnings_surprise.json",
+      "final_value": 186280.5723141256,
+      "id": "cover_picker_earnings_surprise",
+      "n_days": 757,
+      "n_trades": 34,
+      "portable": true,
+      "sha256": "fe85155aca54141c293597559d2f8f936db50afe90ce2d8ed9979be616552ac4",
+      "total_tax": 13415.75447756902,
+      "why": "Component coverage for the earnings_surprise picker, which no other golden exercises. Fundamental snapshot ranking \u2014 see the note about non-stable tie ordering."
+    }
+  ],
+  "data": {
+    "combined_sha256": "80f3cb2e7ca03b304d17df3b1058d5008d60746f04f32669ff4e156e7cf8fd6d",
+    "fundamentals_sha256": "31a183f850159600d3c114cc1d879ce5034cc51455ae276c994603bc525ce9c5",
+    "n_files": 530
+  },
+  "entry_point": "reference/service.py::EngineService.run_backtest",
+  "env": {
+    "git_commit": "b87bfd13e9e36d1f114f0604f99dfbd28acec254",
+    "git_dirty": true,
+    "numpy": "2.5.1",
+    "pandas": "3.0.5",
+    "python": "3.13.3"
+  },
+  "generated_by": "tools/gen_golden.py",
+  "portability_notes": [
+    "RESOLVED in Phase 3: the random picker's CPython Mersenne Twister is reimplemented in web/engine/src/mt19937.ts, so random_seeded is now portable and passes parity.",
+    "Float formatting differs between Python repr and JS toString; compare parsed numbers, never serialized strings.",
+    "pandas .std() defaults to ddof=1 (sample) \u2014 a naive TS std() with ddof=0 will drift. pandas .mean()/.sum() use NumPy pairwise summation, not a left-to-right loop.",
+    "pandas pct_change is x[i]/x[i-1]-1, and ewm(adjust=False) is a*x+(1-a)*prev; the algebraically equivalent rewrites of either are not bit-identical.",
+    "Python round(x, n) is half-to-even on the float's EXACT value. JS toFixed rounds half away from zero and scaling by 10^n first destroys the tie \u2014 see serialize.ts::pyRound.",
+    "Fundamental pickers rank with sort_values(kind='stable'). The pandas default (quicksort) is not stable, and several columns have many duplicate values, which made the top-n SELECTION an artifact of the sort implementation whenever a tie straddled the cutoff. cover_picker_high_dividend_topn25 pins this."
+  ],
+  "purpose": "Reference-oracle outputs frozen from the Python engine. The TypeScript port must reproduce these within tolerance.",
+  "tolerance": {
+    "python_vs_python": "exact (byte-identical serialization)",
+    "python_vs_typescript": "rel 1e-9 on equity/metrics; trade counts, tickers, sides and dates must match exactly"
+  }
+}
