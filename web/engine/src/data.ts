@@ -19,6 +19,9 @@ import { searchsortedRight } from "./numeric.js";
 export const FIELDS = ["Open", "High", "Low", "Close", "Volume"] as const;
 export type Field = (typeof FIELDS)[number];
 
+/** Bundle format version; must match tools/build_web_data.py::FORMAT_VERSION. */
+export const FORMAT_VERSION = 2;
+
 /** One ticker's real bars, mirroring a pandas OHLCV frame. */
 export interface TickerSeries {
   ticker: string;
@@ -93,7 +96,14 @@ function compact(
   return { days, fields, tradable };
 }
 
-/** Decode a per-ticker `tickers/<T>.bin` (full OHLCV). */
+/**
+ * Decode a per-ticker `tickers/<T>.bin`.
+ *
+ * The file declares which fields it carries, so the set can change without a
+ * decoder change. Current bundles ship Close only: the engine reads nothing
+ * else, and publishing full OHLCV made the bundle three times larger for data
+ * no strategy touches.
+ */
 export function decodeTicker(
   ticker: string,
   buf: ArrayBuffer,
@@ -102,15 +112,25 @@ export function decodeTicker(
   readMagic(buf, "STK1");
   const head = new DataView(buf);
   const version = head.getUint32(4, true);
-  if (version !== 1) throw new Error(`${ticker}: unsupported format_version ${version}`);
+  if (version !== FORMAT_VERSION) {
+    throw new Error(`${ticker}: unsupported format_version ${version}`);
+  }
   const first = head.getUint32(8, true);
   const n = head.getUint32(12, true);
+  const nfields = head.getUint32(16, true);
 
-  let off = 16;
+  let off = 20;
+  const ids = new Uint8Array(buf, off, nfields);
+  const names = Array.from(ids, (i) => FIELDS[i]);
+  off += nfields;
+
   const dense: Partial<Record<Field, Float32Array>> = {};
-  for (const f of FIELDS) {
+  for (const f of names) {
     dense[f] = new Float32Array(buf.slice(off, off + 4 * n));
     off += 4 * n;
+  }
+  if (dense.Close === undefined) {
+    throw new Error(`${ticker}: bundle has no Close series`);
   }
   const maskBytes = (n + 7) >> 3;
   const bits = unpackBits(new Uint8Array(buf, off, maskBytes), n);
@@ -131,7 +151,9 @@ export function decodeUniverse(
   readMagic(buf, "STKU");
   const head = new DataView(buf);
   const version = head.getUint32(4, true);
-  if (version !== 1) throw new Error(`universe: unsupported format_version ${version}`);
+  if (version !== FORMAT_VERSION) {
+    throw new Error(`universe: unsupported format_version ${version}`);
+  }
   const nTickers = head.getUint32(8, true);
   if (nTickers !== tickers.length) {
     throw new Error(`universe: ${nTickers} tickers in binary, ${tickers.length} in manifest`);

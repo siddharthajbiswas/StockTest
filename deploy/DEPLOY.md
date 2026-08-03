@@ -62,10 +62,18 @@ Open <https://biswas.net/sid/stocktest/>.
 | App bundle (JS/CSS/HTML) | ~68 kB | Always |
 | `manifest`, `calendar`, `catalog`, `tickers`, `fundamentals`, `sp500-pit` | ~150 kB | Always |
 | `universe.bin.gz` | 12.6 MB | Strategy mode only |
-| `tickers/<SYM>.bin.gz` | ~190 kB each | Manual mode, per ticker picked |
+| `tickers/<SYM>.bin.gz` | ~25 kB each | Manual mode, per ticker picked |
 
-So picking your own stocks costs a fraction of a megabyte; letting a strategy
-pick downloads the 12.6 MB universe once, after which the browser caches it.
+So picking your own stocks costs well under a megabyte; letting a strategy pick
+downloads the 12.6 MB universe once, after which the browser caches it.
+
+**Only closing prices are published.** The engine reads `Close` and nothing else
+— Volume is used solely for a tradability test, which is precomputed into a bit
+at build time, and Open/High/Low were only ever there for a chart that does not
+exist. Dropping them took the published tree from 79 MB to 27 MB and changed no
+backtest result (the golden suite verifies this). See `TICKER_FIELDS` in
+`tools/build_web_data.py`; the file format is self-describing, so adding a field
+back is a rebuild, not a code change.
 
 **Compression is done by us, not the host.** GitHub Pages compresses by content
 type and leaves `application/octet-stream` alone, so the worker fetches the
@@ -134,10 +142,20 @@ Nothing in the app depends on any of the above; it is purely cost cleanup.
 
 **Publishing this app publicly redistributes that data** — the bundle is
 downloaded by every visitor, which is the point of a client-side engine. That is
-a licensing question, not a technical one, and it is worth settling before the
-site is public. Options if it matters: keep the deploy private or
-password-gated, switch to a data source whose licence permits redistribution, or
-have the app fetch prices per-user at runtime from a provider the visitor is
+a licensing question, not a technical one.
+
+What is published has been narrowed to closing prices only (see above), which
+removes the bulk-OHLCV shape that most resembles redistributing a market-data
+product, and cuts the payload by two thirds. Researched alternatives, none of
+which is a drop-in: yfinance, Stooq, Tiingo-free and Alpha-Vantage-free are all
+terms-of-service rather than open-data licences, so changing provider mostly
+changes whose terms apply. Databento grants explicit redistribution rights but
+supplies raw exchange data with no dividend adjustment, and this engine depends
+on `auto_adjust=True` total-return prices — `backtester/tax.py` relies on
+dividends showing up as price appreciation.
+
+Remaining options if the residual risk matters: keep the deploy private, or have
+the app fetch prices per-user at runtime from a provider the visitor is
 themselves entitled to use.
 
 ---
@@ -148,8 +166,8 @@ themselves entitled to use.
 - **Bandwidth:** Pages has a soft limit of 100 GB/month. At 12.9 MB per
   strategy-mode first load that is roughly 7,700 cold sessions/month, and
   browser caching means repeat visits cost nothing.
-- **Repo size:** the published tree is ~79 MB, mostly `tickers/`. Pages'
-  published-site limit is 1 GB, so there is headroom — but the Pages repo grows
-  by that much on each data refresh unless you squash or use a separate branch.
+- **Repo size:** the published tree is ~27 MB. Pages' published-site limit is
+  1 GB, so there is plenty of headroom — but the Pages repo grows by that much
+  on each data refresh unless you squash or use a separate branch.
 - **Privacy:** every backtest runs on the visitor's own machine. No request
   leaves the browser after the initial asset load, and nothing is logged.

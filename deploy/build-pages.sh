@@ -59,6 +59,12 @@ total=$(du -sh "$OUT" | cut -f1)
 universe=$(du -h "$OUT/data/universe.bin.gz" | cut -f1)
 tickers=$(du -sh "$OUT/data/tickers" | cut -f1)
 n_tickers=$(ls "$OUT/data/tickers" | wc -l | tr -d ' ')
+# Median per-ticker transfer, derived rather than hardcoded — it changes
+# whenever TICKER_FIELDS or the history window changes.
+per_ticker_kb=$(ls -l "$OUT/data/tickers" | awk 'NR>1{print $5}' | sort -n \
+  | awk '{a[NR]=$1} END{printf "%.0f", a[int(NR/2)]/1024}')
+base_kb=$(du -sk "$OUT/data" --exclude=tickers 2>/dev/null | cut -f1 || \
+  echo $(( $(du -sk "$OUT/data" | cut -f1) - $(du -sk "$OUT/data/tickers" | cut -f1) )))
 
 cat <<EOF
 
@@ -69,8 +75,12 @@ cat <<EOF
   tickers/             $tickers   ($n_tickers files, lazily fetched in manual mode)
 
 First load transfers roughly:
-  manual mode     ~0.2 MB  + ~190 kB per ticker you pick
-  strategy mode   ~12.9 MB (the universe bundle, cached by the browser after)
+  manual mode     ~0.2 MB  + ~${per_ticker_kb} kB per ticker you pick
+  strategy mode   ~$universe (the universe bundle, cached by the browser after)
+
+Per-ticker files carry Close only (see TICKER_FIELDS in tools/build_web_data.py).
+The engine reads nothing else, so shipping OHLCV tripled the payload for data no
+strategy touches.
 
 Publish with:
   PAGES=<path to your rahulbiswas.github.io checkout>

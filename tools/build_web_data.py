@@ -6,8 +6,9 @@ form designed around what the engine actually reads:
   * **Strategies only ever read `Close`.** Every picker and timer goes through
     `ctx.history(t, "Close", ...)`; nothing reads Open/High/Low, and Volume is
     used solely for the `volume > 0` tradability test in `market.py`. So the
-    universe bundle carries Close plus a precomputed tradability bit, and
-    nothing else. Full OHLCV lives in the lazily-fetched per-ticker files.
+    universe bundle AND the per-ticker files carry Close plus a precomputed
+    tradability bit, and nothing else. (Open/High/Low were published until the
+    Close-only trim; see TICKER_FIELDS.)
 
   * **Dense-over-span beats sparse.** A ticker trades on nearly every union
     calendar day inside its own span (measured: 123 wasted cells out of
@@ -28,9 +29,12 @@ i.e. numpy packbits with bitorder="little"):
 
   calendar.bin      int32[n_cal]                  days since 1970-01-01 (UTC)
 
-  tickers/<T>.bin   magic "STK1", uint32 version, uint32 first, uint32 n,
-                    float32[n] x 5 (open, high, low, close, volume),
-                    uint8[ceil(n/8)] tradable
+  tickers/<T>.bin   magic "STK1", uint32 version(=2), uint32 first, uint32 n,
+                    uint32 nfields, uint8[nfields] field ids (index into
+                    FIELDS), float32[n] x nfields, uint8[ceil(n/8)] tradable
+
+                    Self-describing: adding a field back to TICKER_FIELDS and
+                    rebuilding needs no decoder change.
 
   universe.bin      magic "STKU", uint32 version, uint32 n_tickers,
                     uint32 n_cal, (uint32 first, uint32 n) x n_tickers,
@@ -51,9 +55,9 @@ PRECISION (measured across all 528 tickers, 4.52M bars):
 
 Close is already float32-derived upstream (yfinance), so storing it as float32
 is effectively lossless — which is what makes this format safe, because the
-engine reads Close and nothing else. Open/High/Low genuinely lose ~6e-8; they
-exist only in the per-ticker files for charting and are never read by the
-simulation. `tools/measure_f32_drift.py` confirms the end-to-end effect on the
+engine reads Close and nothing else. Open/High/Low genuinely lose ~6e-8 — they
+are no longer published at all, and were never read by the simulation.
+`tools/measure_f32_drift.py` confirms the end-to-end effect on the
 Phase 0 goldens is <=2.2e-15 on equity, ~500,000x inside the 1e-9 tolerance,
 with every trade count identical.
 
@@ -85,8 +89,26 @@ from backtester.data import DATA_DIR, FIELDS, available_tickers  # noqa: E402
 from backtester.universe import CONSTITUENTS_PATH, _normalize  # noqa: E402
 
 OUT = ROOT / "build" / "webdata"
-FORMAT_VERSION = 1
+FORMAT_VERSION = 2
 EPOCH = np.datetime64("1970-01-01", "D")
+
+# Which price fields the per-ticker files actually ship.
+#
+# The engine reads Close and nothing else — every picker and timer goes through
+# ctx.history(t, "Close", ...), and Volume is used solely for the >0 tradability
+# test, which is precomputed into a bit here. Open/High/Low were shipped only so
+# a future candlestick chart could use them, and they cost ~53 MB of the 79 MB
+# bundle.
+#
+# Dropping them cuts the published payload by two thirds, changes no backtest
+# result (the golden suite proves it), and means what is published is a
+# close-price series rather than a full OHLCV market-data product. Add a field
+# back here and rebuild if the UI ever needs it — the file format is
+# self-describing, so the decoder needs no change.
+TICKER_FIELDS = ["Close"]
+
+# Field ids stored in the per-ticker header, indexing FIELDS.
+_FIELD_ID = {f: i for i, f in enumerate(FIELDS)}
 
 
 # ---------------------------------------------------------------------------
@@ -227,9 +249,11 @@ def build(verify: bool) -> int:
         first, n, arrs, tradable = ticker_arrays(frames[t], calendar)
         total_cells += n
 
-        body = b"".join(arrs[f].tobytes() for f in FIELDS)
-        blob = (b"STK1" + struct.pack("<III", FORMAT_VERSION, first, n)
-                + body + pack_bits(tradable))
+        ids = bytes(_FIELD_ID[f] for f in TICKER_FIELDS)
+        body = b"".join(arrs[f].tobytes() for f in TICKER_FIELDS)
+        blob = (b"STK1"
+                + struct.pack("<IIII", FORMAT_VERSION, first, n, len(TICKER_FIELDS))
+                + ids + body + pack_bits(tradable))
         info = write(OUT / "tickers" / f"{t}.bin", blob, also_gzip=True)
         idx = frames[t].index
         per_ticker[t] = {
@@ -309,6 +333,7 @@ def build(verify: bool) -> int:
             "End-to-end effect on the Phase 0 goldens: <=2.2e-15. "
             "See precision_report.json.",
         ],
+        "ticker_fields": TICKER_FIELDS,
         "calendar": {**cal_info, "n": int(len(calendar)),
                      "start": str(calendar[0])[:10], "end": str(calendar[-1])[:10]},
         "universe": {**uni_info, "tickers": tickers, "n_tickers": len(tickers),
@@ -358,10 +383,13 @@ def build(verify: bool) -> int:
 def read_ticker(path: Path):
     b = path.read_bytes()
     assert b[:4] == b"STK1", f"bad magic in {path}"
-    version, first, n = struct.unpack_from("<III", b, 4)
-    off = 16
+    version, first, n, nfields = struct.unpack_from("<IIII", b, 4)
+    assert version == FORMAT_VERSION, f"{path}: version {version}"
+    off = 20
+    names = [FIELDS[i] for i in b[off:off + nfields]]
+    off += nfields
     arrs = {}
-    for f in FIELDS:
+    for f in names:
         arrs[f] = np.frombuffer(b, dtype="<f4", count=n, offset=off)
         off += 4 * n
     mask_bytes = (n + 7) // 8
@@ -414,7 +442,8 @@ def verify_roundtrip(tickers, frames, calendar, per_ticker) -> int:
             errs.append(f"{t}: universe table {(table[i])} != per-ticker {(first, n)}")
 
         # Prices must equal float32(source) EXACTLY at every real bar.
-        for f in FIELDS:
+        # Only the shipped fields exist to check; see TICKER_FIELDS.
+        for f in TICKER_FIELDS:
             if f not in df.columns:
                 continue
             src = df[f].to_numpy(dtype=np.float64)
