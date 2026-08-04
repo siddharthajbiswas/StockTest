@@ -143,8 +143,10 @@ export function LineChart({ dates, series }: { dates: string[]; series: Series[]
         </text>
       </svg>
 
+      {/* `below-legend`: the legend shares this positioning box, so the
+          default top would put the bubble on top of it. */}
       {readout && (
-        <div className="chart-tip" style={tooltipStyle(sx(i!) / W)}>
+        <div className="chart-tip below-legend" style={tooltipStyle(sx(i!) / W)}>
           <div className="chart-tip-date">{prettyDate(readout.date)}</div>
           {readout.rows.map((r) => (
             <div key={r.label} className="chart-tip-row">

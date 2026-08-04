@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { fetchTickerHistory } from "../api";
 import type { RoundTrip, TickerHistory } from "../types";
 import { money, prettyDate, signedPct } from "../format";
@@ -45,7 +46,11 @@ export function StockHistory({ symbol, name, trips, onClose }: Props) {
 
   const title = data?.name ?? name ?? null;
 
-  return (
+  // Portalled for the same reason as StrategyDetail: this one is opened from
+  // inside the results sheet, which sets `overflow: hidden`. It escapes that
+  // today only because nothing between here and the root is transformed — a
+  // fragile thing to rely on for a modal.
+  return createPortal(
     <div className="results-overlay" onClick={onClose}>
       <div
         className="detail-sheet stock-sheet"
@@ -121,7 +126,8 @@ export function StockHistory({ symbol, name, trips, onClose }: Props) {
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

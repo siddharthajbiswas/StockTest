@@ -68,7 +68,7 @@ const TOUR_STEPS: TourStep[] = [
     targetId: "tour-mode",
   },
   {
-    title: "Two choices, not one: what and when",
+    title: "Two choices: what, and when",
     body: "A strategy decides WHICH stocks you own — momentum buys the fastest risers, value buys the cheapest. A timer then decides WHEN to actually hold them — always (Buy & Hold), only while trending up, or only after a dip. You pick one of each, and they combine.",
   },
   {

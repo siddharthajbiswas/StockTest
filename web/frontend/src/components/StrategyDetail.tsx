@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import type { StrategyDetail } from "../content";
 import type { ParamSpec } from "../types";
 
@@ -39,7 +40,13 @@ export function StrategyDetail({
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  return (
+  // Portalled to <body>. The grids that open this sheet live inside
+  // `.container`, which sets `position: relative; z-index: 1` and so opens a
+  // stacking context — inside it the overlay's z-index:70 is scoped, and the
+  // sticky topbar (z-index:20, a sibling of .container) paints over the sheet's
+  // header. Rendering at the document root puts the overlay back in the root
+  // stacking context, where its z-index means what it says.
+  return createPortal(
     <div className="results-overlay" onClick={onClose}>
       <div
         className="detail-sheet"
@@ -117,6 +124,7 @@ export function StrategyDetail({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
