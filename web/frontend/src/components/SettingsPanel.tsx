@@ -1,4 +1,3 @@
-import { useState } from "react";
 import type { Mode, UniverseOption } from "../types";
 import { InfoTip } from "./InfoTip";
 import { TaxRateHelper } from "./TaxRateHelper";
@@ -39,8 +38,6 @@ export function SettingsPanel({ mode, config, update, universeOptions, dataRange
   const activeUniverse = universeOptions.find((u) => u.id === config.universe);
   const dataMin = dataRange?.start;
   const dataMax = dataRange?.end;
-  const [helperOpen, setHelperOpen] = useState(false);
-
   // Whether the rates in force are the ones the helper currently computes, so
   // the button can read "Applied" instead of inviting a pointless second click.
   const helperRates = computeRates(config.taxStatus, config.taxIncome, config.taxState);
@@ -151,8 +148,10 @@ export function SettingsPanel({ mode, config, update, universeOptions, dataRange
         )}
 
         {/* Rate helper — answers "what are MY rates, including state tax?" */}
-        <details className="collapsible" style={{ marginTop: 12 }} open={helperOpen}>
-          <summary onClick={() => setHelperOpen((v) => !v)}>
+        {/* Uncontrolled, like the other collapsibles here. Driving `open` from
+            state while the browser also toggles it natively is a needless race. */}
+        <details className="collapsible" style={{ marginTop: 12 }}>
+          <summary>
             <span className="caret">▸</span> Work out my rates from my income and state
           </summary>
           <div className="body">
