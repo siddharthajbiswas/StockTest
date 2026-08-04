@@ -49,6 +49,19 @@ export interface TickerRecord {
   date_to: string | null;
 }
 
+/** One stock's price history — served by the worker's `tickerHistory` op. */
+export interface TickerHistory {
+  symbol: string;
+  name: string | null;
+  dates: string[];
+  closes: number[];
+  /** Range of the underlying data, before downsampling. */
+  first_date: string | null;
+  last_date: string | null;
+  /** Real bar count, which exceeds dates.length when downsampled. */
+  n_bars: number;
+}
+
 export interface Metrics {
   starting_cash: number;
   final_value: number;

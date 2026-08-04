@@ -30,6 +30,7 @@ import type {
   BacktestRequest,
   BacktestResponse,
   Picker,
+  TickerHistory,
   TickerRecord,
   Timer,
   UniverseNote,
@@ -81,6 +82,16 @@ export const searchTickers = (q: string, limit = 12) =>
     universe: UniverseNote;
     results: TickerRecord[];
   }>;
+
+/**
+ * One stock's close-price history, for the detail view opened from the trade
+ * log. The worker reads the same per-ticker file the engine uses, so this is
+ * free for any ticker a backtest already touched.
+ */
+export const fetchTickerHistory = (
+  symbol: string,
+  opts: { start?: string | null; end?: string | null; maxPoints?: number } = {},
+) => client.tickerHistory<TickerHistory>(symbol, opts);
 
 /**
  * Run a backtest, serving an identical previous run from the local cache.

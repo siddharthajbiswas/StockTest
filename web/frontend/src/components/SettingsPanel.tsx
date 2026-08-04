@@ -1,5 +1,8 @@
+import { useState } from "react";
 import type { Mode, UniverseOption } from "../types";
 import { InfoTip } from "./InfoTip";
+import { TaxRateHelper } from "./TaxRateHelper";
+import { computeRates, type FilingStatus } from "../taxTables";
 
 export interface Config {
   start: string;
@@ -12,6 +15,10 @@ export interface Config {
   rebalance: "D" | "W" | "M" | "Q";
   commissionBps: number;
   slippageBps: number;
+  /** Inputs to the rate helper. Kept here so they survive the panel unmounting. */
+  taxStatus: FilingStatus;
+  taxIncome: number;
+  taxState: string;
 }
 
 interface Props {
@@ -32,6 +39,16 @@ export function SettingsPanel({ mode, config, update, universeOptions, dataRange
   const activeUniverse = universeOptions.find((u) => u.id === config.universe);
   const dataMin = dataRange?.start;
   const dataMax = dataRange?.end;
+  const [helperOpen, setHelperOpen] = useState(false);
+
+  // Whether the rates in force are the ones the helper currently computes, so
+  // the button can read "Applied" instead of inviting a pointless second click.
+  const helperRates = computeRates(config.taxStatus, config.taxIncome, config.taxState);
+  const near = (a: number, b: number) => Math.abs(a - b) < 0.005;
+  const helperApplied =
+    !config.taxDefaults &&
+    near(config.stRatePct, helperRates.shortTotal * 100) &&
+    near(config.ltRatePct, helperRates.longTotal * 100);
   return (
     <div className="panel">
       {/* Date range */}
@@ -75,7 +92,7 @@ export function SettingsPanel({ mode, config, update, universeOptions, dataRange
       <div className="field" style={{ marginTop: 8 }}>
         <label style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
           Taxes
-          <InfoTip text="Selling winners triggers capital-gains tax. Frequent trading is taxed at higher short-term rates, while buy-and-hold defers tax — so two strategies with the same gross return can differ a lot after tax. We compare everything net of tax." />
+          <InfoTip text="Selling winners triggers capital-gains tax. Frequent trading is taxed at higher short-term rates, while buy-and-hold defers tax — so two strategies with the same gross return can differ a lot after tax. We compare everything net of tax. The rates below are all-in: federal, the 3.8% net investment income surtax, and your state's income tax on gains." />
         </label>
         <p className="hint" style={{ marginBottom: 10 }}>
           Why it matters: a strategy only beats the market if it wins <em>after</em> taxes and fees.
@@ -127,9 +144,34 @@ export function SettingsPanel({ mode, config, update, universeOptions, dataRange
         )}
         {config.taxDefaults && (
           <p className="hint" style={{ marginTop: 8 }}>
-            Defaults: 35% short-term, 15% long-term.
+            Defaults: 35% short-term, 15% long-term — a rough stand-in for a high earner in a
+            state with income tax. Your real rates depend on your income and state; the helper
+            below works them out.
           </p>
         )}
+
+        {/* Rate helper — answers "what are MY rates, including state tax?" */}
+        <details className="collapsible" style={{ marginTop: 12 }} open={helperOpen}>
+          <summary onClick={() => setHelperOpen((v) => !v)}>
+            <span className="caret">▸</span> Work out my rates from my income and state
+          </summary>
+          <div className="body">
+            <TaxRateHelper
+              status={config.taxStatus}
+              income={config.taxIncome}
+              state={config.taxState}
+              onChange={update}
+              onApply={(shortPct, longPct) =>
+                update({
+                  taxDefaults: false,
+                  stRatePct: Math.round(shortPct * 100) / 100,
+                  ltRatePct: Math.round(longPct * 100) / 100,
+                })
+              }
+              applied={helperApplied}
+            />
+          </div>
+        </details>
       </div>
 
       {/* Advanced — collapsed by default (progressive disclosure) */}

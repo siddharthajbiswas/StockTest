@@ -213,6 +213,71 @@ export class EngineService {
     return { universe: this.universeNote(), results: this.index!.search(q, limit) };
   }
 
+  /**
+   * One ticker's close-price history, for the stock detail view.
+   *
+   * Reads the same per-ticker file a manual-mode backtest would, so opening a
+   * stock from the trade log costs nothing extra once that ticker is cached.
+   * Downsamples to at most `maxPoints` bars: a full history can be 16,000 days,
+   * and the chart cannot resolve more than a few hundred. The last bar is always
+   * kept so the series ends where the data does rather than at a stride boundary.
+   */
+  async tickerHistory(
+    symbol: string,
+    start: string | null = null,
+    end: string | null = null,
+    maxPoints = 900,
+  ): Promise<{
+    symbol: string;
+    name: string | null;
+    dates: string[];
+    closes: number[];
+    first_date: string | null;
+    last_date: string | null;
+    n_bars: number;
+  }> {
+    await this.init();
+    const record = this.index!.get(symbol);
+    if (record === undefined) throw new UnknownTickersError([symbol]);
+
+    const full = await this.needTicker(symbol);
+    const clipped = clipSeries(
+      full,
+      start === null ? null : dayFromIso(start),
+      end === null ? null : dayFromIso(end),
+    );
+    const close = clipped.fields.Close;
+    const n = clipped.days.length;
+    if (close === undefined || n === 0) {
+      return {
+        symbol, name: record.name, dates: [], closes: [],
+        first_date: null, last_date: null, n_bars: 0,
+      };
+    }
+
+    const stride = Math.max(1, Math.ceil(n / maxPoints));
+    const dates: string[] = [];
+    const closes: number[] = [];
+    for (let i = 0; i < n; i += stride) {
+      dates.push(isoOfDay(clipped.days[i]));
+      closes.push(close[i]);
+    }
+    if ((n - 1) % stride !== 0) {
+      dates.push(isoOfDay(clipped.days[n - 1]));
+      closes.push(close[n - 1]);
+    }
+
+    return {
+      symbol,
+      name: record.name,
+      dates,
+      closes,
+      first_date: isoOfDay(clipped.days[0]),
+      last_date: isoOfDay(clipped.days[n - 1]),
+      n_bars: n,
+    };
+  }
+
   // ---- market construction --------------------------------------------
   private async manualMarket(tickers: string[], start: string | null, end: string | null) {
     const wanted = [...new Set(tickers)];

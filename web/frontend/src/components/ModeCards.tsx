@@ -19,7 +19,8 @@ export function ModeCards({ mode, onPick }: Props) {
           {mode === "manual" && <span className="check">✓</span>}
         </h3>
         <p className="desc">
-          Choose your own basket of companies and test a timing rule on them.
+          Choose your own basket of companies. You’ll still pick a timing rule next, which
+          decides when to hold them.
         </p>
       </button>
 
@@ -33,7 +34,8 @@ export function ModeCards({ mode, onPick }: Props) {
           {mode === "ai" && <span className="check">✓</span>}
         </h3>
         <p className="desc">
-          Start from a proven idea — momentum, value, quality — and let it choose the basket.
+          Start from a known idea — momentum, value, quality — and let it rank the market and
+          choose the basket for you.
         </p>
       </button>
     </div>

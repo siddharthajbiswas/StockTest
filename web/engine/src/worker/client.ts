@@ -129,6 +129,10 @@ export class EngineClient {
   allTickers = () => this.call<{ universe: unknown; tickers: unknown[] }>("tickers");
   searchTickers = (q: string, limit = 12) =>
     this.call<{ universe: unknown; results: unknown[] }>("searchTickers", { q, limit });
+  tickerHistory = <T>(
+    symbol: string,
+    opts: { start?: string | null; end?: string | null; maxPoints?: number } = {},
+  ) => this.call<T>("tickerHistory", { symbol, ...opts });
   backtest = <T>(req: unknown) => this.call<T>("backtest", req);
   validate = <T>(req: unknown, opts: CallOptions = {}) =>
     this.call<T>("validate", req, opts);

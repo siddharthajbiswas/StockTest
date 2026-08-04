@@ -23,6 +23,8 @@ interface Props {
   mode: Mode;
   pickers: Picker[];
   universeOptions: UniverseOption[];
+  /** symbol -> company name, for the trade log's hover and stock detail view. */
+  tickerNames: Map<string, string>;
   onClose: () => void;
 }
 
@@ -36,7 +38,15 @@ function etaText(p: ValidationProgress): string {
     : ` · about ${Math.ceil(remaining / 60)} min left`;
 }
 
-export function Results({ data, config, mode, pickers, universeOptions, onClose }: Props) {
+export function Results({
+  data,
+  config,
+  mode,
+  pickers,
+  universeOptions,
+  tickerNames,
+  onClose,
+}: Props) {
   const [validation, setValidation] = useState<ValidationResult | null>(null);
   const [validating, setValidating] = useState(false);
   const [validateError, setValidateError] = useState<string | null>(null);
@@ -226,8 +236,10 @@ export function Results({ data, config, mode, pickers, universeOptions, onClose 
           <h3 className="block-title">Trade log</h3>
           <p className="sub" style={{ marginTop: -4, marginBottom: 12 }}>
             Completed round trips (a buy matched to the sell that closed it), most recent first.
+            Hover a ticker for the company name, or click it to see that stock’s price history
+            with these trades marked on it.
           </p>
-          <TradeLog trips={data.round_trips} />
+          <TradeLog trips={data.round_trips} names={tickerNames} />
         </div>
       </div>
     </div>

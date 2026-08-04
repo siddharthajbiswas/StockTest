@@ -60,6 +60,13 @@ export function createHandler(opts: HandlerOptions) {
           reply(svc.searchTickers(p.q, p.limit ?? 20));
           break;
         }
+        case "tickerHistory": {
+          const p = req.payload as {
+            symbol: string; start?: string | null; end?: string | null; maxPoints?: number;
+          };
+          reply(await svc.tickerHistory(p.symbol, p.start ?? null, p.end ?? null, p.maxPoints));
+          break;
+        }
         case "backtest":
           reply(await svc.runBacktest(req.payload as any));
           break;

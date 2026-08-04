@@ -1,11 +1,20 @@
 import { useState } from "react";
 import type { RoundTrip } from "../types";
 import { money, signedPct } from "../format";
+import { StockHistory } from "./StockHistory";
 
 const PAGE = 40;
 
-export function TradeLog({ trips }: { trips: RoundTrip[] }) {
+interface Props {
+  trips: RoundTrip[];
+  /** symbol -> company name, for the hover title. Empty map is fine. */
+  names: Map<string, string>;
+}
+
+export function TradeLog({ trips, names }: Props) {
   const [limit, setLimit] = useState(PAGE);
+  const [openSymbol, setOpenSymbol] = useState<string | null>(null);
+
   if (trips.length === 0) {
     return (
       <p className="hint">
@@ -37,10 +46,20 @@ export function TradeLog({ trips }: { trips: RoundTrip[] }) {
           <tbody>
             {shown.map((t, i) => {
               const win = t.pnl > 0;
+              const name = names.get(t.ticker);
               return (
                 <tr key={i}>
-                  <td className="mono" style={{ fontWeight: 650, textAlign: "left" }}>
-                    {t.ticker}
+                  <td style={{ textAlign: "left" }}>
+                    <button
+                      className="ticker-link mono"
+                      // The native title is the tooltip here on purpose: it
+                      // works on the table's horizontal scroll and needs no
+                      // positioning logic against a clipped container.
+                      title={name ? `${t.ticker} — ${name}\nClick for price history` : `${t.ticker}\nClick for price history`}
+                      onClick={() => setOpenSymbol(t.ticker)}
+                    >
+                      {t.ticker}
+                    </button>
                   </td>
                   <td>{t.entry_date}</td>
                   <td>{t.exit_date}</td>
@@ -59,6 +78,19 @@ export function TradeLog({ trips }: { trips: RoundTrip[] }) {
         <button className="btn" style={{ marginTop: 12 }} onClick={() => setLimit((l) => l + PAGE)}>
           Show more ({sorted.length - limit} left)
         </button>
+      )}
+
+      {openSymbol && (
+        <StockHistory
+          symbol={openSymbol}
+          name={names.get(openSymbol)}
+          // Every trip in this symbol, oldest first, so the table reads
+          // chronologically alongside the chart.
+          trips={trips
+            .filter((t) => t.ticker === openSymbol)
+            .sort((a, b) => (a.entry_date < b.entry_date ? -1 : 1))}
+          onClose={() => setOpenSymbol(null)}
+        />
       )}
     </div>
   );

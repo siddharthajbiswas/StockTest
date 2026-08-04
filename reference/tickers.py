@@ -5,10 +5,13 @@ startup, joined with whatever metadata the fundamentals snapshot happens to
 carry. IMPORTANT: this is a *fixed* universe, not "any stock" — there is a row
 here only if we have a local price CSV for it.
 
-The local fundamentals snapshot currently has no company-name column, so search
-falls back to symbol-only matching. The name join looks for any of a few common
-name columns, so if a future snapshot adds one, names light up automatically
-with no code change.
+Company names come from `data/company_names.csv` (written by
+`tools/fetch_company_names.py`). They are deliberately NOT a column of the
+fundamentals snapshot: `tools/build_web_data.py` bundles every non-ticker
+fundamentals column into the numeric factor matrix the pickers rank on, so a
+string name column would ride along into data no strategy reads. As a fallback
+the join still looks for a name column on the snapshot, so a future vendor file
+that carries one lights up with no code change.
 """
 
 from __future__ import annotations
@@ -21,6 +24,8 @@ import pandas as pd
 
 # Columns we'll treat as a human-readable company name if the snapshot has one.
 _NAME_COLUMNS = ("name", "longName", "shortName", "companyName", "company")
+# Default location of the dedicated names file (tools/fetch_company_names.py).
+NAMES_PATH = Path(__file__).resolve().parents[1] / "data" / "company_names.csv"
 _FUZZY_THRESHOLD = 0.6  # min SequenceMatcher ratio for a fuzzy symbol match
 
 
@@ -35,18 +40,27 @@ def _clean(x) -> float | None:
 
 
 class TickerIndex:
-    def __init__(self, prices: dict[str, pd.DataFrame], fundamentals_path: Path | str):
+    def __init__(
+        self,
+        prices: dict[str, pd.DataFrame],
+        fundamentals_path: Path | str,
+        names_path: Path | str | None = None,
+    ):
         fund = self._load_fundamentals(fundamentals_path)
         name_col = next((c for c in _NAME_COLUMNS if c in fund.columns), None)
+        names = self._load_names(
+            NAMES_PATH if names_path is None else names_path
+        )
 
         self.records: list[dict] = []
         for symbol in sorted(prices):
             df = prices[symbol]
             row = fund.loc[symbol] if symbol in fund.index else None
-            name = None
+            # The dedicated names file wins; the snapshot column is the fallback.
+            name = names.get(symbol)
             market_cap = None
             if row is not None:
-                if name_col is not None:
+                if name is None and name_col is not None:
                     raw = row.get(name_col)
                     name = None if (raw is None or (isinstance(raw, float) and math.isnan(raw))) else str(raw)
                 if "marketCap" in fund.columns:
@@ -62,7 +76,10 @@ class TickerIndex:
                 }
             )
         self._by_symbol = {r["symbol"]: r for r in self.records}
-        self.has_name_data = name_col is not None
+        # True when any record actually carries a name, rather than merely when a
+        # source was configured — the UI uses this to decide whether to offer
+        # name-based search at all, and an empty names file should read as "no".
+        self.has_name_data = any(r["name"] for r in self.records)
 
     @staticmethod
     def _load_fundamentals(path: Path | str) -> pd.DataFrame:
@@ -70,6 +87,15 @@ class TickerIndex:
         if not path.exists():
             return pd.DataFrame()
         return pd.read_csv(path, index_col="ticker")
+
+    @staticmethod
+    def _load_names(path: Path | str) -> dict[str, str]:
+        """{symbol: company name}, empty when the file hasn't been fetched."""
+        path = Path(path)
+        if not path.exists():
+            return {}
+        df = pd.read_csv(path).dropna(subset=["name"])
+        return {str(t): str(n) for t, n in zip(df["ticker"], df["name"])}
 
     # ---- API-facing views -----------------------------------------------
     def all(self) -> list[dict]:

@@ -20,6 +20,7 @@ export type RequestKind =
   | "universes"
   | "tickers"
   | "searchTickers"
+  | "tickerHistory"
   | "backtest"
   | "validate";
 

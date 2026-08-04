@@ -11,7 +11,7 @@ FIELDS = ["Open", "High", "Low", "Close", "Volume"]
 
 # CSVs in data/ that are not per-ticker price series and must be kept out of the
 # tradable universe (e.g. the fundamentals snapshot written by fetch_fundamentals).
-NON_PRICE_FILES = {"fundamentals", "sp500_constituents"}
+NON_PRICE_FILES = {"fundamentals", "sp500_constituents", "company_names"}
 
 
 def available_tickers(data_dir: Path | str = DATA_DIR) -> list[str]:

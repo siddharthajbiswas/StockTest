@@ -102,6 +102,39 @@ test("ticker search matches the Python index", async () => {
   } finally { await c.close(); }
 });
 
+test("ticker history serves a downsampled close series with names", async () => {
+  const c = new TestClient();
+  try {
+    const full = await c.call<any>("tickerHistory", { symbol: "AAPL" });
+    assert.equal(full.symbol, "AAPL");
+    assert.equal(full.name, "Apple Inc.", "company name comes from the ticker index");
+    assert.ok(full.n_bars > 5000, `AAPL should have deep history, got ${full.n_bars}`);
+    // Downsampled to the cap, with the final bar always retained.
+    assert.ok(full.dates.length <= 901, `expected <= 901 points, got ${full.dates.length}`);
+    assert.equal(full.dates[full.dates.length - 1], full.last_date);
+    assert.equal(full.dates[0], full.first_date);
+    assert.equal(full.dates.length, full.closes.length);
+    assert.ok(full.closes.every((v: number) => Number.isFinite(v) && v > 0));
+    // Ascending, which the chart's binary search over dates depends on.
+    for (let i = 1; i < full.dates.length; i++) {
+      assert.ok(full.dates[i] > full.dates[i - 1], `dates must ascend at ${i}`);
+    }
+
+    // A clipped window returns fewer bars and no downsampling.
+    const win = await c.call<any>("tickerHistory", {
+      symbol: "AAPL", start: "2020-01-01", end: "2020-12-31",
+    });
+    assert.ok(win.n_bars > 240 && win.n_bars < 260, `2020 trading days, got ${win.n_bars}`);
+    assert.equal(win.dates.length, win.n_bars, "under the cap, nothing is dropped");
+    assert.ok(win.first_date >= "2020-01-01" && win.last_date <= "2020-12-31");
+
+    // Unknown symbols are the same structured error the backtest path raises.
+    await assert.rejects(() => c.call("tickerHistory", { symbol: "NOTREAL" }));
+    // ...and the worker is still alive afterwards.
+    assert.equal((await c.call<any>("tickerHistory", { symbol: "MSFT" })).symbol, "MSFT");
+  } finally { await c.close(); }
+});
+
 test("backtest over the worker matches the golden oracle", async () => {
   const c = new TestClient();
   try {
