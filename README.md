@@ -17,13 +17,13 @@ want the full sweep (see [For power users](#for-power-users)).
 
 ## The web app (start here)
 
-A React UI over the engine compiled to TypeScript and run in a Web Worker — no
+A React UI over the engine ported to JavaScript and run in a Web Worker — no
 server, no API, nothing leaves your machine. It walks you through one decision at
 a time and surfaces the honest caveats instead of burying them.
 
 ### Run it
 
-There is no server. The engine is a TypeScript port of `backtester/` that runs
+There is no server. The engine is a JavaScript port of `backtester/` that runs
 in a Web Worker in the browser, so you only need the data bundle and Vite.
 
 ```bash
@@ -122,9 +122,9 @@ for the strategy design notes.
 ```
 backtester/      # the engine: data, portfolio, tax, indicators, universe
 strategies/      # picker & timer implementations (the composable pieces)
-web/engine/      # TypeScript port of the engine (runs in a Web Worker)
+web/engine/      # JavaScript port of the engine (runs in a Web Worker)
 reference/       # Python reference implementation — generates the golden oracle
-web/frontend/    # React + Vite + TypeScript UI
+web/frontend/    # React + Vite UI (plain JavaScript + JSX)
 data/            # per-ticker price CSVs + fundamentals snapshot
 *.py             # CLI tools (see "For power users")
 ```
@@ -137,9 +137,9 @@ Needs the dev deps: `.venv/bin/pip install -r requirements-dev.txt`.
 # Python: reference implementation + the golden oracle it generates
 .venv/bin/python -m pytest reference golden -q
 
-# TypeScript engine (parity against the oracle, worker, RNG, units)
+# JavaScript engine (parity against the oracle, worker, RNG, units)
 cd web/engine && npm test
 
-# frontend (typecheck + production build)
+# frontend (production build)
 cd web/frontend && npm run build
 ```

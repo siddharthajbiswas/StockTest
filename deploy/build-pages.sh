@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Build the complete static site for GitHub Pages.
 #
-# StockTest has no backend. The engine is a TypeScript port running in a Web
+# StockTest has no backend. The engine is a JavaScript port running in a Web
 # Worker, so a deploy is one directory of static files: the app bundle plus the
 # binary price data it loads at runtime.
 #
@@ -38,7 +38,7 @@ cp -R dist/. "$OUT/"
 
 # Ship only the .gz artifacts. The worker fetches those and inflates them with
 # DecompressionStream, because static hosts do not compress
-# application/octet-stream — see web/engine/src/worker/worker.ts.
+# application/octet-stream — see web/engine/src/worker/worker.js.
 #
 # search.json is a test fixture for the ticker-search port, not a runtime
 # artifact, and precision_report.json is a build diagnostic. Neither ships.

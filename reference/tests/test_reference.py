@@ -1,7 +1,7 @@
 """Behavioural tests for the reference implementation.
 
 These replace the old `web/backend/tests/` suite, which drove everything through
-a FastAPI `TestClient`. The HTTP API is gone — the app talks to the TypeScript
+a FastAPI `TestClient`. The HTTP API is gone — the app talks to the JavaScript
 engine in a Web Worker — so what survives here is the behaviour that was being
 tested *underneath* the endpoints, called directly on `EngineService`.
 
@@ -12,7 +12,7 @@ What deliberately did NOT survive, and where its coverage moved:
     Chrome (migration, persistence across reload, delete, LRU eviction).
   * HTTP status codes and response envelopes — there is no HTTP layer. The
     equivalent error surface is the worker protocol, covered by
-    `web/engine/test/worker.test.ts`.
+    `web/engine/test/worker.test.js`.
 
 Run:  .venv/bin/python -m pytest reference -q
 """

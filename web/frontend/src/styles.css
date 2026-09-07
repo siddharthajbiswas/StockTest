@@ -70,7 +70,7 @@ button { font-family: inherit; font-size: inherit; cursor: pointer; }
 /* ---------------- layout ---------------- */
 .app { min-height: 100%; display: flex; flex-direction: column; }
 
-/* Animated particle field (ParticleField.tsx): fixed above the body's gradient
+/* Animated particle field (ParticleField.jsx): fixed above the body's gradient
    (z-index:0) but below every app surface, which are lifted above it (the
    container/topbar/runbar all carry a higher z-index). Never intercepts input.
    The violet/magenta dots drift up from the bottom. */

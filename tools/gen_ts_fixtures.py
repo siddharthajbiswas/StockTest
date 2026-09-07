@@ -1,4 +1,4 @@
-"""Generate unit-level fixtures for the TypeScript port (Phase 2).
+"""Generate unit-level fixtures for the JavaScript port (Phase 2).
 
 The end-to-end golden cases prove the whole stack agrees, but when they fail
 they don't say *where*. These fixtures pin each ported primitive individually —

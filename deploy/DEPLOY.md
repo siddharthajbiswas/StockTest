@@ -1,7 +1,7 @@
 # Deploying StockTest to biswas.net/sid/stocktest
 
 StockTest is a **static site**. There is no backend, no VM, no database and no
-API. The engine is a TypeScript port of `backtester/` that runs in a Web Worker
+API. The engine is a JavaScript port of `backtester/` that runs in a Web Worker
 in the browser, and the price data ships as a binary bundle the worker fetches.
 
 A deploy is therefore: build one directory, copy it into the Pages repo, push.
@@ -78,7 +78,7 @@ back is a rebuild, not a code change.
 **Compression is done by us, not the host.** GitHub Pages compresses by content
 type and leaves `application/octet-stream` alone, so the worker fetches the
 `.gz` files and inflates them with `DecompressionStream`
-(`web/engine/src/worker/worker.ts`). Nothing needs configuring server-side; this
+(`web/engine/src/worker/worker.js`). Nothing needs configuring server-side; this
 is what makes a purely static deploy viable.
 
 `.nojekyll` is written into the output so Pages serves the tree verbatim.

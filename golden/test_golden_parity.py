@@ -7,7 +7,7 @@ and diff the result against the committed JSON in this directory. Two jobs:
      refactor of the tax netting or the portfolio lot accounting that changes
      numbers without breaking a unit test.
   2. **During the TS port.** These same JSON files are the contract the
-     TypeScript implementation must reproduce. `compare_payloads` below is
+     JavaScript implementation must reproduce. `compare_payloads` below is
      deliberately written as a spec of *what* must match and *how closely*, so
      the TS-side checker can mirror it.
 

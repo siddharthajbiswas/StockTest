@@ -1,6 +1,6 @@
 # StockTest Frontend
 
-A React + Vite + TypeScript UI for the in-browser backtest engine, designed for
+A React + Vite UI (plain JavaScript + JSX) for the in-browser backtest engine, designed for
 **non-experts**:
 one clear decision at a time, generous whitespace, and the honest caveats
 surfaced (not buried).
@@ -14,9 +14,9 @@ npm install
 npm run dev            # http://localhost:5173
 ```
 
-The engine runs in a Web Worker (`web/engine`); `src/api.ts` posts messages to
+The engine runs in a Web Worker (`web/engine`); `src/api.js` posts messages to
 it instead of issuing `fetch` calls. The dev server streams the price bundle
-from `build/webdata/` at `/data` (see the middleware in `vite.config.ts`).
+from `build/webdata/` at `/data` (see the middleware in `vite.config.js`).
 Production build: `npm run build`, or `deploy/build-pages.sh` for the full
 static site including data.
 
@@ -46,7 +46,7 @@ status always reflects the picker actually run, not preset defaults.
 
 The run bar has a **★ Save strategy** action that names the current
 picker+params+timer+params (plus window/universe/tax) and stores it in the
-browser (IndexedDB, `src/storage.ts`). Saved combos appear in a **My strategies** panel at the top of
+browser (IndexedDB, `src/storage.js`). Saved combos appear in a **My strategies** panel at the top of
 the screen, each with **Re-run** (loads + runs immediately), **Edit** (loads
 into the wizard to tweak), and delete.
 4. **When & taxes** — a date-range picker and a tax section (“use sensible
@@ -73,11 +73,11 @@ into the wizard to tweak), and delete.
   P&L \$ and %, holding period), reconstructed FIFO by the engine.
 
 All results copy — metric explanations and the trust/caveat logic — lives in one
-reviewable file, `src/content.ts`.
+reviewable file, `src/content.js`.
 
 ## Onboarding
 
-A dependency-free 5-step tour (`components/Onboarding.tsx`) explains what the
+A dependency-free 5-step tour (`components/Onboarding.jsx`) explains what the
 tool does, the two modes, what a timer is, and that results are judged against
 the S&P net of tax. It shows once (tracked in `localStorage`), is reopenable via
 **Take a tour**, and its final step launches **Try an example** — which pre-fills
@@ -88,9 +88,9 @@ button lives in the header.
 
 ```
 src/
-  api.ts, types.ts        # worker client + response shapes
-  storage.ts              # saved strategies + result cache (IndexedDB)
-  App.tsx                 # flow orchestration, state, run, tour
+  api.js, types.js        # worker client + response shapes
+  storage.js              # saved strategies + result cache (IndexedDB)
+  App.jsx                 # flow orchestration, state, run, tour
   components/
     ModeCards, PickerGrid, TimerGrid, TickerPicker
     SettingsPanel         # dates, taxes, collapsed advanced

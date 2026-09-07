@@ -3,7 +3,7 @@
 `oos_validation.run_validation` is the heaviest thing in the project — it runs
 every picker x timer combo once over the span (30 with --price-only, 100
 without), then slices those curves into a holdout and a walk-forward track
-record. This pins its full output so the TypeScript port can be checked against
+record. This pins its full output so the JavaScript port can be checked against
 it the same way the backtests are.
 
 Also emits Spearman fixtures: pandas delegates `corr(method="spearman")` to

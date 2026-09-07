@@ -1,6 +1,6 @@
 """Freeze the Python engine as a reference oracle.
 
-Phase 0 of the TypeScript port: run a fixed set of (picker, timer, window,
+Phase 0 of the JavaScript port: run a fixed set of (picker, timer, window,
 params) combos through the *same* entry point the web app uses
 (`EngineService.run_backtest`) and dump the full result — equity curves, trade
 blotter, tax numbers, round trips, and headline metrics — to JSON.

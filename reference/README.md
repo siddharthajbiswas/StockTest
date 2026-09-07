@@ -3,7 +3,7 @@
 This is **not** a backend. Nothing serves it, nothing calls it at runtime, and
 the app does not depend on it. It exists for one reason:
 
-> It is the implementation the TypeScript engine is proven correct against.
+> It is the implementation the JavaScript engine is proven correct against.
 
 `web/engine` is a port of `backtester/` + `strategies/`. A port is only
 trustworthy if something independent says it matches, and that something is the
@@ -45,9 +45,9 @@ coverage now calls `EngineService` directly. What did not survive moved rather
 than vanished:
 
 - **saved-strategy store** → IndexedDB in the browser
-  (`web/frontend/src/storage.ts`), verified in Chrome.
+  (`web/frontend/src/storage.js`), verified in Chrome.
 - **HTTP error envelopes** → the worker protocol
-  (`web/engine/test/worker.test.ts`).
+  (`web/engine/test/worker.test.js`).
 
 ## Running things
 
