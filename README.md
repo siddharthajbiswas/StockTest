@@ -9,6 +9,9 @@ buy & hold, moving-average cross, RSI, …). From 10 pickers and 10 timers that'
 to 100 strategies, each scored net of commission, slippage, and capital-gains tax,
 and always benchmarked against SPY.
 
+**[Try it live →](https://biswas.net/sid/stocktest/)** — it runs entirely in your
+browser. No signup, no backend, nothing leaves your machine.
+
 The **web app is the primary way to use StockTest** — no code or command line
 required. The original CLI tools are still here for power users and researchers who
 want the full sweep (see [For power users](#for-power-users)).
@@ -59,6 +62,33 @@ stocks fetches ~190 kB per ticker.
 - **Validate a strategy out-of-sample** — re-test the exact combo on data it wasn't
   chosen on (holdout rank persistence + a walk-forward track record), so you can
   tell a real edge from an overfit one.
+
+---
+
+## How it's kept correct
+
+StockTest is implemented twice. `backtester/` and `reference/` are the Python
+original; `web/engine/` is a JavaScript port of it that runs in the browser. Python
+is the source of truth, and the port is pinned to it by a golden-oracle suite rather
+than by hand-checking.
+
+The Python side freezes 25 cases — 23 backtests and 2 out-of-sample validations —
+chosen to cover every picker, every timer, and the awkward windows (2008, COVID,
+point-in-time index membership). The JavaScript engine reruns all of them and
+compares **300,508 values at 1e-9 relative tolerance**, with trade counts, dates,
+tickers and sides required to match exactly. `web/frontend/verify.html` runs that
+same suite through the shipped path — a real Web Worker, decoding the real price
+bundle over HTTP — so the thing being verified is the thing that ships.
+
+Two places where the languages genuinely disagree, and what it took to reconcile them:
+
+- **Seeded randomness.** `RandomPicker` draws from Python's `random.sample`, which
+  is CPython's Mersenne Twister. Reproducing the stream meant reimplementing
+  MT19937, `getrandbits`, `_randbelow` and `sample` in JavaScript
+  (`web/engine/src/mt19937.js`) — rejection sampling and all.
+- **Rounding.** Python's `round()` is half-to-even on the float's exact value;
+  JavaScript's `toFixed` rounds half away from zero, and scaling by 10ⁿ first
+  destroys the tie. Hence `pyRound` in `web/engine/src/serialize.js`.
 
 ---
 
@@ -143,3 +173,7 @@ cd web/engine && npm test
 # frontend (production build)
 cd web/frontend && npm run build
 ```
+
+For the parity suite in a real browser rather than Node, run the frontend dev
+server and open `/verify.html` — it reruns every golden case through an actual Web
+Worker and prints a per-case pass/fail table.
