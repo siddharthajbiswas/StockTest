@@ -1,0 +1,1065 @@
+{
+ "family": "seasonal",
+ "module_path": "/Users/siddhartha/dev/StockTest/research/lab/families/seasonal.py",
+ "results_md": "/Users/siddhartha/dev/StockTest/research/lab/results/seasonal.md (table of every run: /Users/siddhartha/dev/StockTest/research/lab/results/seasonal_table.csv, 1,536 rows / 862 configs, protocol column; template and table builder: research/lab/scratch/seasonal/seasonal_template.md + build_md.py)",
+ "n_configs_tested": 862,
+ "headline": "No calendar or seasonality strategy beats SPY after California (or federal) tax with good confidence. Calendar timing loses in CA almost without exception: of 262 pre-registered rules (2000-2026), the median CA score is -3.47 pp/yr and none clears bar items 1-3. Only one kind of config clears items 1-3 in CA: the tax-managed 'cyclical SPDRs Nov-Apr / SPY May-Oct' rule (score +0.64 pp/yr, full_excess +1.18, ex10_beat 0.84, ex15_beat 0.91, boot_p 0.025; its Oct 1 neighbour scores +0.85). After 2002 it freezes into a static cyclical-sector tilt (XLK about 27%), and it fails item 4 (the family's walk-forward is negative) and item 6 (it needs XLK; 0 of 24 random menus clear items 1-3). In tax-deferred accounts, sector seasonality is the one persistent calendar effect (+0.98 pp/yr on full, +2.69 over 1986-2026), but it also fails the family walk-forward and depends on the basket. Carry nothing from this family forward.",
+ "findings": [
+  "CA, calendar timing: of 262 pre-registered ETF-era rules (G1-G18), only 6 have a positive CA score. Four are once-a-year barometers (+0.21 to +0.70 pp/yr, ex10_beat 0.53, boot_p 0.44-0.68); two are constant-leverage controls. The CA median is -3.47 pp/yr and no rule clears items 1-3. Over 1986-2026 (235 rules, VFINX benchmark) the median is -3.18, 3 rules are positive and the best is +0.27. Switching twice a year turns deferred gains into 48.1% short-term gains.",
+  "The only CA configs that clear items 1-3 on full: tax-managed cyclical season Nov-Apr (gain budget 1%/yr): score +0.64, full_excess +1.18, ex10_beat 0.84, ex15_beat 0.91, ex20_beat 1.00, boot_p 0.025. Its Oct1-May1 neighbour: +0.85, +1.44, 0.91, 0.94, boot_p 0.035. These are comparable to the incumbent preset (+0.66, +1.54, 0.70, 0.83, 0.025).",
+  "That CA pass is a static tilt in disguise. The holdings replay shows it switches fully only while holdings show losses (2000-02, 2008). From 2010 on it averages XLK 26.6%, XLI 23.4%, XLB 20.6%, XLY 17.1%, SPY 12.3%. A gain budget of 0 does as well (+0.53 on screen). Its edge is in 2000-10 (+1.90 pp), with -0.04 in 2010-20 and -0.55 in 2020-26; the 5-year window started fresh in 2021 lost 2.0 pp/yr.",
+  "Static controls in CA: buying XLY/XLI/XLB/XLK once and never trading scores +1.21 on full, with every 10/15/20-year window and all sub-periods positive (+1.43 / +0.95 / +0.65), but boot_p is 0.287. Without XLK it scores +0.46 with boot_p 0.35. The 1986-2026 Fidelity version of the static basket scores +2.44 with boot_p 0.048 on long CA. This is a sector bet, not seasonality; refer it to the sector and factor families.",
+  "Neighbourhood of the CA candidate (11 neighbours on screen CA): all positive (+0.16 to +0.77) with 10-year beat rates of 0.76-0.88 (0.59 at a 5% budget). boot_p is at or below 0.071 only for budgets of 1% or less and 4 of 6 boundary pairs. Budgets of 2-5% and the Nov1-Apr1 and Dec1-May1 boundaries have boot_p 0.14-0.28; gb=0.05 on full scores +0.13 with boot_p 0.268.",
+  "PROTOCOL 5.3 for the CA candidate (G22): the same tax-managed rule on 24 random 4-fund menus from BROAD_EQUITY_POOL_2003 is positive on 8/24 (median -0.11 pp, best +0.25), and 0/24 clear items 1-3. The cyclical basket (+0.54) beats all 24. The six random menus with positive full_excess and boot_p of 0.11 or less all hold a tech fund. With the star removed (no XLK), full CA scores +0.46, ex10_beat 0.66, boot_p 0.30 and fails.",
+  "NONE: the famous effects lose to SPY in 2000-2026: Halloween/Sell-in-May into T-bills, Harding MACD, turn-of-month, pre-holiday, Mondays, Santa, barometers, presidential cycle, OpEx, quarter-end, same-month rotation, learned months. At near-zero costs (0+1 bp), TOM (-6.97), pre-holiday (-8.37), Mondays (-1.59) and Halloween/T-bills (-1.69) still lose, because the problem is time out of the market.",
+  "NONE, sector seasonality (cyclicals Nov-Apr, SPY May-Oct) clears items 1-3. Full: +0.98, ex10_beat 1.00, ex15_beat 0.94, boot_p 0.071. No-XLK: +1.46, boot_p 0.035. Oct1-May1: +1.21, boot_p 0.048. 1986-2026 Fidelity version: +2.69, boot_p 0.008, pre-2000 ho5 +2.49 (beat 0.78). After tax it loses (CA -2.17, FED -1.69).",
+  "Is the sector effect seasonality or a basket effect? Over 24 random menus the winter-only rule beats SPY on just 7 (median -0.22), but it beats holding the same menu all year on 19 (median +1.35). Reverse-season placebos lose (-0.66 ETF, -0.86 long). Among all 126 four-SPDR baskets the cyclical one ranks 11th (58% positive, median +0.07). On Fidelity funds it ranks 1st of 126, but 120/125 other baskets also beat VFINX (median +1.10), and an equal-weight 9-sector all-year basket scores +1.74, so the long-history evidence mixes in fund selection.",
+  "Post-publication decay (long_screen, 5-year windows by start era): in NONE, Halloween/Harding/January barometer are positive only for 1986-87 and 2000-02 starts and lose 6-7 pp/yr for 2013-21 starts. Sector seasonality and the small-cap January switch stay positive in every era in NONE, but in CA sector seasonality is negative for every start era except 2000-02.",
+  "Family selection test (item 4): with yearly decisions the ETF-era walk-forward loses out of sample: family CA -2.97 pp/yr (beat 0.17), NONE -3.90; sector sub-family CA -0.57, NONE -1.22. Over 1986-2026 the family is about zero (CA -0.43, NONE -0.02) and the sector sub-family is positive (NONE +3.73, CA +1.86), but only from 1996-2008 decisions; 2009+ decisions range -1.7 to +1.8. The DSR of each set's best config is at most 0.27 (0.81 for the long NONE sector set). PBO is 0.03-0.48, except 0.65 for the full-history ETF NONE family.",
+  "Leverage is not seasonality. SSO in Nov-Apr / SPY in May-Oct scores +4.32 in NONE (boot_p 0.162, max DD -75%) versus a constant 1.5x SSO/SPY mix at +3.68 (boot_p 0.117, DD -73%). In CA the seasonal version scores -1.33 and the constant one +2.77 (boot_p 0.174).",
+  "Verified predecessor material: the scheduled NYSE calendar matches the SPY/VFINX/^GSPC data calendars from 1980 except for 12 unscheduled closures; the raw-effects table reproduces exactly; May-Oct SPY beat VFISX in 19 of 26 years (2000-2025). Corrections: barometer boot_p is 0.44-0.68, not 0.6-0.9; config counts are updated; the 'same-season ranking' signal was drafted but never added or run."
+ ],
+ "candidates": [
+  {
+   "label": "Tax-managed cyclical season: XLY/XLI/XLB/XLK Nov 1-May 1, SPY otherwise, TAX execution gb=0.01 (G19 cyclicals Nov-Apr / SPY TAX gb=0.01)",
+   "cfg": {
+    "kind": "weights",
+    "signal": "seasonal.cal",
+    "params": {
+     "layers": [
+      {
+       "rule": {
+        "type": "window",
+        "start": [
+         11,
+         1
+        ],
+        "end": [
+         5,
+         1
+        ]
+       },
+       "w": {
+        "XLY": 0.25,
+        "XLI": 0.25,
+        "XLB": 0.25,
+        "XLK": 0.25
+       }
+      }
+     ],
+     "default": {
+      "SPY": 1
+     },
+     "rebalance_states": true
+    },
+    "rebalance": "M",
+    "execution": "tax",
+    "gain_budget": 0.01
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.0064,
+     "full_excess": 0.0118,
+     "ex5_mean": 0.005,
+     "ex10_mean": 0.0071,
+     "ex10_beat": 0.8358,
+     "ex10_min": -0.0079,
+     "ex15_beat": 0.9149,
+     "ex20_beat": 1,
+     "boot_p": 0.025,
+     "max_dd": -0.5706,
+     "bench_max_dd": -0.5519,
+     "trades": 423,
+     "turnover": 0.0971
+    },
+    "FED": {
+     "score": 0.0073,
+     "full_excess": 0.0122,
+     "ex5_mean": 0.0058,
+     "ex10_mean": 0.0081,
+     "ex10_beat": 0.8507,
+     "ex10_min": -0.0076,
+     "ex15_beat": 0.9362,
+     "ex20_beat": 1,
+     "boot_p": 0.027,
+     "max_dd": -0.5706,
+     "bench_max_dd": -0.5519,
+     "trades": 427,
+     "turnover": 0.0971
+    },
+    "NONE": {
+     "score": 0.0098,
+     "full_excess": 0.0096,
+     "ex5_mean": 0.0085,
+     "ex10_mean": 0.0107,
+     "ex10_beat": 1,
+     "ex10_min": 0.0005,
+     "ex15_beat": 0.9362,
+     "ex20_beat": 1,
+     "boot_p": 0.07,
+     "max_dd": -0.5521,
+     "bench_max_dd": -0.5519,
+     "trades": 903,
+     "turnover": 2.0578
+    },
+    "subperiods_excess": {
+     "CA": {
+      "2000-2010": 0.019,
+      "2010-2020": -0.0004,
+      "2020-2026": -0.0055
+     }
+    }
+   },
+   "long_protocol": {
+    "protocol": "long",
+    "twin_label": "G19 cyclicals(Fid) Nov-Apr / VFINX TAX gb=0.01 (FSRPX/FSDAX/FSDPX/FSPTX)",
+    "CA": {
+     "score": 0.015,
+     "full_excess": 0.0093,
+     "ho5_mean": 0.0109,
+     "ho5_beat": 0.5135,
+     "ho10_mean": 0.0038,
+     "boot_p": 0.135
+    },
+    "FED": {
+     "score": 0.0168,
+     "full_excess": 0.0108,
+     "ho5_mean": 0.0126,
+     "ho5_beat": 0.5405,
+     "ho10_mean": 0.0045,
+     "boot_p": 0.106
+    },
+    "NONE": {
+     "score": 0.0268,
+     "full_excess": 0.0278,
+     "ho5_mean": 0.0244,
+     "ho5_beat": 0.7838,
+     "ho10_mean": 0.023,
+     "boot_p": 0.008
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "high",
+   "robustness_notes": "Passes items 1-3 in CA and FED on full. Fails item 4: the family walk-forward is negative in the ETF era (CA -2.97 pp/yr with yearly decisions; -0.57 inside the sector sub-family). Fails item 6: no-XLK version +0.46, ex10_beat 0.66, boot_p 0.30; same rule on 24 random menus 8/24 positive, 0/24 clear items 1-3, cyclical basket beats all 24. Item 5 is mixed: 11 neighbours all positive, but boot_p holds only for gain budgets of 1% or less and 4/6 boundaries (gb=0.05 on full: +0.13, boot_p 0.268). Item 7: long twin CA +1.50 but boot_p 0.135 and ho5_beat 0.51. In substance it is a static tilt: the holdings replay shows it frozen after 2002 (XLK ~27%), gb=0 does as well, and the never-rebalanced basket scores higher (+1.21, boot_p 0.287). Edge concentrated in 2000-10."
+  },
+  {
+   "label": "Tax-managed cyclical season, Oct 1-May 1 boundary (G19 cyclicals Oct1-May1 / SPY TAX gb=0.01) - best-scoring CA neighbour, selected post hoc",
+   "cfg": {
+    "kind": "weights",
+    "signal": "seasonal.cal",
+    "params": {
+     "layers": [
+      {
+       "rule": {
+        "type": "window",
+        "start": [
+         10,
+         1
+        ],
+        "end": [
+         5,
+         1
+        ]
+       },
+       "w": {
+        "XLY": 0.25,
+        "XLI": 0.25,
+        "XLB": 0.25,
+        "XLK": 0.25
+       }
+      }
+     ],
+     "default": {
+      "SPY": 1
+     },
+     "rebalance_states": true
+    },
+    "rebalance": "M",
+    "execution": "tax",
+    "gain_budget": 0.01
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.0085,
+     "full_excess": 0.0144,
+     "ex5_mean": 0.0076,
+     "ex10_mean": 0.0094,
+     "ex10_beat": 0.9104,
+     "ex10_min": -0.0085,
+     "ex15_beat": 0.9362,
+     "ex20_beat": 0.963,
+     "boot_p": 0.035,
+     "max_dd": -0.5669,
+     "bench_max_dd": -0.5519,
+     "trades": 416,
+     "turnover": 0.0807
+    },
+    "FED": {
+     "score": 0.0096,
+     "full_excess": 0.0149,
+     "ex5_mean": 0.0088,
+     "ex10_mean": 0.0106,
+     "ex10_beat": 0.9254,
+     "ex10_min": -0.0086,
+     "ex15_beat": 0.9787,
+     "ex20_beat": 1,
+     "boot_p": 0.027,
+     "max_dd": -0.5669,
+     "bench_max_dd": -0.5519,
+     "trades": 416,
+     "turnover": 0.0805
+    },
+    "NONE": {
+     "score": 0.0122,
+     "full_excess": 0.0131,
+     "ex5_mean": 0.0115,
+     "ex10_mean": 0.0126,
+     "ex10_beat": 0.8955,
+     "ex10_min": -0.0032,
+     "ex15_beat": 0.9574,
+     "ex20_beat": 1,
+     "boot_p": 0.042,
+     "max_dd": -0.5607,
+     "bench_max_dd": -0.5519,
+     "trades": 1009,
+     "turnover": 2.0556
+    },
+    "subperiods_excess": {
+     "CA": {
+      "2000-2010": 0.0243,
+      "2010-2020": 0.0032,
+      "2020-2026": -0.0129
+     }
+    }
+   },
+   "long_protocol": {
+    "note": "no long-history twin with this boundary was run"
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "high",
+   "robustness_notes": "Same mechanism and failures as the Nov-Apr version (items 4 and 6). It is the best of 7 boundary pairs, so it carries extra selection bias. 2020-26 sub-period -1.29 pp. The walk-forward inside the sector sub-family chose it for 2015/2017/2018 starts (OOS +0.88/+1.23/+0.63 pp), but the family-level selection is negative."
+  },
+  {
+   "label": "CONTROL, not seasonal: buy XLY/XLI/XLB/XLK 25% each once, never rebalance (G22 buyhold cyclicals(4) never rebalanced)",
+   "cfg": {
+    "kind": "buyhold",
+    "weights": {
+     "XLY": 0.25,
+     "XLI": 0.25,
+     "XLB": 0.25,
+     "XLK": 0.25
+    }
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.0121,
+     "full_excess": 0.0046,
+     "ex5_mean": 0.0108,
+     "ex10_mean": 0.0127,
+     "ex10_beat": 1,
+     "ex10_min": 0.0053,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.287,
+     "max_dd": -0.5786,
+     "bench_max_dd": -0.5519,
+     "trades": 4,
+     "turnover": 0
+    },
+    "FED": {
+     "score": 0.0132,
+     "full_excess": 0.0048,
+     "ex5_mean": 0.0121,
+     "ex10_mean": 0.0139,
+     "ex10_beat": 1,
+     "ex10_min": 0.0056,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.294,
+     "max_dd": -0.5786,
+     "bench_max_dd": -0.5519,
+     "trades": 4,
+     "turnover": 0
+    },
+    "NONE": {
+     "score": 0.0142,
+     "full_excess": 0.0049,
+     "ex5_mean": 0.0135,
+     "ex10_mean": 0.015,
+     "ex10_beat": 1,
+     "ex10_min": 0.006,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.301,
+     "max_dd": -0.5786,
+     "bench_max_dd": -0.5519,
+     "trades": 4,
+     "turnover": 0
+    },
+    "subperiods_excess": {
+     "CA": {
+      "2000-2010": 0.0143,
+      "2010-2020": 0.0095,
+      "2020-2026": 0.0065
+     }
+    }
+   },
+   "long_protocol": {
+    "protocol": "long",
+    "twin_label": "G22 buyhold cyclicals(4 Fid) never rebalanced (FSRPX/FSDAX/FSDPX/FSPTX, windows from 1986-10)",
+    "CA": {
+     "score": 0.0244,
+     "full_excess": 0.0214,
+     "ho5_mean": 0.0075,
+     "ho5_beat": 0.5588,
+     "ho10_mean": 0.0024,
+     "boot_p": 0.048
+    },
+    "FED": {
+     "score": 0.0266,
+     "full_excess": 0.0216,
+     "ho5_mean": 0.0084,
+     "ho5_beat": 0.5588,
+     "ho10_mean": 0.0024,
+     "boot_p": 0.051
+    },
+    "NONE": {
+     "score": 0.0288,
+     "full_excess": 0.0217,
+     "ho5_mean": 0.0093,
+     "ho5_beat": 0.5588,
+     "ho10_mean": 0.0024,
+     "boot_p": 0.062
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "high",
+   "robustness_notes": "Reported because it is what the CA 'seasonal' pass really holds. It is a static sector tilt (a quarter in tech at purchase), not a calendar strategy, and belongs with the sector/factor families. Every 10/15/20-year window and all three sub-periods are positive in CA, but boot_p is 0.287 (fails item 3). Without XLK it scores +0.46 with boot_p 0.35. The long Fidelity twin clears items 1-3 in CA (boot_p 0.048), but those proxies are narrow, actively managed industry funds (Retailing, Defense & Aerospace, Materials, Technology). No random-menu or walk-forward check was run for it as a stand-alone strategy."
+  },
+  {
+   "label": "Santa-rally barometer: if SPY's last-5-Dec + first-2-Jan return < 0, hold short Treasuries (VFISX) for the rest of the year (G7 barometer santa bearish->short until yearend)",
+   "cfg": {
+    "kind": "weights",
+    "signal": "seasonal.cal",
+    "params": {
+     "layers": [
+      {
+       "rule": {
+        "type": "barometer",
+        "t": "SPY",
+        "kind": "santa",
+        "until": null
+       },
+       "w": {
+        "VFISX|VWSTX": 1
+       }
+      }
+     ],
+     "default": {
+      "SPY": 1
+     }
+    },
+    "rebalance": "A",
+    "execution": "standard"
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.0067,
+     "full_excess": -0.0052,
+     "ex5_mean": 0.0058,
+     "ex10_mean": 0.0081,
+     "ex10_beat": 0.5373,
+     "ex10_min": -0.05,
+     "ex15_beat": 0.766,
+     "ex20_beat": 0.7037,
+     "boot_p": 0.62,
+     "max_dd": -0.4284,
+     "bench_max_dd": -0.5519,
+     "trades": 33,
+     "turnover": 0.7634
+    },
+    "FED": {
+     "score": 0.009,
+     "full_excess": -0.0025,
+     "ex5_mean": 0.0071,
+     "ex10_mean": 0.0104,
+     "ex10_beat": 0.5373,
+     "ex10_min": -0.0532,
+     "ex15_beat": 0.766,
+     "ex20_beat": 0.8148,
+     "boot_p": 0.574,
+     "max_dd": -0.4261,
+     "bench_max_dd": -0.5519,
+     "trades": 33,
+     "turnover": 0.7797
+    },
+    "NONE": {
+     "score": 0.0126,
+     "full_excess": 0.002,
+     "ex5_mean": 0.0102,
+     "ex10_mean": 0.0141,
+     "ex10_beat": 0.5373,
+     "ex10_min": -0.0545,
+     "ex15_beat": 0.766,
+     "ex20_beat": 0.963,
+     "boot_p": 0.495,
+     "max_dd": -0.4203,
+     "bench_max_dd": -0.5519,
+     "trades": 33,
+     "turnover": 0.7999
+    },
+    "subperiods_excess": {
+     "CA": {
+      "2000-2010": 0.0412,
+      "2010-2020": -0.0196,
+      "2020-2026": -0.0599
+     }
+    }
+   },
+   "long_protocol": {
+    "protocol": "long_screen (long not run)",
+    "twin_label": "G7 barometer santa bearish->short until yearend (VFINX)",
+    "CA": {
+     "score": 0.0004,
+     "full_excess": -0.0213,
+     "ho5_mean": -0.0269,
+     "ho5_beat": 0,
+     "ho10_mean": -0.034,
+     "boot_p": 0.902
+    },
+    "NONE": {
+     "score": 0.0069,
+     "full_excess": -0.007,
+     "ho5_mean": -0.031,
+     "ho5_beat": 0,
+     "ho10_mean": -0.032,
+     "boot_p": 0.654
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "medium",
+   "robustness_notes": "Best standard (non-tax-managed) calendar rule in CA by score, but full_excess is negative, ex10_beat 0.54 and boot_p 0.62, so it fails items 1-3. It is all 2000-10 (+4.1 pp; -2.0 in 2010-20, -6.0 in 2020-26). The pre-2000 holdout contradicts it (ho5 -2.69 pp, beat 0.00). It is the best of 8 barometers."
+  },
+  {
+   "label": "Sector seasonality: XLY/XLI/XLB/XLK Nov 1-May 1, SPY otherwise (G12 cyclicals Nov-Apr / SPY May-Oct)",
+   "cfg": {
+    "kind": "weights",
+    "signal": "seasonal.cal",
+    "params": {
+     "layers": [
+      {
+       "rule": {
+        "type": "window",
+        "start": [
+         11,
+         1
+        ],
+        "end": [
+         5,
+         1
+        ]
+       },
+       "w": {
+        "XLY": 0.25,
+        "XLI": 0.25,
+        "XLB": 0.25,
+        "XLK": 0.25
+       }
+      }
+     ],
+     "default": {
+      "SPY": 1
+     }
+    },
+    "rebalance": "A",
+    "execution": "standard"
+   },
+   "regime_target": "NONE",
+   "stats": {
+    "CA": {
+     "score": -0.0217,
+     "full_excess": -0.0217,
+     "ex5_mean": -0.0215,
+     "ex10_mean": -0.0206,
+     "ex10_beat": 0.1045,
+     "ex10_min": -0.0473,
+     "ex15_beat": 0,
+     "ex20_beat": 0,
+     "boot_p": 0.982,
+     "max_dd": -0.5836,
+     "bench_max_dd": -0.5519,
+     "trades": 269,
+     "turnover": 2.055
+    },
+    "FED": {
+     "score": -0.0169,
+     "full_excess": -0.0156,
+     "ex5_mean": -0.0177,
+     "ex10_mean": -0.0158,
+     "ex10_beat": 0.1194,
+     "ex10_min": -0.0393,
+     "ex15_beat": 0.0638,
+     "ex20_beat": 0,
+     "boot_p": 0.938,
+     "max_dd": -0.5748,
+     "bench_max_dd": -0.5519,
+     "trades": 269,
+     "turnover": 2.0415
+    },
+    "NONE": {
+     "score": 0.0098,
+     "full_excess": 0.0094,
+     "ex5_mean": 0.0085,
+     "ex10_mean": 0.0106,
+     "ex10_beat": 1,
+     "ex10_min": 0.0005,
+     "ex15_beat": 0.9362,
+     "ex20_beat": 1,
+     "boot_p": 0.071,
+     "max_dd": -0.5518,
+     "bench_max_dd": -0.5519,
+     "trades": 269,
+     "turnover": 2.0029
+    },
+    "subperiods_excess": {
+     "NONE": {
+      "2000-2010": 0.0173,
+      "2010-2020": 0.0077,
+      "2020-2026": -0.0022
+     }
+    }
+   },
+   "long_protocol": {
+    "protocol": "long",
+    "twin_label": "G12 cyclicals Nov-Apr / VFINX May-Oct (Fidelity Select FSRPX/FSDAX/FSDPX/FSPTX)",
+    "CA": {
+     "score": -0.0138,
+     "full_excess": -0.0271,
+     "ho5_mean": -0.0248,
+     "ho5_beat": 0.3243,
+     "ho10_mean": -0.0331,
+     "boot_p": 0.99
+    },
+    "FED": {
+     "score": -0.0066,
+     "full_excess": -0.0137,
+     "ho5_mean": -0.0181,
+     "ho5_beat": 0.3784,
+     "ho10_mean": -0.0232,
+     "boot_p": 0.891
+    },
+    "NONE": {
+     "score": 0.0269,
+     "full_excess": 0.0278,
+     "ho5_mean": 0.0249,
+     "ho5_beat": 0.7838,
+     "ho10_mean": 0.0236,
+     "boot_p": 0.008
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "medium",
+   "robustness_notes": "Clears items 1-3 in NONE on full and on long, and the pre-2000 holdout supports it (ho5 +2.49, but that data is in-sample for the 2009 publication). Fails item 4: ETF-era walk-forward is negative (family -3.90, sector sub-family -1.22 with yearly decisions); long-era sub-family +3.73 comes only from pre-2009 decisions. Item 6 is fragile: the rule on 24 random menus beats SPY on only 7 (median -0.22), and the cyclical basket ranks 11/126 among four-SPDR baskets. Boundary neighbours: 6 of 7 positive on screen (+0.31 to +1.18). Holding the same basket all year did as well over 2000-26 (+1.22). Loses after tax (CA -2.17)."
+  },
+  {
+   "label": "Sector seasonality without tech: XLY/XLI/XLB Nov 1-May 1, SPY otherwise (G19 XLY+XLI+XLB (no XLK) Nov-Apr / SPY May-Oct)",
+   "cfg": {
+    "kind": "weights",
+    "signal": "seasonal.cal",
+    "params": {
+     "layers": [
+      {
+       "rule": {
+        "type": "window",
+        "start": [
+         11,
+         1
+        ],
+        "end": [
+         5,
+         1
+        ]
+       },
+       "w": {
+        "XLY": 0.3333333333333333,
+        "XLI": 0.3333333333333333,
+        "XLB": 0.3333333333333333
+       }
+      }
+     ],
+     "default": {
+      "SPY": 1
+     }
+    },
+    "rebalance": "A",
+    "execution": "standard"
+   },
+   "regime_target": "NONE",
+   "stats": {
+    "CA": {
+     "score": -0.019,
+     "full_excess": -0.017,
+     "ex5_mean": -0.0186,
+     "ex10_mean": -0.0179,
+     "ex10_beat": 0.1493,
+     "ex10_min": -0.0496,
+     "ex15_beat": 0.1064,
+     "ex20_beat": 0,
+     "boot_p": 0.876,
+     "max_dd": -0.5929,
+     "bench_max_dd": -0.5519,
+     "trades": 215,
+     "turnover": 2.0562
+    },
+    "FED": {
+     "score": -0.0136,
+     "full_excess": -0.0098,
+     "ex5_mean": -0.0142,
+     "ex10_mean": -0.0126,
+     "ex10_beat": 0.2537,
+     "ex10_min": -0.0422,
+     "ex15_beat": 0.1702,
+     "ex20_beat": 0.1481,
+     "boot_p": 0.777,
+     "max_dd": -0.5836,
+     "bench_max_dd": -0.5519,
+     "trades": 215,
+     "turnover": 2.0418
+    },
+    "NONE": {
+     "score": 0.0146,
+     "full_excess": 0.0181,
+     "ex5_mean": 0.0134,
+     "ex10_mean": 0.0155,
+     "ex10_beat": 0.7761,
+     "ex10_min": -0.0053,
+     "ex15_beat": 0.8936,
+     "ex20_beat": 1,
+     "boot_p": 0.035,
+     "max_dd": -0.5602,
+     "bench_max_dd": -0.5519,
+     "trades": 215,
+     "turnover": 2.0017
+    },
+    "subperiods_excess": {
+     "NONE": {
+      "2000-2010": 0.0381,
+      "2010-2020": 0.0125,
+      "2020-2026": -0.0078
+     }
+    }
+   },
+   "long_protocol": {
+    "protocol": "long",
+    "twin_label": "G19 FSRPX+FSDAX+FSDPX (no tech) Nov-Apr / VFINX",
+    "CA": {
+     "score": -0.0125,
+     "full_excess": -0.0273,
+     "ho5_mean": -0.0301,
+     "ho5_beat": 0.1892,
+     "ho10_mean": -0.0383,
+     "boot_p": 0.976
+    },
+    "FED": {
+     "score": -0.0053,
+     "full_excess": -0.0138,
+     "ho5_mean": -0.0247,
+     "ho5_beat": 0.2973,
+     "ho10_mean": -0.0296,
+     "boot_p": 0.864
+    },
+    "NONE": {
+     "score": 0.0283,
+     "full_excess": 0.0278,
+     "ho5_mean": 0.0155,
+     "ho5_beat": 0.7027,
+     "ho10_mean": 0.0144,
+     "boot_p": 0.006
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "high",
+   "robustness_notes": "Best sector-season config in NONE on full, but the basket was chosen after seeing that XLK hurts a winter basket (post hoc). Clears items 1-3 in NONE on full and long. Fails item 4 (family walk-forward negative in the ETF era). Edge concentrated in 2000-10 (+3.81), with 2020-26 at -0.78. In CA it scores -1.90."
+  },
+  {
+   "label": "Small-cap January effect: IWM (NAESX before 2000-05) Dec 15-Mar 1, SPY otherwise (G11 small Dec15-Mar1 else SPY)",
+   "cfg": {
+    "kind": "weights",
+    "signal": "seasonal.cal",
+    "params": {
+     "layers": [
+      {
+       "rule": {
+        "type": "window",
+        "start": [
+         12,
+         15
+        ],
+        "end": [
+         3,
+         1
+        ]
+       },
+       "w": {
+        "IWM|NAESX": 1
+       }
+      }
+     ],
+     "default": {
+      "SPY": 1
+     }
+    },
+    "rebalance": "A",
+    "execution": "standard"
+   },
+   "regime_target": "NONE",
+   "stats": {
+    "CA": {
+     "score": -0.0252,
+     "full_excess": -0.0201,
+     "ex5_mean": -0.0241,
+     "ex10_mean": -0.0248,
+     "ex10_beat": 0.0597,
+     "ex10_min": -0.0535,
+     "ex15_beat": 0.0213,
+     "ex20_beat": 0,
+     "boot_p": 0.956,
+     "max_dd": -0.5625,
+     "bench_max_dd": -0.5519,
+     "trades": 107,
+     "turnover": 2.0633
+    },
+    "FED": {
+     "score": -0.021,
+     "full_excess": -0.0134,
+     "ex5_mean": -0.0205,
+     "ex10_mean": -0.0208,
+     "ex10_beat": 0.0746,
+     "ex10_min": -0.0487,
+     "ex15_beat": 0.0638,
+     "ex20_beat": 0,
+     "boot_p": 0.88,
+     "max_dd": -0.5591,
+     "bench_max_dd": -0.5519,
+     "trades": 107,
+     "turnover": 2.052
+    },
+    "NONE": {
+     "score": 0.0047,
+     "full_excess": 0.0135,
+     "ex5_mean": 0.0053,
+     "ex10_mean": 0.0043,
+     "ex10_beat": 0.7164,
+     "ex10_min": -0.0144,
+     "ex15_beat": 0.8723,
+     "ex20_beat": 1,
+     "boot_p": 0.119,
+     "max_dd": -0.55,
+     "bench_max_dd": -0.5519,
+     "trades": 107,
+     "turnover": 2.0195
+    },
+    "subperiods_excess": {
+     "NONE": {
+      "2000-2010": 0.0346,
+      "2010-2020": -0.0008,
+      "2020-2026": -0.0012
+     }
+    }
+   },
+   "long_protocol": {
+    "protocol": "long",
+    "twin_label": "G11 small Dec15-Mar1 else VFINX (NAESX)",
+    "CA": {
+     "score": -0.0191,
+     "full_excess": -0.0332,
+     "ho5_mean": -0.028,
+     "ho5_beat": 0.1622,
+     "ho10_mean": -0.0364,
+     "boot_p": 0.997
+    },
+    "FED": {
+     "score": -0.0128,
+     "full_excess": -0.0209,
+     "ho5_mean": -0.0217,
+     "ho5_beat": 0.2973,
+     "ho10_mean": -0.027,
+     "boot_p": 0.979
+    },
+    "NONE": {
+     "score": 0.0188,
+     "full_excess": 0.0183,
+     "ho5_mean": 0.0208,
+     "ho5_beat": 0.6757,
+     "ho10_mean": 0.0188,
+     "boot_p": 0.018
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "medium",
+   "robustness_notes": "Clears items 1-3 in NONE over 1986-2026 (long +1.88, boot_p 0.018), but on the 2000-2026 full protocol it fails: ex10_beat 0.72, boot_p 0.119, roughly flat since 2010. Five of the 11 G11 windows clear items 1-3 on long_screen NONE, but none clears them on full. The effect has decayed. Loses badly after tax (CA -2.52)."
+  },
+  {
+   "label": "LEVERAGE: SSO (2x S&P) Nov 1-May 1, SPY otherwise (G10 LEV SSO Nov-Apr / SPY May-Oct)",
+   "cfg": {
+    "kind": "weights",
+    "signal": "seasonal.cal",
+    "params": {
+     "layers": [
+      {
+       "rule": {
+        "type": "window",
+        "start": [
+         11,
+         1
+        ],
+        "end": [
+         5,
+         1
+        ]
+       },
+       "w": {
+        "SSO": 1
+       }
+      }
+     ],
+     "default": {
+      "SPY": 1
+     }
+    },
+    "rebalance": "A",
+    "execution": "standard",
+    "requires": [
+     "SSO"
+    ]
+   },
+   "regime_target": "NONE",
+   "stats": {
+    "CA": {
+     "score": -0.0133,
+     "full_excess": -0.0247,
+     "ex5_mean": -0.0102,
+     "ex10_mean": -0.0134,
+     "ex10_beat": 0.2683,
+     "ex10_min": -0.0402,
+     "ex15_beat": 0,
+     "ex20_beat": 0,
+     "boot_p": 0.772,
+     "max_dd": -0.7805,
+     "bench_max_dd": -0.5519,
+     "trades": 81,
+     "turnover": 2.0665
+    },
+    "FED": {
+     "score": -0.0023,
+     "full_excess": -0.0144,
+     "ex5_mean": -0.0006,
+     "ex10_mean": -0.0026,
+     "ex10_beat": 0.5122,
+     "ex10_min": -0.0308,
+     "ex15_beat": 0.2381,
+     "ex20_beat": 0,
+     "boot_p": 0.673,
+     "max_dd": -0.7734,
+     "bench_max_dd": -0.5519,
+     "trades": 81,
+     "turnover": 2.0467
+    },
+    "NONE": {
+     "score": 0.0432,
+     "full_excess": 0.0254,
+     "ex5_mean": 0.044,
+     "ex10_mean": 0.0425,
+     "ex10_beat": 1,
+     "ex10_min": 0.0157,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.162,
+     "max_dd": -0.7548,
+     "bench_max_dd": -0.5519,
+     "trades": 81,
+     "turnover": 1.9956
+    },
+    "subperiods_excess": {
+     "NONE": {
+      "2000-2010": null,
+      "2010-2020": 0.0802,
+      "2020-2026": -0.0012
+     }
+    }
+   },
+   "long_protocol": {
+    "note": "no long-history proxy for SSO; windows start 2007-01 (SSO launched 2006-06)"
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": true,
+   "hindsight_risk": "low",
+   "robustness_notes": "Leveraged: the gain is leverage, not seasonality. A constant 50% SSO + 50% SPY at the same average exposure scores +3.68 (boot_p 0.117) against +4.32 (boot_p 0.162) here, and both fail item 3. Max DD -75% vs SPY -55% (from 2007). Windows start only in 2007, and 2020-26 is about flat. Loses in CA (-1.33). Belongs to the leverage family."
+  }
+ ],
+ "diagnostics": {
+  "note": "report.diagnostics on the screened grids (unique configs). 'all' = report.diagnostics as is; its PBO/DSR monthly matrix is truncated to the latest-starting config (ETF core/family: 199 months from 2010-01, UPRO); 'full_hist' = configs starting at the protocol's first start (319 months). wf_yearly = metrics.walk_forward with step_quarters=1 (12 decisions 10/5, 19 decisions 5/3), because report.diagnostics' step_quarters=4 gives only 3-4 decisions on yearly protocols. Full tables: research/lab/scratch/seasonal/diag_all.json, wf_yearly.json.",
+  "CA": {
+   "etf_family_all": {
+    "n_configs": 364,
+    "walk_forward": {
+     "oos_mean": -0.0607,
+     "oos_beat": 0,
+     "is_mean": 0.0514,
+     "avg_config_oos_mean": -0.0562
+    },
+    "walk_forward_5_3": {
+     "oos_mean": -0.0357,
+     "oos_beat": 0.25
+    },
+    "pbo": 0.1638,
+    "pbo_months": 199,
+    "dsr_best": 0.0316,
+    "best_by_monthly_mean": "G10 LEV control const 50SSO+50SPY (1.5x)"
+   },
+   "etf_family_full_hist": {
+    "n_configs": 327,
+    "walk_forward": {
+     "oos_mean": -0.0387,
+     "oos_beat": 0
+    },
+    "pbo": 0.241,
+    "pbo_months": 319,
+    "dsr_best": 0.0168,
+    "best_by_monthly_mean": "G19 cyclicals Oct1-May1 / SPY TAX gb=0.01"
+   },
+   "etf_family_wf_yearly": {
+    "wf10_5_oos_mean": -0.0297,
+    "wf10_5_oos_beat": 0.1667,
+    "wf5_3_oos_mean": -0.0028,
+    "wf5_3_oos_beat": 0.4737
+   },
+   "etf_core_G1_G18_wf_yearly": {
+    "wf10_5_oos_mean": -0.0297,
+    "wf10_5_oos_beat": 0.1667
+   },
+   "etf_sector_subfamily": {
+    "n_configs": 70,
+    "wf_default_oos_mean": -0.0052,
+    "wf_yearly_oos_mean": -0.0057,
+    "wf_yearly_oos_beat": 0.5,
+    "pbo": 0.0454,
+    "dsr_best": 0.0776
+   },
+   "long_family": {
+    "n_configs": 244,
+    "wf_default_oos_mean": 0.0086,
+    "wf_yearly_oos_mean": -0.0043,
+    "wf_yearly_oos_beat": 0.4231,
+    "pbo": 0.0338,
+    "dsr_best": 0.0008
+   },
+   "long_sector_subfamily": {
+    "n_configs": 11,
+    "wf_yearly_oos_mean": 0.0186,
+    "wf_yearly_oos_beat": 0.6923,
+    "pbo": 0.0274,
+    "dsr_best": 0.0196
+   }
+  },
+  "NONE": {
+   "etf_family_all": {
+    "n_configs": 458,
+    "walk_forward": {
+     "oos_mean": -0.044,
+     "oos_beat": 0,
+     "is_mean": 0.0997,
+     "avg_config_oos_mean": -0.0406
+    },
+    "walk_forward_5_3": {
+     "oos_mean": -0.0787,
+     "oos_beat": 0.25
+    },
+    "pbo": 0.4128,
+    "pbo_months": 199,
+    "dsr_best": 0.0088,
+    "best_by_monthly_mean": "G10 LEV SSO Nov-Apr / SPY May-Oct"
+   },
+   "etf_family_full_hist": {
+    "n_configs": 397,
+    "walk_forward": {
+     "oos_mean": -0.0519,
+     "oos_beat": 0
+    },
+    "pbo": 0.6498,
+    "pbo_months": 319,
+    "dsr_best": 0.0008,
+    "best_by_monthly_mean": "G1 win Oct1-May15 safe=long"
+   },
+   "etf_family_wf_yearly": {
+    "wf10_5_oos_mean": -0.039,
+    "wf10_5_oos_beat": 0.25,
+    "wf5_3_oos_mean": -0.0252,
+    "wf5_3_oos_beat": 0.3158
+   },
+   "etf_core_G1_G18_wf_yearly": {
+    "wf10_5_oos_mean": -0.0341,
+    "wf10_5_oos_beat": 0.25
+   },
+   "etf_sector_subfamily": {
+    "n_configs": 151,
+    "wf_default_oos_mean": -0.0072,
+    "wf_yearly_oos_mean": -0.0122,
+    "wf_yearly_oos_beat": 0.4167,
+    "pbo": 0.484,
+    "dsr_best": 0.2669
+   },
+   "long_family": {
+    "n_configs": 369,
+    "wf_default_oos_mean": -0.01,
+    "wf_yearly_oos_mean": -0.0002,
+    "wf_yearly_oos_beat": 0.5,
+    "pbo": 0.3436,
+    "dsr_best": 0.002
+   },
+   "long_sector_subfamily": {
+    "n_configs": 136,
+    "wf_yearly_oos_mean": 0.0373,
+    "wf_yearly_oos_beat": 0.8077,
+    "pbo": 0.1772,
+    "dsr_best": 0.8143,
+    "note": "gains from 1996-2008 decisions only; 2009+ decisions -1.7..+1.8 pp"
+   }
+  }
+ },
+ "hindsight_checks": "PROTOCOL 5.3 checks were run for both candidate lines.\n\nCA tax-managed cyclical season:\n- The same tax-managed rule on the same 24 random 4-fund menus from BROAD_EQUITY_POOL_2003 (G22, screen CA) is positive on 8/24 (median -0.11 pp, best +0.25), and 0/24 clear items 1-3. The cyclical basket (+0.54 on screen) beats all 24, and the six random menus with positive full_excess and boot_p of 0.11 or less all hold a tech fund (XLK/IYW/IGV/QQQ/SOXX).\n- Star removed (no XLK): full CA +0.46, ex10_beat 0.66, boot_p 0.30, which fails.\n- Static controls: never-rebalanced cyclicals +1.21 (boot_p 0.287); without XLK +0.46 (boot_p 0.35).\n- The config itself (G19) was built after the G12 sector result was seen.\n\nNONE sector seasonality:\n- Same rule on 24 random menus (G21, screen NONE): beats SPY on 7/24 (median -0.22), but beats the same menu held all year on 19/24 (median +1.35).\n- All 126 four-SPDR baskets in Nov-Apr: the cyclical basket ranks 11/126; 73/125 others are positive (median +0.07); by sector, baskets with XLE/XLB/XLY/XLI help and XLF/XLP/XLU hurt.\n- Long history (Fidelity Select): the cyclical basket ranks 1/126, but 120/125 others also beat VFINX (median +1.10), so fund selection is mixed in.\n- Removing XLK improves NONE (+1.46).\n- The pre-2000 holdout supports it (ho5 +2.49), but the published sector-Halloween study used data through the mid-2000s, so only the post-2009 years are truly out of sample: 2010-20 +0.77, 2020-26 -0.22 pp.\n- Reverse-season placebos lose in both eras.\n\nOther checks:\n- The scheduled-calendar construction was verified against the data calendars (12 unscheduled closures only), so there is no calendar look-ahead.\n- Learned and same-month rules use only prior years.\n\nLeverage (SSO) is labelled separately.",
+ "concerns": [
+  "Multiple testing: 493 ETF-era and 369 long-era configs. The deflated Sharpe of each set's best config is at most 0.27 (0.81 for the long NONE sector set), and walk-forward selection is negative in the ETF era.",
+  "The CA pass is a static cyclical-sector tilt in disguise. Its boot_p of 0.025 rests on one path, the 2000-01 start, which happened to sell XLK in May 2000 and harvest losses through 2000-02. Its edge is in 2000-10, it needs XLK, and the 2021 fresh-start window lost 2.0 pp/yr. It concentrates in growth/tech, the same regime risk as the incumbent preset.",
+  "The long-history sector proxies are narrow, actively managed Fidelity Select funds (Retailing, Defense & Aerospace, Materials, Technology). Their historical loads and redemption fees are not modelled, and their all-year buy-and-hold already beats VFINX by 2-3 pp/yr. FSDPX starts 1986-09, so in 1986 the CalSignal basket is 75% invested.",
+  "The safe=long Halloween variants (best G1/G8 in NONE) are partly a duration bet on the 1986-2020 bond rally. Bond interest is taxed as deferred gains in the engine (PROTOCOL 5.5), which flatters them in CA, and they still lose in CA.",
+  "The engine pays each January's tax from cash even when fully invested, so cash runs negative at 0% until the next sale (avg cash -1.3% for standard sector-season in CA). This flatters taxable switching rules slightly; the CA candidate is unaffected (avg cash +0.02%). CalSignal(cover_tax=True) exists but was not needed for the negative verdicts.",
+  "The screen protocol has only 12 fifteen-year windows, so ex15_beat is coarse there. Verdicts use full and long.",
+  "The ETF-era basket placebo ran in CA for only 44 of 125 baskets (from the predecessor's interrupted run); NONE is complete. The long-era basket placebo ran in NONE only."
+ ],
+ "untested_ideas": [
+  "Learned same-season rotation (SameSeason signal drafted in research/lab/scratch/seasonal/sameseason_draft.py, never added to the module or run). It would learn the winter basket from prior years only, the proper out-of-sample test of sector seasonality without a textbook or hindsight basket.",
+  "Sector seasonality on broad sector index proxies before 1998 instead of narrow Fidelity Select industry funds, to separate fund selection from seasonality in the long history.",
+  "A random-menu and walk-forward check of the static never-rebalanced cyclical basket as a stand-alone CA strategy. It is a sector-tilt idea for the sector_deep/factor_style families.",
+  "cover_tax=True (stricter cash handling of the annual tax bill) applied to every taxable switching rule. It would only lower already-negative CA results.",
+  "Asset location: run the seasonal or leveraged rule in a tax-deferred account and buy-and-hold SPY in the taxable one. The engine models one account only.",
+  "Calendar overlays on new contributions or dividends instead of switching existing holdings. The engine has no cash flows."
+ ],
+ "lab_bugs": [
+  "report.diagnostics -> metrics.monthly_matrix(recs).dropna() silently truncates the PBO/DSR sample of a whole config set to the latest-starting config's months. One UPRO config (first screen start 2010-01) cut the ETF-era seasonal family from 319 to 199 months. Suggest computing PBO on configs with full history, or reporting the sample length.",
+  "report.diagnostics calls metrics.walk_forward(step_quarters=4), which steps 4 entries of protocol.starts. That is yearly on full/long (quarterly starts) but every 4 years on screen/long_screen (yearly starts), so screen diagnostics have only 3 (10/5) or 4 (5/3) walk-forward decisions and oos_beat is from n=3. Suggest stepping by calendar time (e.g. one year) rather than list entries.",
+  "Engine realism (site behaviour, not a lab-vs-site mismatch): Backtest settles each prior year's tax from cash on the first trading day of the new year even when the portfolio is fully invested. Cash goes negative, an implicit 0% loan, until the next sale. This slightly flatters strategies that realize gains, e.g. avg cash -1.26% for the standard sector-season rule in CA.",
+  "Minor: sweep.run_one measures rec['elapsed'] from before acquiring the CPU slot, so 'elapsed' includes slot-wait time under contention."
+ ]
+}

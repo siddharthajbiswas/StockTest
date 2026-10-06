@@ -1,0 +1,1080 @@
+{
+ "family": "mean_reversion",
+ "module_path": "/Users/siddhartha/dev/StockTest/research/lab/families/mean_reversion.py",
+ "results_md": "/Users/siddhartha/dev/StockTest/research/lab/results/mean_reversion.md (full write-up: verdict, every group tested with counts, screen table by group, finalists on full, real-vs-SYNTHETIC leverage tables, the RH closest-call evidence, NONE overlay diagnostics, family diagnostics, hindsight/robustness, lab notes, untested ideas). Table: /Users/siddhartha/dev/StockTest/research/lab/results/mean_reversion_table.csv (6,068 rows; columns label, protocol, regime, source = engine | engine+synthetic-leverage | fastsim-NONE:*, plus all report.table statistics and the exact cfg). Scripts/logs: /Users/siddhartha/dev/StockTest/research/lab/scratch/mean_reversion/ (session-2 entry points: resume_screen2.py, grid2.py, grid3.py, grid4.py, finalists2.py, run_full2.py, run_synth2.py, long2.py, analyze2.py, diag2.py, diag_synth.py, run_verify.py, finalize_report.py, build_table2.py).",
+ "n_configs_tested": 2039,
+ "headline": "No mean-reversion, dip-buying or volatility rule beats buying and holding SPY after California tax with good confidence, and nothing passes in FED either. Every unlevered rule (Connors RSI(2)/ConnorsRSI timers, down streaks, N-day lows, %-below-MA, Bollinger %b, drawdown or VIX-spike buying from a T-bill reserve, VIX risk-off, vol targeting, baskets, cross-sectional reversal, the website's own RSI/Bollinger/vol-reversion timers) loses or ties after tax, on 2000-2026 and on 1986-2026 fund proxies. The only CA-positive structures are leveraged: the closest call, a reserve-funded, trend-filtered UPRO dip sleeve held at least 366 days, clears criteria 1-3 in CA on real ETFs and on synthetic leverage back to 2000 and 1986. It still fails the family walk-forward (criterion 4), has a deflated Sharpe of 0.006-0.06 given about 2,000 configs, has drawdowns 10-20 pp deeper than SPY's, and is not distinguishable from risk-matched leverage or a plain \"UPRO above the 200-day average\" rule. In a tax-deferred account (diagnostic only), a 3x dip overlay (ConnorsRSI<15 above the 200-day average, 5-7 days) shows a genuine timing edge (+5 pp/yr over random entries), but it is leveraged, cost-sensitive, fails the family walk-forward, and loses in CA.",
+ "findings": [
+  "Unlevered short-term dip timers lose everywhere: 0 of 260 standalone SPY/T-bill timers have a positive score in CA (best -4.3 pp/yr) or NONE (best -3.3); their 1986+ twins on VFINX/VFISX lose 5.3-5.6 pp/yr, with pre-2000 holdouts of -8.6 to -9.9 pp/yr. Making them tax-aware (no sale of a winner before 366 days) does not help: 0 of 31 positive in CA (-1.3 to -4.7 pp/yr).",
+  "Buying drawdowns or VIX spikes from a T-bill reserve and holding at least 366 days is at best a wash in CA: best screen +0.12 pp/yr; full protocol -0.15 (100% reserve, buy after a 30% drawdown) and -0.05 (30% reserve); 1986+ twins -0.1 to -1.5 pp/yr with negative pre-2000 holdouts.",
+  "VIX risk-off and term-structure rules lose 0.3-7.5 pp/yr in CA; vol targeting loses in all 90 CA variants (best -0.22); per-asset dip baskets lose 1.6-10.2 pp/yr in both regimes; short-term cross-sectional reversal loses 2.1-9.1 in CA (0 of 90 positive); 3-5-year loser rotations are about zero (+0.25 after a look-ahead-free correction, boot_p 0.54); pairs fail (the only positive is a QQQ tilt, boot_p 0.47).",
+  "The website's own MR timers (RSI 14 30/70, RSI(2), Bollinger, vol-reversion) lose 2.8-10.7 pp/yr as plain timers. Tax-managed monthly Bollinger is +1.43 pp/yr in CA on full (beat10 0.63, boot_p 0.18) only because it delays the initial purchase and then almost never sells; its 1986+ twin is +0.33 with a -0.6 pp/yr pre-2000 holdout.",
+  "Real leveraged ETFs exist only since 2006/2009, so every real-ETF window of a leveraged rule is a bull market. Buy-and-hold 10% UPRO + 90% SPY, never traded, clears criteria 1-3 in CA (+2.38 pp/yr, boot_p 0.015). Leveraged rules were therefore judged against risk-matched leverage controls and on SYNTHETIC 2x/3x series (same engine) back to 2000 and 1986.",
+  "Drawdown ladders that look best in CA on real data (all of SPY into UPRO after a 30% drawdown, back at a new high: +7.85 pp/yr, boot_p 0.025) owe their edge to two trades (July 2010, March 2020). On SYNTHETIC history their 10-year beat rate is 0.53 (2000+) / 0.39 (1986+), with drawdowns of -88% / -91%.",
+  "Tax-aware whole-book overlays (SPY->UPRO on a dip in an uptrend; losers cut at once, winners held at least 366 days) score +7.16 pp/yr CA on real full (boot_p 0.033) and +5.25 on SYNTHETIC 2000+. But 0 of 26 variants and controls pass on SYNTHETIC 1986+, and a no-dip version or plain 'UPRO above the 200-day, else SPY' does as well (+4.2 to +4.4 on 1986+). This is leveraged trend following, not mean reversion.",
+  "Closest CA call: RH sleeve (80% SPY never traded + 20% T-bill reserve -> UPRO when %b(20,2)<0 or RSI(2)<10 above the 200-day average, held >=366 days, sold on the next RSI(2)>65). The %b version clears criteria 1-3 in CA on real full (+3.44, boot_p 0.009), SYNTHETIC full 2000+ (+2.79, boot_p 0.016) and SYNTHETIC long 1986+ (+1.75, boot_p 0.029, ho10 +0.90). It is robust to costs (+2.67 at 35 bps) and stricter distribution taxes (-0.05 pp). It fails criterion 4 (CA family walk-forward 10/5 = -4.1 pp/yr lab, -6.9 yearly; SYNTHETIC leveraged PBO 0.54), its deflated Sharpe is 0.062 (RSI(2) version 0.006), exposure drifts from 1.5x to 2.7x, and it is not distinguishable from risk-matched constant or buy-and-hold leverage (+0.6 to +2.7 pp/yr, p 0.10-0.41) or the plain leveraged 200-day trend rule (-1.1 to +3.0, p 0.20-0.67).",
+  "In a tax-deferred account (NONE, diagnostic): ConnorsRSI(3,2,100)<15 & SPY>SMA200 -> 3x for 7 days scores +5.07 pp/yr on engine full (boot_p 0.005, max DD -39%). It beats random entries with the same filter, exit and exposure by +5.2 (real, p 0.05), +7.1 (SYNTHETIC 2000+) and +8.7 (1986+) pp/yr, holds a 1986+ pre-2000 holdout of +7.6 pp/yr (100% beat), and is positive on 73% of 84 other equity ETFs. It is cost-sensitive (gone at 30 bps/side), its neighbourhood passes 1-3 in only 35-58% of cells, and the family/overlay walk-forward is negative. In CA it loses (-1.13).",
+  "Family diagnostics (screen, report.diagnostics): CA walk-forward 10/5 OOS -4.11 pp/yr (lab default, 3 dates), -6.90 with yearly decisions; NONE -6.73 / -6.68; PBO 0.00 (CA) / 0.12 (NONE) on 2009+ shared months; deflated Sharpe of the best config ~0. On SYNTHETIC leveraged records (CA): walk-forward +1.9 (1986+) / +4.7 (2000+) pp/yr, beat 0.54-0.67, PBO 0.36 / 0.54.",
+  "The fast simulator used for the 624-config overlay neighbourhoods reproduces the engine exactly: 0.0 difference on 12 sampled real-ETF configs and <=6e-6 on SYNTHETIC 1986+ runs."
+ ],
+ "candidates": [
+  {
+   "label": "RHN|res20|pctb<0&F200|x:rsi2>65|dip:UPRO|hold366",
+   "cfg": {
+    "kind": "mean_reversion.ladder",
+    "sig": "SPY",
+    "core": {
+     "SPY": 0.8,
+     "SHY|VFISX": 0.2
+    },
+    "fund": "SHY|VFISX",
+    "dip": "UPRO",
+    "levels": [
+     [
+      {
+       "i": "pctb",
+       "n": 20,
+       "k": 2,
+       "lt": 0
+      },
+      {
+       "i": "dsma",
+       "n": 200,
+       "gt": 0
+      }
+     ]
+    ],
+    "tranche": [
+     1
+    ],
+    "release": [
+     {
+      "i": "rsi",
+      "n": 2,
+      "gt": 65
+     }
+    ],
+    "rearm": [
+     {
+      "i": "rsi",
+      "n": 2,
+      "gt": 65
+     }
+    ],
+    "min_hold": 366,
+    "label": "RHN|res20|pctb<0&F200|x:rsi2>65|dip:UPRO|hold366",
+    "requires": [
+     "UPRO"
+    ]
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.0344,
+     "full_excess": 0.04728,
+     "ex5_mean": 0.02377,
+     "ex10_mean": 0.03291,
+     "ex10_beat": 1,
+     "ex10_min": 0.001,
+     "ex15_beat": 1,
+     "ex20_beat": null,
+     "boot_p": 0.009,
+     "max_dd": -0.53932,
+     "bench_max_dd": -0.55189,
+     "trades": 67,
+     "turnover": 0.90857
+    },
+    "FED": {
+     "score": 0.04122,
+     "full_excess": 0.05965,
+     "ex5_mean": 0.02784,
+     "ex10_mean": 0.03971,
+     "ex10_beat": 1,
+     "ex10_min": 0.00256,
+     "ex15_beat": 1,
+     "ex20_beat": null,
+     "boot_p": 0.005,
+     "max_dd": -0.52836,
+     "bench_max_dd": -0.55189,
+     "trades": 67,
+     "turnover": 0.88354
+    },
+    "NONE": {
+     "score": 0.04983,
+     "full_excess": 0.0752,
+     "ex5_mean": 0.03391,
+     "ex10_mean": 0.04835,
+     "ex10_beat": 1,
+     "ex10_min": 0.00508,
+     "ex15_beat": 1,
+     "ex20_beat": null,
+     "boot_p": 0.004,
+     "max_dd": -0.52306,
+     "bench_max_dd": -0.55189,
+     "trades": 52,
+     "turnover": 0.84675
+    }
+   },
+   "long_protocol": {
+    "CA": {
+     "score": 0.01749,
+     "full_excess": 0.02331,
+     "ho5_mean": 0.01318,
+     "ho5_beat": 0.56757,
+     "ho10_mean": 0.00902,
+     "protocol": "long",
+     "source": "SYNTHETIC leverage (engine on synthetic 3x of VFINX), VFINX benchmark"
+    },
+    "NONE": {
+     "score": 0.02513,
+     "full_excess": 0.03746,
+     "ho5_mean": 0.02142,
+     "ho5_beat": 0.64865,
+     "ho10_mean": 0.01586,
+     "protocol": "long",
+     "source": "SYNTHETIC leverage (engine on synthetic 3x of VFINX), VFINX benchmark"
+    },
+    "CA_synthetic_full_2000plus": {
+     "score": 0.0279,
+     "full_excess": 0.0475,
+     "ex10_beat": 0.99,
+     "ex15_beat": 1,
+     "boot_p": 0.016,
+     "max_dd": -0.66
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": true,
+   "hindsight_risk": "medium",
+   "robustness_notes": "Family's best CA result; real full windows start 2009-07 (UPRO). Criteria 1-3 pass on real full, SYNTHETIC full 2000+ (+2.79, boot_p 0.016) and SYNTHETIC long 1986+ (+1.75, boot_p 0.029); pre-2000 holdout +0.90 pp/yr (beat 0.59). FAILS criterion 4: CA family walk-forward 10/5 -4.1 pp/yr (lab) / -6.9 (yearly); on SYNTHETIC leveraged records walk-forward is +1.9/+4.7 but PBO 0.54 (2000+). Deflated Sharpe 0.062 (n_trials 2000). Criterion 5 partial: all 9 %b neighbours positive on every dataset, but only 4/9 (real), 5/9 (2000+), 2/9 (1986+) pass 1-3. Leverage: avg exposure 1.57x, drifting from 1.5x (2009) to 2.7x (2026) because the UPRO sleeve is never rebalanced; avg T-bill weight 12%; max DD -54% real, -63% SYNTHETIC 1986+. vs risk-matched leverage on the 1986+ path: +0.6 to +1.7 pp/yr vs constant 1.5x/2x and buy-and-hold 30-50% UPRO (p 0.10-0.41); -1.1 pp/yr vs 'UPRO above 200d else SPY' (p 0.67). Beats its own untimed twins (p 0.01-0.04). Costs: +2.67 at 35 bps/side; stricter distribution tax -0.03 to -0.07 pp. Designed in session 2 after seeing related results (data-snooping risk)."
+  },
+  {
+   "label": "RH|res20|rsi2<10&F200|x:rsi2>65|dip:UPRO|hold366",
+   "cfg": {
+    "kind": "mean_reversion.ladder",
+    "sig": "SPY",
+    "core": {
+     "SPY": 0.8,
+     "SHY|VFISX": 0.2
+    },
+    "fund": "SHY|VFISX",
+    "dip": "UPRO",
+    "levels": [
+     [
+      {
+       "i": "rsi",
+       "n": 2,
+       "lt": 10
+      },
+      {
+       "i": "dsma",
+       "n": 200,
+       "gt": 0
+      }
+     ]
+    ],
+    "tranche": [
+     1
+    ],
+    "release": [
+     {
+      "i": "rsi",
+      "n": 2,
+      "gt": 65
+     }
+    ],
+    "rearm": [
+     {
+      "i": "rsi",
+      "n": 2,
+      "gt": 65
+     }
+    ],
+    "min_hold": 366,
+    "label": "RH|res20|rsi2<10&F200|x:rsi2>65|dip:UPRO|hold366",
+    "requires": [
+     "UPRO"
+    ]
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.01587,
+     "full_excess": 0.02316,
+     "ex5_mean": 0.01616,
+     "ex10_mean": 0.0141,
+     "ex10_beat": 0.82759,
+     "ex10_min": -0.00581,
+     "ex15_beat": 1,
+     "ex20_beat": null,
+     "boot_p": 0.1135,
+     "max_dd": -0.58245,
+     "bench_max_dd": -0.55189,
+     "trades": 75,
+     "turnover": 1.05028
+    },
+    "FED": {
+     "score": 0.02015,
+     "full_excess": 0.02917,
+     "ex5_mean": 0.01914,
+     "ex10_mean": 0.01805,
+     "ex10_beat": 0.89655,
+     "ex10_min": -0.00444,
+     "ex15_beat": 1,
+     "ex20_beat": null,
+     "boot_p": 0.077,
+     "max_dd": -0.56054,
+     "bench_max_dd": -0.55189,
+     "trades": 73,
+     "turnover": 0.93166
+    },
+    "NONE": {
+     "score": 0.026,
+     "full_excess": 0.03514,
+     "ex5_mean": 0.02413,
+     "ex10_mean": 0.02328,
+     "ex10_beat": 0.89655,
+     "ex10_min": -0.0026,
+     "ex15_beat": 1,
+     "ex20_beat": null,
+     "boot_p": 0.068,
+     "max_dd": -0.54246,
+     "bench_max_dd": -0.55189,
+     "trades": 64,
+     "turnover": 0.83557
+    }
+   },
+   "long_protocol": {
+    "CA": {
+     "score": 0.02519,
+     "full_excess": 0.03479,
+     "ho5_mean": 0.02423,
+     "ho5_beat": 0.67568,
+     "ho10_mean": 0.02011,
+     "protocol": "long",
+     "source": "SYNTHETIC leverage (engine on synthetic 3x of VFINX), VFINX benchmark"
+    },
+    "NONE": {
+     "score": 0.03427,
+     "full_excess": 0.05477,
+     "ho5_mean": 0.03578,
+     "ho5_beat": 0.7027,
+     "ho10_mean": 0.02909,
+     "protocol": "long",
+     "source": "SYNTHETIC leverage (engine on synthetic 3x of VFINX), VFINX benchmark"
+    },
+    "CA_synthetic_full_2000plus": {
+     "score": 0.0202,
+     "full_excess": 0.0343,
+     "ex10_beat": 0.88,
+     "ex15_beat": 0.96,
+     "boot_p": 0.085,
+     "max_dd": -0.73
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": true,
+   "hindsight_risk": "medium",
+   "robustness_notes": "Canonical Connors entry (RSI(2)<10 above SMA200) in the RH sleeve. Real full CA misses boot_p (0.114). Passes 1-3 on SYNTHETIC full 2000+ (boot_p 0.085) and SYNTHETIC long 1986+ (+2.52, boot_p 0.080, ho10 +2.01, beat 0.76); also passes in FED on real full (boot_p 0.077). Battery: costs +0.93 at 35 bps; stricter tax -0.01 to -0.03 pp; sub-periods CA 2010-20 +4.35, 2020-26 +2.50; deflated Sharpe 0.006. Avg exposure 1.73x (1.5x -> 2.2x), max DD -58% real / -77% SYNTHETIC 1986+. On real 2009-26 data the untimed twin (reserve always in UPRO) is better (+3.07 vs +1.59). Robustness variants (release 50/80, F150/F250, 450-day hold, lag 1, SSO, 10% reserve) are all positive; 7/11 pass on 2000+, 3/11 on 1986+. Fails criterion 4 and is leverage-explained (see %b version)."
+  },
+  {
+   "label": "TX|crsi<15&F200|x:hold5|on:UPRO|minhold366",
+   "cfg": {
+    "kind": "weights",
+    "signal": "mean_reversion.timer",
+    "rebalance": "A",
+    "params": {
+     "sig": "SPY",
+     "on": {
+      "UPRO": 1
+     },
+     "off": {
+      "SPY": 1
+     },
+     "entry": [
+      {
+       "i": "crsi",
+       "lt": 15
+      },
+      {
+       "i": "dsma",
+       "n": 200,
+       "gt": 0
+      }
+     ],
+     "exit": [],
+     "min_hold": 366,
+     "max_hold": 5
+    },
+    "label": "TX|crsi<15&F200|x:hold5|on:UPRO|minhold366",
+    "requires": [
+     "UPRO"
+    ]
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.07157,
+     "full_excess": 0.08744,
+     "ex5_mean": 0.07311,
+     "ex10_mean": 0.0711,
+     "ex10_beat": 1,
+     "ex10_min": 0.00582,
+     "ex15_beat": 1,
+     "ex20_beat": null,
+     "boot_p": 0.0325,
+     "max_dd": -0.61157,
+     "bench_max_dd": -0.55189,
+     "trades": 121,
+     "turnover": 3.39573
+    },
+    "FED": {
+     "score": 0.08822,
+     "full_excess": 0.11093,
+     "ex5_mean": 0.08773,
+     "ex10_mean": 0.08777,
+     "ex10_beat": 1,
+     "ex10_min": 0.01493,
+     "ex15_beat": 1,
+     "ex20_beat": null,
+     "boot_p": 0.017,
+     "max_dd": -0.59048,
+     "bench_max_dd": -0.55189,
+     "trades": 121,
+     "turnover": 3.41269
+    },
+    "NONE": {
+     "score": 0.11269,
+     "full_excess": 0.13871,
+     "ex5_mean": 0.11207,
+     "ex10_mean": 0.11139,
+     "ex10_beat": 1,
+     "ex10_min": 0.02569,
+     "ex15_beat": 1,
+     "ex20_beat": null,
+     "boot_p": 0.0135,
+     "max_dd": -0.58979,
+     "bench_max_dd": -0.55189,
+     "trades": 121,
+     "turnover": 3.43603
+    }
+   },
+   "long_protocol": {
+    "CA": {
+     "score": 0.04183,
+     "full_excess": 0.02269,
+     "ho5_mean": 0.05407,
+     "ho5_beat": 0.6,
+     "ho10_mean": 0.04079,
+     "protocol": "long_screen",
+     "source": "SYNTHETIC leverage (engine on synthetic 3x of VFINX), VFINX benchmark; ex10_beat 0.71, boot_p 0.245, max DD -0.78"
+    },
+    "CA_synthetic_screen_2000plus": {
+     "score": 0.0525,
+     "full_excess": 0.0513,
+     "ex10_beat": 1,
+     "ex15_beat": 1,
+     "boot_p": 0.045,
+     "max_dd": -0.61
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": true,
+   "hindsight_risk": "high",
+   "robustness_notes": "Whole book SPY->UPRO on ConnorsRSI<15 above SMA200. A winner may not be sold before 366 days, so it holds while SPY stays above the entry price (breakeven stop) for up to a year; losers are exited at once. In UPRO 69% of days (avg exposure 2.43x), so it is mostly a 3x strategy. Passes 1-3 on real full (2009-07+), where any leverage passes. SYNTHETIC 2000+ passes (boot_p 0.045), but SYNTHETIC 1986+ fails (ex10_beat 0.71, boot_p 0.245), and 0 of 26 neighbourhood variants and controls pass on 1986+. A no-dip version (+4.17) and plain 'UPRO above 200d else SPY' (+4.44) do as well on 1986+, so it is leveraged trend following. Negative cash about -1.4% from tax bills paid from cash (engine quirk) adds a little free leverage. Fails criteria 2-3 on the long proxy and criterion 4."
+  },
+  {
+   "label": "L|swap100|ddATH:30|dip:UPRO|rel:ath",
+   "cfg": {
+    "kind": "mean_reversion.ladder",
+    "sig": "SPY",
+    "core": {
+     "SPY": 1
+    },
+    "fund": "SPY",
+    "dip": "UPRO",
+    "levels": [
+     [
+      {
+       "i": "dd",
+       "n": 0,
+       "lt": -0.3
+      }
+     ]
+    ],
+    "tranche": [
+     1
+    ],
+    "release": [
+     {
+      "i": "dd",
+      "n": 0,
+      "gt": -0.01
+     }
+    ],
+    "rearm": [
+     {
+      "i": "dd",
+      "n": 0,
+      "gt": -0.02
+     }
+    ],
+    "min_hold": 366,
+    "label": "L|swap100|ddATH:30|dip:UPRO|rel:ath",
+    "requires": [
+     "UPRO"
+    ]
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.07855,
+     "full_excess": 0.08203,
+     "ex5_mean": 0.07646,
+     "ex10_mean": 0.08354,
+     "ex10_beat": 1,
+     "ex10_min": 0.03174,
+     "ex15_beat": 1,
+     "ex20_beat": null,
+     "boot_p": 0.0245,
+     "max_dd": -0.5173,
+     "bench_max_dd": -0.55189,
+     "trades": 15,
+     "turnover": 0.20391
+    },
+    "FED": {
+     "score": 0.08658,
+     "full_excess": 0.09398,
+     "ex5_mean": 0.08496,
+     "ex10_mean": 0.09068,
+     "ex10_beat": 1,
+     "ex10_min": 0.03834,
+     "ex15_beat": 1,
+     "ex20_beat": null,
+     "boot_p": 0.0125,
+     "max_dd": -0.5173,
+     "bench_max_dd": -0.55189,
+     "trades": 15,
+     "turnover": 0.17302
+    },
+    "NONE": {
+     "score": 0.09632,
+     "full_excess": 0.10645,
+     "ex5_mean": 0.09622,
+     "ex10_mean": 0.09987,
+     "ex10_beat": 1,
+     "ex10_min": 0.04571,
+     "ex15_beat": 1,
+     "ex20_beat": null,
+     "boot_p": 0.008,
+     "max_dd": -0.5173,
+     "bench_max_dd": -0.55189,
+     "trades": 9,
+     "turnover": 0.14438
+    }
+   },
+   "long_protocol": {
+    "CA": {
+     "score": 0.01015,
+     "full_excess": 0.01361,
+     "ho5_mean": 0.01133,
+     "ho5_beat": 0.2,
+     "ho10_mean": 0.0097,
+     "protocol": "long_screen",
+     "source": "SYNTHETIC leverage (engine on synthetic 3x of VFINX), VFINX benchmark; ex10_beat 0.39, boot_p 0.36, max DD -0.91"
+    },
+    "CA_synthetic_screen_2000plus": {
+     "score": 0.0291,
+     "full_excess": 0.0235,
+     "ex10_beat": 0.53,
+     "ex15_beat": 0.58,
+     "boot_p": 0.307,
+     "max_dd": -0.88
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": true,
+   "hindsight_risk": "high",
+   "robustness_notes": "Best CA score among real-ETF ladders, but the excess is two trades: all-in UPRO in July 2010 and on 2020-03-20, both near selloff bottoms. With SYNTHETIC 3x it went all-in during 2001-02 and 2008: ex10_beat 0.53 (2000+) / 0.39 (1986+), max DD -88% / -91%. Buy-and-hold 10-50% UPRO also clears criteria 1-3 over the same 2009+ windows. Family-code issue: the swap ladder's January tax settlement cannot sell the dip asset (see lab_bugs). Not a candidate."
+  },
+  {
+   "label": "SITE|SPY|boll20-1.5|taxmanaged-M",
+   "cfg": {
+    "kind": "combo",
+    "tickers": [
+     "SPY"
+    ],
+    "timer": "bollinger",
+    "timer_params": {
+     "window": 20,
+     "k": 1.5
+    },
+    "rebalance": "M",
+    "trade_rule": "tax_managed",
+    "gain_budget": 0.01,
+    "wash_days": 31,
+    "label": "SITE|SPY|boll20-1.5|taxmanaged-M"
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.01431,
+     "full_excess": 0.02005,
+     "ex5_mean": 0.00418,
+     "ex10_mean": 0.0179,
+     "ex10_beat": 0.62687,
+     "ex10_min": -0.02781,
+     "ex15_beat": 0.85106,
+     "ex20_beat": 1,
+     "boot_p": 0.1765,
+     "max_dd": -0.33717,
+     "bench_max_dd": -0.55189,
+     "trades": 21,
+     "turnover": 0.034
+    },
+    "FED": {
+     "score": 0.01574,
+     "full_excess": 0.02063,
+     "ex5_mean": 0.00497,
+     "ex10_mean": 0.01992,
+     "ex10_beat": 0.62687,
+     "ex10_min": -0.02975,
+     "ex15_beat": 0.85106,
+     "ex20_beat": 1,
+     "boot_p": 0.1865,
+     "max_dd": -0.33717,
+     "bench_max_dd": -0.55189,
+     "trades": 20,
+     "turnover": 0.03396
+    },
+    "NONE": {
+     "score": -0.04197,
+     "full_excess": -0.04211,
+     "ex5_mean": -0.0467,
+     "ex10_mean": -0.03866,
+     "ex10_beat": 0.29851,
+     "ex10_min": -0.11558,
+     "ex15_beat": 0.08511,
+     "ex20_beat": 0.03704,
+     "boot_p": 0.8975,
+     "max_dd": -0.27205,
+     "bench_max_dd": -0.55189,
+     "trades": 40,
+     "turnover": 0.80488
+    }
+   },
+   "long_protocol": {
+    "CA": {
+     "score": 0.00332,
+     "full_excess": -0.00118,
+     "ho5_mean": -0.01784,
+     "ho5_beat": 0.3,
+     "ho10_mean": -0.00632,
+     "protocol": "long_screen",
+     "source": "engine, real 1986+ fund proxies (VFINX), VFINX benchmark"
+    },
+    "NONE": {
+     "score": -0.05384,
+     "full_excess": -0.06365,
+     "ho5_mean": -0.10595,
+     "ho5_beat": 0,
+     "ho10_mean": -0.10188,
+     "protocol": "long_screen",
+     "source": "engine, real 1986+ fund proxies (VFINX), VFINX benchmark"
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "medium",
+   "robustness_notes": "Best unlevered CA result and site-expressible (manual SPY, Bollinger 20/1.5 timer, TaxManagedCombo monthly). It waits in cash (0%) for a monthly close below the lower band, then almost never sells because the 1% gain budget blocks sales, so the edge is a lucky entry delay in the 2000s (e.g. cash mid-2003 to March 2007, re-entry March 2009). Fails ex10_beat (0.63) and boot_p (0.18). In NONE the same rule trades freely and loses 4.2 pp/yr. 1986+ twin +0.33 pp/yr (boot_p 0.99) with a negative pre-2000 holdout. Neighbour boll20-2 is similar (+1.33)."
+  },
+  {
+   "label": "L|res100|ddATH:30|dip:SPY|rel:never",
+   "cfg": {
+    "kind": "mean_reversion.ladder",
+    "sig": "SPY",
+    "core": {
+     "SHY|VFISX": 1
+    },
+    "fund": "SHY|VFISX",
+    "dip": "IVV|SPY",
+    "levels": [
+     [
+      {
+       "i": "dd",
+       "n": 0,
+       "lt": -0.3
+      }
+     ]
+    ],
+    "tranche": [
+     1
+    ],
+    "release": [],
+    "rearm": [
+     {
+      "i": "dd",
+      "n": 0,
+      "gt": -0.02
+     }
+    ],
+    "min_hold": 366,
+    "label": "L|res100|ddATH:30|dip:SPY|rel:never"
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": -0.00147,
+     "full_excess": 0.01879,
+     "ex5_mean": -0.00903,
+     "ex10_mean": -0.00261,
+     "ex10_beat": 0.56716,
+     "ex10_min": -0.07953,
+     "ex15_beat": 0.85106,
+     "ex20_beat": 1,
+     "boot_p": 0.038,
+     "max_dd": -0.56613,
+     "bench_max_dd": -0.55189,
+     "trades": 3,
+     "turnover": 0.01245
+    },
+    "FED": {
+     "score": -0.00171,
+     "full_excess": 0.01928,
+     "ex5_mean": -0.01031,
+     "ex10_mean": -0.00258,
+     "ex10_beat": 0.56716,
+     "ex10_min": -0.08574,
+     "ex15_beat": 0.85106,
+     "ex20_beat": 1,
+     "boot_p": 0.0275,
+     "max_dd": -0.5597,
+     "bench_max_dd": -0.55189,
+     "trades": 3,
+     "turnover": 0.01238
+    },
+    "NONE": {
+     "score": -0.00161,
+     "full_excess": 0.01972,
+     "ex5_mean": -0.01096,
+     "ex10_mean": -0.00219,
+     "ex10_beat": 0.56716,
+     "ex10_min": -0.09088,
+     "ex15_beat": 0.85106,
+     "ex20_beat": 1,
+     "boot_p": 0.0245,
+     "max_dd": -0.5525,
+     "bench_max_dd": -0.55189,
+     "trades": 3,
+     "turnover": 0.0123
+    }
+   },
+   "long_protocol": {
+    "CA": {
+     "score": -0.01528,
+     "full_excess": -0.00039,
+     "ho5_mean": -0.06487,
+     "ho5_beat": 0,
+     "ho10_mean": -0.04996,
+     "protocol": "long_screen",
+     "source": "engine, real 1986+ fund proxies (VFINX/VFISX|VFIIX), VFINX benchmark"
+    },
+    "NONE": {
+     "score": -0.01745,
+     "full_excess": -0.0004,
+     "ho5_mean": -0.08048,
+     "ho5_beat": 0,
+     "ho10_mean": -0.05689,
+     "protocol": "long_screen",
+     "source": "engine, real 1986+ fund proxies (VFINX/VFISX|VFIIX), VFINX benchmark"
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "low",
+   "robustness_notes": "Representative of 'buy after an X% drawdown and hold 12m+' (scale-in from short Treasuries, buy everything after a 30% drawdown from the high, never sell). Score is about zero (-0.15 pp/yr). Its boot_p of 0.038 comes only from the 2000 start, which waited out 2000-02. Long-history twin -1.5 pp/yr, with pre-2000 holdouts of -5 to -6.5 pp/yr (never beat). All 144 unlevered reserve ladders: best screen +0.07, median -0.6 pp/yr."
+  },
+  {
+   "label": "F|crsi<15&F200|x:hold7|on:UPRO",
+   "cfg": {
+    "kind": "weights",
+    "signal": "mean_reversion.timer",
+    "rebalance": "A",
+    "params": {
+     "sig": "SPY",
+     "on": {
+      "UPRO": 1
+     },
+     "off": {
+      "SPY": 1
+     },
+     "entry": [
+      {
+       "i": "crsi",
+       "lt": 15
+      },
+      {
+       "i": "dsma",
+       "n": 200,
+       "gt": 0
+      }
+     ],
+     "exit": [],
+     "max_hold": 7
+    },
+    "label": "F|crsi<15&F200|x:hold7|on:UPRO",
+    "requires": [
+     "UPRO"
+    ]
+   },
+   "regime_target": "NONE",
+   "stats": {
+    "CA": {
+     "score": -0.01129,
+     "full_excess": -0.00162,
+     "ex5_mean": -0.00801,
+     "ex10_mean": -0.0149,
+     "ex10_beat": 0.13793,
+     "ex10_min": -0.03617,
+     "ex15_beat": 0,
+     "ex20_beat": null,
+     "boot_p": 0.549,
+     "max_dd": -0.43974,
+     "bench_max_dd": -0.55189,
+     "trades": 465,
+     "turnover": 14.16971
+    },
+    "FED": {
+     "score": 0.0008,
+     "full_excess": 0.01864,
+     "ex5_mean": 0.00184,
+     "ex10_mean": -0.0035,
+     "ex10_beat": 0.37931,
+     "ex10_min": -0.02862,
+     "ex15_beat": 0.77778,
+     "ex20_beat": null,
+     "boot_p": 0.2165,
+     "max_dd": -0.39712,
+     "bench_max_dd": -0.55189,
+     "trades": 465,
+     "turnover": 14.15265
+    },
+    "NONE": {
+     "score": 0.05073,
+     "full_excess": 0.08558,
+     "ex5_mean": 0.04967,
+     "ex10_mean": 0.04427,
+     "ex10_beat": 1,
+     "ex10_min": 0.00628,
+     "ex15_beat": 1,
+     "ex20_beat": null,
+     "boot_p": 0.0055,
+     "max_dd": -0.3936,
+     "bench_max_dd": -0.55189,
+     "trades": 465,
+     "turnover": 14.17682
+    }
+   },
+   "long_protocol": {
+    "NONE": {
+     "score": 0.07626,
+     "full_excess": 0.07601,
+     "ho5_mean": 0.07807,
+     "ho5_beat": 0.94595,
+     "ho10_mean": 0.07592,
+     "protocol": "long",
+     "source": "FAST-SIM (engine-equivalent, verified <=6e-6) on SYNTHETIC 3x of VFINX, VFINX benchmark; engine long_screen NONE +0.0771, boot_p 0.000"
+    },
+    "CA": {
+     "score": 0.00934,
+     "full_excess": -0.00268,
+     "ho5_mean": -0.00223,
+     "ho5_beat": 0.6,
+     "ho10_mean": -0.00839,
+     "protocol": "long_screen",
+     "source": "SYNTHETIC leverage (engine), VFINX benchmark; boot_p 0.59"
+    },
+    "FED": {
+     "score": 0.02398,
+     "full_excess": 0.01718,
+     "ho5_mean": 0.01188,
+     "ho5_beat": 0.6,
+     "ho10_mean": 0.00873,
+     "protocol": "long_screen",
+     "source": "SYNTHETIC leverage (engine), VFINX benchmark; boot_p 0.09"
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": true,
+   "hindsight_risk": "low",
+   "robustness_notes": "Tax-deferred diagnostic only. The family's only genuine timing edge: vs random entries with the same SMA200 filter, 7-day exit and exposure, +5.2 pp/yr on real UPRO (perm p 0.05), +7.1 SYNTHETIC 2000+, +8.7 SYNTHETIC 1986+ (p 0.00). Avg exposure 1.38x (in UPRO 19% of days); constant 1.3x control +2.97. The hold-5 version is positive on 73% of 84 other equity ETFs. Breaks at 30 bps/side costs. 31-cell neighbourhood: 74-90% positive, 35-58% pass 1-3; ConnorsRSI<15 is a ridge. 1-day lag (RSI2>65-exit version): +2.56 real, +6.35 SYNTHETIC 1986+. Fails criterion 4 (NONE family walk-forward -6.7 pp/yr; overlay sub-family 10/5 negative on real and 2000+ data because selection picks unfiltered variants that crash). Loses in CA (-1.13) because every entry sells the SPY core and all gains are short-term."
+  },
+  {
+   "label": "V|fear|vix>25&F200->SSO|vix<20->spy",
+   "cfg": {
+    "kind": "weights",
+    "signal": "mean_reversion.timer",
+    "rebalance": "A",
+    "params": {
+     "sig": "SPY",
+     "on": {
+      "SSO": 1
+     },
+     "off": {
+      "SPY": 1
+     },
+     "entry": [
+      {
+       "i": "vix",
+       "gt": 25
+      },
+      {
+       "i": "dsma",
+       "n": 200,
+       "gt": 0
+      }
+     ],
+     "exit": [
+      {
+       "i": "vix",
+       "lt": 20
+      }
+     ]
+    },
+    "label": "V|fear|vix>25&F200->SSO|vix<20->spy",
+    "requires": [
+     "SSO"
+    ]
+   },
+   "regime_target": "NONE",
+   "stats": {
+    "CA": {
+     "score": 0.00049,
+     "full_excess": -0.00129,
+     "ex5_mean": 0.00189,
+     "ex10_mean": -0.00026,
+     "ex10_beat": 0.43902,
+     "ex10_min": -0.04294,
+     "ex15_beat": 0.47619,
+     "ex20_beat": 0,
+     "boot_p": 0.523,
+     "max_dd": -0.61235,
+     "bench_max_dd": -0.55189,
+     "trades": 89,
+     "turnover": 2.95544
+    },
+    "FED": {
+     "score": 0.00686,
+     "full_excess": 0.00753,
+     "ex5_mean": 0.00769,
+     "ex10_mean": 0.00531,
+     "ex10_beat": 0.87805,
+     "ex10_min": -0.03782,
+     "ex15_beat": 0.80952,
+     "ex20_beat": 1,
+     "boot_p": 0.2745,
+     "max_dd": -0.58925,
+     "bench_max_dd": -0.55189,
+     "trades": 89,
+     "turnover": 3.03776
+    },
+    "NONE": {
+     "score": 0.02778,
+     "full_excess": 0.03111,
+     "ex5_mean": 0.02994,
+     "ex10_mean": 0.02309,
+     "ex10_beat": 0.92683,
+     "ex10_min": -0.02806,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.0165,
+     "max_dd": -0.55982,
+     "bench_max_dd": -0.55189,
+     "trades": 89,
+     "turnover": 3.14695
+    }
+   },
+   "long_protocol": {
+    "NONE": {
+     "score": 0.02698,
+     "full_excess": 0.02585,
+     "ho5_mean": 0.02296,
+     "ho5_beat": 0.8,
+     "ho10_mean": 0.02202,
+     "protocol": "long_screen",
+     "source": "SYNTHETIC 2x of VFINX (engine), VFINX benchmark; boot_p 0.003; VIX from 1990, windows from 1991"
+    },
+    "CA": {
+     "score": 0.00443,
+     "full_excess": -0.00558,
+     "ho5_mean": 0.00529,
+     "ho5_beat": 0.7,
+     "ho10_mean": 0.00472,
+     "protocol": "long_screen",
+     "source": "SYNTHETIC leverage (engine), VFINX benchmark; boot_p 0.74"
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": true,
+   "hindsight_risk": "medium",
+   "robustness_notes": "Tax-deferred diagnostic only. Contrarian VIX: switch SPY to SSO when lagged VIX > 25 while SPY > SMA200, back when VIX < 20. NONE passes 1-3 on real full (2006-07+, boot_p 0.017) and on SYNTHETIC 2000+ (+2.53, p 0.035) and 1986+ (+2.70, p 0.003). Neighbour vix>30&F200 is similar (SYNTHETIC 1986+ +2.35, p 0.003); the unfiltered vix>25-35 versions fail on SYNTHETIC history (drawdown -89%). The VRP variant (VIX minus 21-day realized > 5 & uptrend -> SSO) is NONE +4.23 (p 0.041). Both are about zero in CA, and the family walk-forward is negative (criterion 4)."
+  }
+ ],
+ "diagnostics": {
+  "CA": {
+   "n_configs": 1581,
+   "walk_forward": {
+    "oos_mean": -0.0411,
+    "oos_beat": 0.3333,
+    "is_mean": 0.1149,
+    "avg_config_oos_mean": -0.0651,
+    "mean_oos_rank_pct": 0.4425,
+    "note": "lab default step_quarters=4 -> 3 decision dates on screen"
+   },
+   "walk_forward_5_3": {
+    "oos_mean": 0.046,
+    "oos_beat": 0.75,
+    "is_mean": 0.132,
+    "avg_config_oos_mean": -0.0271
+   },
+   "walk_forward_10_5_yearly": {
+    "oos_mean": -0.069,
+    "oos_beat": 0.1667,
+    "n_dates": 12,
+    "avg_config_oos_mean": -0.062
+   },
+   "walk_forward_5_3_yearly": {
+    "oos_mean": 0.0232,
+    "oos_beat": 0.4737,
+    "n_dates": 19
+   },
+   "pbo": {
+    "pbo": 0.0002,
+    "n_configs": 1581,
+    "n_splits": 5000,
+    "is_best_mean": 0.1305,
+    "oos_of_is_best_mean": 0.0953,
+    "note": "monthly matrix only covers shared months 2009+ (UPRO configs), so PBO~0 just reflects leverage winning after 2009"
+   },
+   "dsr_best": {
+    "sr_annual": 0.413,
+    "dsr": 1e-06,
+    "psr": 0.938
+   },
+   "best_by_monthly_mean": "TX|rsi2<10&F200|x:rsi2>65|on:UPRO|taxexec-noST-gb0.01",
+   "unlevered_subset": {
+    "n_configs": 776,
+    "walk_forward_oos_mean": -0.0764,
+    "walk_forward_10_5_yearly_oos_mean": -0.0925,
+    "pbo": 0.0906,
+    "dsr_best": 2e-06,
+    "best_by_monthly_mean": "SITE|SPY|boll20-2|taxmanaged-M"
+   },
+   "SYNTHETIC_leveraged_records": {
+    "long_screen_1986plus": {
+     "n": 126,
+     "wf10_5_yearly_oos_mean": 0.0192,
+     "oos_beat": 0.54,
+     "n_dates": 26,
+     "wf5_3_oos_mean": 0.0065,
+     "pbo": 0.359
+    },
+    "screen_2000plus": {
+     "n": 217,
+     "wf10_5_yearly_oos_mean": 0.0474,
+     "oos_beat": 0.67,
+     "n_dates": 12,
+     "wf5_3_oos_mean": 0.0137,
+     "pbo": 0.539
+    }
+   }
+  },
+  "NONE": {
+   "n_configs": 1583,
+   "walk_forward": {
+    "oos_mean": -0.0673,
+    "oos_beat": 0.3333,
+    "is_mean": 0.147,
+    "avg_config_oos_mean": -0.0727
+   },
+   "walk_forward_5_3": {
+    "oos_mean": -0.0188,
+    "oos_beat": 0.5
+   },
+   "walk_forward_10_5_yearly": {
+    "oos_mean": -0.0668,
+    "oos_beat": 0.25,
+    "n_dates": 12
+   },
+   "walk_forward_5_3_yearly": {
+    "oos_mean": 0.0305,
+    "oos_beat": 0.5263,
+    "n_dates": 19
+   },
+   "pbo": {
+    "pbo": 0.117,
+    "n_configs": 1583,
+    "n_splits": 5000,
+    "is_best_mean": 0.146,
+    "oos_of_is_best_mean": 0.0336
+   },
+   "dsr_best": {
+    "sr_annual": 0.439,
+    "dsr": 0,
+    "psr": 0.952
+   },
+   "best_by_monthly_mean": "TXN|crsi<15&F250|x:hold5|on:UPRO|mh366",
+   "unlevered_subset": {
+    "n_configs": 777,
+    "walk_forward_oos_mean": -0.0678,
+    "pbo": 0.1564,
+    "dsr_best": 0.0062
+   },
+   "fastsim_overlay_subfamily_624": {
+    "real_full": {
+     "wf10_5_oos": -0.0622,
+     "wf5_3_oos": 0.0114,
+     "pbo": 0.276
+    },
+    "synthetic_2000_full": {
+     "wf10_5_oos": -0.0238,
+     "wf5_3_oos": 0.0315,
+     "pbo": 0.308
+    },
+    "synthetic_1986_long": {
+     "wf10_5_oos": 0.0235,
+     "wf5_3_oos": 0.0492,
+     "pbo": 0.241
+    }
+   }
+  }
+ },
+ "hindsight_checks": "Instrument hindsight: everything that matters runs on SPY (the benchmark) and its own 2x/3x funds (SSO/UPRO). No star instrument (QQQ/XLK/TQQQ) was chosen for having won. The one positive pair (QQQ/SPY reversion) is a QQQ tilt and fails anyway (CA +1.36, boot_p 0.47). Menu rules (sector/22-ETF baskets, cross-sectional reversal on sectors/22 ETFs/countries) were negative or about zero (best CA +0.44, boot_p 0.75), so the PROTOCOL 5.3 random-menu test was not needed (hindsight.py is ready). The real hindsight issue is leverage-period hindsight: real SSO/UPRO exist only in the 2006/2009-2026 bull market, where buy-and-hold 10% UPRO clears criteria 1-3 in CA. This was handled by (a) SYNTHETIC daily-reset 2x/3x series in the same engine back to 2000 (SPY) and 1986 (VFINX), covering 1987, 2000-02 and 2008, on screen/full/long_screen/long protocols (302 configs, 614 runs), and (b) constant and buy-and-hold leverage controls plus no-timing twins on the same windows and paths. Cross-index test (no star): the NONE ConnorsRSI overlay on a synthetic 3x of each of the 84 equity ETFs in BROAD_EQUITY_POOL_2003 is positive on 73% (mean +2.0 pp/yr). Pre-2000 holdouts: 28 unlevered long-history twins on real VFINX/VFISX proxies, all non-positive in CA, with negative holdouts for the textbook timers. For the leveraged candidates the holdouts are synthetic: RH %b +0.90 pp/yr (beat 0.59), RSI(2) +2.01 (0.76); TX overlay +4.08 but failing beat/boot_p overall; NONE overlay +7.6 (beat 1.00). One-day execution lag tested for the overlays and the RH sleeve (both survive in sign).",
+ "concerns": [
+  "Every CA-positive result in this family is leveraged. On the only real data (2009-2026) any leverage passes criteria 1-3, so conclusions about leveraged rules rest on SYNTHETIC 2x/3x series. These are calibrated to SSO/UPRO within ~0.2 pp/yr but cannot capture fund-specific frictions, closures or tracking issues in 1987/2000-02/2008.",
+  "Multiple testing: 2,039 distinct configs (1,659 on the engine, 380 only in fast-sim) plus 302 synthetic stress versions. The RH, TX and TXN structures were designed in session 2 after seeing related results, which is data snooping; deflated Sharpe of the best CA candidates is 0.006-0.06.",
+  "Protocol deviations, stated in the report: 32 strategies + 5 controls ran on 'full' (guideline <= 30); the planned T grid ran 260/364 configs (104 secondary-exit variants were stopped when the shared machine slowed to ~0.05 runs/s; every T entry signal is covered and all T configs run are negative).",
+  "Engine modelling quirks that matter here: tax bills paid from cash can leave long-holding timers with negative cash, an interest-free loan worth about 0.5-1 pp/yr for VIX 'fear' timers in CA; lots are FIFO-only, which penalizes switching strategies versus a real broker's specific-lot relief; bond interest and leveraged-fund distributions are taxed as deferred capital gains (realism.adjusted shows only -0.01 to -0.07 pp/yr for the RH finalists).",
+  "The family walk-forward (criterion 4) on the real-ETF grid is partly a data-availability artifact: UPRO configs only enter a 10-year in-sample window from 2019-2020. The synthetic leveraged records give a fairer but mixed answer (OOS positive, PBO 0.36 / 0.54).",
+  "The RH sleeve's leverage is not stable: the UPRO tranche compounds without rebalancing, so exposure rises in long bull markets (1.5x -> 2.7x by 2026). Its synthetic 1986+ drawdowns (-63% to -77%) are deeper than SPY's -55%, and a crash late in a bull run would hit at maximum leverage.",
+  "Bootstrap p-values use only the first-start path, so one lucky early start can produce a low boot_p with a non-positive score (e.g. L|res100|ddATH:30: boot_p 0.038, score -0.15)."
+ ],
+ "untested_ideas": [
+  "S&P 500 futures overlays (Section 1256 60/40 tax treatment regardless of holding period) would sharply cut the CA tax drag of the short-term dip overlay; the engine has no futures/margin.",
+  "Specific-lot (HIFO) sales for switching strategies; the engine is FIFO-only.",
+  "RH sleeve rebalanced back to a fixed weight each year (stable leverage instead of drift), and an RH variant with a stop or trend exit during the 366-day hold. Both need new kind code (a module edit, which would re-run the family cache).",
+  "Fix DipLadder._settle_cash to sell the dip asset as a last resort and re-run the swap ladders (L/E swap100).",
+  "Asset location: run the NONE dip overlay inside an IRA next to a taxable SPY core. This is outside the lab's single-account model.",
+  "New-money (contribution) timing on dips; the engine has no contributions.",
+  "Option-based dip buying (cash-secured puts) and VIX-futures term-structure trades; not available in the engine.",
+  "Cross-index generalization of the RH sleeve (synthetic 3x of other indices vs that index's buy-and-hold) was not run."
+ ],
+ "lab_bugs": [
+  "Engine (so the website too): each January's tax bill is deducted from cash and cash may go negative. A strategy that realized gains and then holds (e.g. MRTimer timers) carries that negative cash, an interest-free loan, until its next trade. VIX 'fear' timers average -3% to -6% cash in CA (flatters their CA score by roughly 0.5-1 pp/yr); whole-book overlays about -1%.",
+  "metrics.walk_forward uses step_quarters=4, i.e. every 4th start. On the yearly 'screen'/'long_screen' protocols that is one decision every 4 years, so report.diagnostics' 10/5 walk-forward rests on 3 dates (2012/2016/2020). It should step by one start on yearly protocols.",
+  "metrics.summary's bench_max_dd is always the benchmark's first-start (2000) drawdown. For configs whose windows start later (leveraged ETFs 2006/2009) the strategy-vs-SPY drawdown comparison is not like for like (SPY's -55% is 2008, which the strategy never saw).",
+  "metrics.monthly_matrix drops months not shared by all configs. For a family mixing 2000-start and 2009-start configs, PBO and the deflated Sharpe are computed on 2009+ only (CA PBO 0.0002 here just says leverage won after 2009).",
+  "Family code (this module, not lab core): DipLadder._settle_cash pays the January tax by selling the funding asset and then the core, never the dip asset. In 'swap' ladders where the whole core is already in the leveraged fund (L|swap100..., E|swap100...), cash stays negative. On SYNTHETIC 1986+ data E|swap100|dd>15&sma50up|dip:UPRO|rel:ath shows equity below zero (max drawdown -103%; metrics.monthly_excess then logs NaN). RH-family ladders keep an SPY core and are unaffected.",
+  "Session-1 grid flaw (not lab core): the 3-5-year-lookback cross-sectional reversal configs had no require_days, so 2000-2003 windows waited in T-bills until the history existed. Corrected twins (XFIX) were run and are lower (+0.44 -> +0.25 pp/yr)."
+ ]
+}

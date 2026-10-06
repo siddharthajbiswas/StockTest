@@ -1,0 +1,1208 @@
+{
+ "family": "taa_models",
+ "module_path": "research/lab/families/taa_models.py",
+ "n_configs_tested": 925,
+ "headline": "Clean negative. None of the published tactical asset allocation models clears the PROTOCOL section 3 bar in CA, FED or NONE. That covers GEM, Accelerating Dual Momentum, Quint, VAA-G4/G12, DAA, PAA, BAA, HAA, GPM, EAA, FAA, AAA, Faber GTAA-5/13 (+top-k), Ivy, RAA, CDM, plus 60/40, Permanent Portfolio, All-Weather and the other statics: 925 strategy configs in all. The closest unleveraged CA config (3-way GEM with a 5% switching margin) scores +0.03 pp/yr on the full protocol with a 10-year beat rate of 0.49 and boot_p 0.42. Its whole lead was earned in 2000-2010. The faithful models score -1.4 (GEM) to -7.6 (GTAA-5) in CA. Two things sink them: taxes on rotation (relative drag ~0.75 + 0.23 x turnover pp/yr) and a dependence on dodging the 2000-02/2008 crashes. Every finalist trails SPY after 2010, and the pre-2000 holdout is negative. Risk-adjusted, they cut drawdowns (-17..-42% vs SPY -55%), but no TAA model's Sharpe beats SPY's reliably after tax; only static stock/bond mixes do, and those lose on return.",
+ "findings": [
+  "CA (primary), full protocol (95 quarterly starts): the best unleveraged config is GEM3-x-rm5|std (SPY/EFA/EEM 12-month GEM with a 5% switching margin). It scores +0.03, full +0.74, ex10_beat 0.49, ex15_beat 0.47, boot_p 0.42, Sharpe 0.61 vs SPY 0.60 (p=0.51). Sub-periods: 2000-10 +12.85, 2010-20 -5.91, 2020-26 -6.78 pp/yr. Next are ADM13612w-x-rm5 -0.03, ADM-x-mom13612w -0.48 and GEM-x-3way -0.72. The faithful models: GEM -1.39, ADM -1.88, VAA-G4 -1.81, DAA-G4 -1.92, QUINT -2.26, HAA-simple -2.93, GTAA-5 -7.60 (from 2007).",
+  "Screen: of 680 distinct non-leveraged CA configs, 2 have a positive score and 0 have a 10-year beat rate >= 0.75. In NONE, 70 of 295 are positive and still 0 reach a 10-year beat rate of 0.75.",
+  "Tax drag: across 112 ETF-era configs starting in 2000, (NONE score - CA score) is about 0.75 + 0.23 x turnover pp/yr. 47 of these configs have a positive NONE score, none of them stays positive in CA, and their median drag is 2.6 pp/yr.",
+  "Tax-managed execution does not rescue all-or-nothing switchers. The tax1 gain budget freezes them in their last purchase: GEM-x|tax1 was 100% VBMFX in 2001-03 and still 91% bonds in 2026 (CA full -5.04). The lt execution (no short-term gains) helps only high-turnover VAA/GTAA/CDM. VAA-G4-x|lt has a CA full-period excess of +0.72, but its score is -1.61. Over 4 weekly rebalance offsets its CA score averages -3.56, and stricter distribution tax cuts the full-period excess to +0.23.",
+  "Regime dependence: every TAA finalist leads SPY by +4.6 to +13.6 pp/yr over 2000-2010 in CA. It then trails by -4.6 to -8.9 over 2010-2020 and by -4.9 to -12.3 over 2020-2026. The ETF-only (-e) versions start after 2003 and are uniformly much worse than the proxy-chain (-x) versions.",
+  "Rebalance-day luck is as large as the edge: moving the monthly rebalance to day 8/15/22 shifts screen scores by 1-5 pp/yr. VAA-G4-x scores +1.78 in NONE on day 1 but -2.11 on day 8. ADM-x-mom13612w scores +3.34 in NONE on day 1 but averages +0.66 over 4 offsets; month-end sampling gives -0.35, and its 13612U momentum twin -2.17.",
+  "Pre-2000 holdout (Vanguard index-fund versions, long protocol vs VFINX): in CA, GEM ho10 is -2.58, 13612W-ADM -3.96 and ADM -3.64. In NONE they at best tie (GEM +0.01, 13612W-ADM -1.89, ADM -1.59). Their 1986-2026 full-period excess is negative in CA for every model.",
+  "Static twins (each finalist's own average mix held statically): timing adds a median +2.9 pp/yr in NONE (15 of 16 positive; VAA-G4 beats its twin in 84% of 10-year windows). In CA it adds a median of only +0.1 pp/yr (range -1.4 to +1.9). The twins are defensive (21-75% bonds) and trail SPY by -0.8 to -3.5 pp/yr in CA.",
+  "Risk-adjusted (Sharpe on matched months, stationary bootstrap): no TAA model beats SPY with p <= 0.10 in CA or FED; the best is VAA-G4-x|lt at 0.75 vs 0.60, p=0.31. In NONE the GEM+VAA-G4+ADM blend gets p=0.056 and the DAA canary on SPY p=0.082, which is not significant among ~20 finalists. Static mixes do have a reliable Sharpe edge (60/40 p=0.032 CA / 0.004 NONE; 80/20 tax1 p=0.016 CA), but they trail SPY by 0.9-1.8 pp/yr.",
+  "Hindsight (PROTOCOL 5.3): the published menus sit at the 46th-75th percentile of 24 random menus from BROAD_EQUITY_POOL_2003 for each of 5 rules, starting 2005. Almost every random menu also loses (CA medians -4.9 to -7.1). Removing EEM from VAA-G4 drops its NONE score from +1.78 to -0.11 (2000+).",
+  "Leverage (labelled): LEV-HAA-S-UPRO|lt (UPRO while the TIP canary is positive, lt execution) scores +6.16 in CA on the full protocol, from 2010-10 only, with boot_p 0.08. It clears criteria 1-3 and fails 4-7. Its Sharpe is 0.77 vs SPY 1.04 on the same months, with 2.1x SPY's vol and a -53% vs -24% monthly drawdown. UPRO buy-and-hold scored +12.79. The same rule with std execution scores -2.54, and on 2x SSO from 2007 +0.47.",
+  "Diagnostics: walk-forward selection of the family's best trailing-10y config loses 6-7 pp/yr out of sample in CA and 11-13 in NONE (0 of 3 dates beat SPY). PBO is 0.58-0.77 on the 2000-start subsets, and the DSR of the best non-leveraged CA config is 0.00-0.19.",
+  "FED (secondary): the best config is ADM13612w-x-rm5|std at +0.73 score / +1.39 full, but boot_p 0.36 and ex10_beat 0.52, so it fails. ADM-x-mom13612w is +0.24, GEM3-x-rm5 +0.34.",
+  "Static allocations never beat SPY on return in any regime: the best is 80/20 at -0.87 CA (full); 60/40 is -1.81, Permanent Portfolio -4.2 and All-Weather -4.9 (screen). Each is also negative in the 1986+ long history.",
+  "The previous researcher's cache was intact. This session finished the remaining 16 full-protocol finalist runs and 166 b2 tax-execution runs, and ran: the hindsight batch (254 runs), leverage (30 runs plus 8 control runs plus 27 full runs), the b4 neighbourhoods (75 runs), static twins plus frontier (69 full runs), the long protocol (20 runs) and the verify battery on 5 configs."
+ ],
+ "candidates": [
+  {
+   "label": "GEM3-x-rm5|std",
+   "cfg": {
+    "name": "GEM3-x-rm5|std",
+    "kind": "weights",
+    "signal": "taa_models.dual",
+    "params": {
+     "risky": [
+      "SPY",
+      "EFA|VGTSX",
+      "EEM|VEIEX"
+     ],
+     "safe": [
+      "AGG|VBMFX"
+     ],
+     "mom": "r12",
+     "abs_ref": "^IRX",
+     "abs_on": "first",
+     "top": 1,
+     "rel_margin": 0.05
+    },
+    "rebalance": "M",
+    "execution": "standard",
+    "requires": [
+     "SPY",
+     "VGTSX",
+     "VEIEX",
+     "VBMFX"
+    ],
+    "require_days": 400,
+    "min_start": "1997-06-03"
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.0003,
+     "full_excess": 0.0074,
+     "ex5_mean": 0.0079,
+     "ex10_mean": -0.0013,
+     "ex10_beat": 0.4925,
+     "ex10_min": -0.0843,
+     "ex15_beat": 0.4681,
+     "ex20_beat": 0.4815,
+     "boot_p": 0.424,
+     "max_dd": -0.4166,
+     "bench_max_dd": -0.5519,
+     "trades": 80,
+     "turnover": 1.3007,
+     "first_start": "2000-01-01",
+     "sharpe_matched": 0.6069,
+     "spy_sharpe_matched": 0.5993,
+     "p_sharpe_le_spy": 0.506
+    },
+    "FED": {
+     "score": 0.0034,
+     "full_excess": 0.0134,
+     "ex5_mean": 0.0105,
+     "ex10_mean": 0.0015,
+     "ex10_beat": 0.5075,
+     "ex10_min": -0.0882,
+     "ex15_beat": 0.4681,
+     "ex20_beat": 0.5185,
+     "boot_p": 0.376,
+     "max_dd": -0.4019,
+     "bench_max_dd": -0.5519,
+     "trades": 79,
+     "turnover": 1.3015,
+     "first_start": "2000-01-01",
+     "sharpe_matched": 0.6913,
+     "spy_sharpe_matched": 0.5993,
+     "p_sharpe_le_spy": 0.369
+    },
+    "NONE": {
+     "score": 0.0123,
+     "full_excess": 0.0249,
+     "ex5_mean": 0.0194,
+     "ex10_mean": 0.0103,
+     "ex10_beat": 0.5075,
+     "ex10_min": -0.087,
+     "ex15_beat": 0.4894,
+     "ex20_beat": 0.6667,
+     "boot_p": 0.274,
+     "max_dd": -0.3853,
+     "bench_max_dd": -0.5519,
+     "trades": 68,
+     "turnover": 1.3009,
+     "first_start": "2000-01-01",
+     "sharpe_matched": 0.7932,
+     "spy_sharpe_matched": 0.5993,
+     "p_sharpe_le_spy": 0.24
+    }
+   },
+   "long_protocol": {
+    "note": "closest long-history analogue GEM-L-3way|std (no 5% margin), protocol long, starts 1995-07, so no pre-2000 holdout windows",
+    "CA": {
+     "score": 0.0087,
+     "full_excess": -0.0088,
+     "ho5_mean": null,
+     "ho5_beat": null,
+     "ho10_mean": null
+    },
+    "FED": {
+     "score": 0.014,
+     "full_excess": 0.0004,
+     "ho5_mean": null,
+     "ho5_beat": null,
+     "ho10_mean": null
+    },
+    "NONE": {
+     "score": 0.0295,
+     "full_excess": 0.0202,
+     "ho5_mean": null,
+     "ho5_beat": null,
+     "ho10_mean": null
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "medium",
+   "robustness_notes": "Closest CA config, but fails the bar: ex10_beat 0.49, ex15_beat 0.47, boot_p 0.42, walk-forward negative. Found in the b4 neighbourhood search: plain 3-way GEM scores -0.72 in CA, 2-way GEM -1.39. Verify battery: rebalance offsets 0/7/14/21 days give a CA score mean of +0.10 [-1.98, +1.60] (3 of 4 positive). One-day lag: +0.21. Costs 0/15/35 bps: +0.22 / -0.38 / -1.24. Stricter annual distribution tax: CA full-period excess +0.74 -> +0.47. Sub-periods CA: 2000-10 +12.85, 2010-20 -5.91, 2020-26 -6.78. Screen neighbours (CA): 13612W momentum -2.02, r6 -2.30, avg1_3_6_12 -1.74, r12s1 -1.40, IEF safe -0.48, quarterly -1.22, day-15 -0.34; lt execution -1.38. The EEM leg (about 34% average weight) is the 2003-07 winner. Random-menu check of the GEM rule (2005+): the published menu is typical."
+  },
+  {
+   "label": "ADM13612w-x-rm5|std",
+   "cfg": {
+    "name": "ADM13612w-x-rm5|std",
+    "kind": "weights",
+    "signal": "taa_models.dual",
+    "params": {
+     "risky": [
+      "SPY",
+      "SCZ|EFA|VGTSX"
+     ],
+     "safe": [
+      "TLT|VUSTX"
+     ],
+     "mom": "13612w",
+     "abs_ref": "zero",
+     "abs_on": "each",
+     "top": 1,
+     "rel_margin": 0.05
+    },
+    "rebalance": "M",
+    "execution": "standard",
+    "requires": [
+     "SPY",
+     "VGTSX",
+     "VUSTX"
+    ],
+    "require_days": 400,
+    "min_start": "1997-06-03"
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": -0.0003,
+     "full_excess": 0.0038,
+     "ex5_mean": 0.0052,
+     "ex10_mean": -0.0005,
+     "ex10_beat": 0.5075,
+     "ex10_min": -0.0916,
+     "ex15_beat": 0.4894,
+     "ex20_beat": 0.4074,
+     "boot_p": 0.468,
+     "max_dd": -0.3611,
+     "bench_max_dd": -0.5519,
+     "trades": 218,
+     "turnover": 3.7823,
+     "first_start": "2000-01-01",
+     "sharpe_matched": 0.5452,
+     "spy_sharpe_matched": 0.5993,
+     "p_sharpe_le_spy": 0.595
+    },
+    "FED": {
+     "score": 0.0073,
+     "full_excess": 0.0139,
+     "ex5_mean": 0.012,
+     "ex10_mean": 0.0071,
+     "ex10_beat": 0.5224,
+     "ex10_min": -0.0941,
+     "ex15_beat": 0.5745,
+     "ex20_beat": 0.5556,
+     "boot_p": 0.359,
+     "max_dd": -0.3506,
+     "bench_max_dd": -0.5519,
+     "trades": 219,
+     "turnover": 3.7757,
+     "first_start": "2000-01-01",
+     "sharpe_matched": 0.6604,
+     "spy_sharpe_matched": 0.5993,
+     "p_sharpe_le_spy": 0.421
+    },
+    "NONE": {
+     "score": 0.0372,
+     "full_excess": 0.044,
+     "ex5_mean": 0.0412,
+     "ex10_mean": 0.037,
+     "ex10_beat": 0.5373,
+     "ex10_min": -0.078,
+     "ex15_beat": 0.7447,
+     "ex20_beat": 1,
+     "boot_p": 0.121,
+     "max_dd": -0.3239,
+     "bench_max_dd": -0.5519,
+     "trades": 215,
+     "turnover": 3.732,
+     "first_start": "2000-01-01",
+     "sharpe_matched": 0.9185,
+     "spy_sharpe_matched": 0.5993,
+     "p_sharpe_le_spy": 0.1025
+    }
+   },
+   "long_protocol": {
+    "note": "closest long-history analogue ADM-L-mom13612w|std (no margin), protocol long, 1986+",
+    "CA": {
+     "score": 0.0034,
+     "full_excess": -0.0214,
+     "ho5_mean": -0.0322,
+     "ho5_beat": 0.0811,
+     "ho10_mean": -0.0396
+    },
+    "FED": {
+     "score": 0.0105,
+     "full_excess": -0.0092,
+     "ho5_mean": -0.0314,
+     "ho5_beat": 0.1351,
+     "ho10_mean": -0.0358
+    },
+    "NONE": {
+     "score": 0.0351,
+     "full_excess": 0.0215,
+     "ho5_mean": -0.0168,
+     "ho5_beat": 0.3514,
+     "ho10_mean": -0.0189
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "medium",
+   "robustness_notes": "Accelerating Dual Momentum: SPY vs intl small caps (SCZ|EFA|VGTSX), TLT safe, Keller 13612W score, 5% hysteresis. Fails in every regime (CA boot_p 0.47, ex10_beat 0.51). The day-1 version is the luckiest of 4 weekly rebalance offsets: CA mean -1.94 [-2.95, -0.03], 0 of 4 positive; NONE mean +0.67 vs +3.72. One-day lag: CA -0.50. Costs 15 bps: CA -1.03. The 13612W score is a spike in the ADM neighbourhood: on screen, 13612U / avg(1,3,6,12) momentum gives -2.92 CA / -2.17 NONE, and month-end sampling -2.82 / -0.35. Stricter distribution tax: CA full +0.38 -> +0.24. Pre-2000 holdout of the long analogue is clearly negative."
+  },
+  {
+   "label": "ADM-x-mom13612w|std",
+   "cfg": {
+    "name": "ADM-x-mom13612w|std",
+    "kind": "weights",
+    "signal": "taa_models.dual",
+    "params": {
+     "risky": [
+      "SPY",
+      "SCZ|EFA|VGTSX"
+     ],
+     "safe": [
+      "TLT|VUSTX"
+     ],
+     "mom": "13612w",
+     "abs_ref": "zero",
+     "abs_on": "each",
+     "top": 1
+    },
+    "rebalance": "M",
+    "execution": "standard",
+    "requires": [
+     "SPY",
+     "VGTSX",
+     "VUSTX"
+    ],
+    "require_days": 400,
+    "min_start": "1997-06-03"
+   },
+   "regime_target": "NONE",
+   "stats": {
+    "CA": {
+     "score": -0.0048,
+     "full_excess": -0.0021,
+     "ex5_mean": 0.0005,
+     "ex10_mean": -0.0051,
+     "ex10_beat": 0.5075,
+     "ex10_min": -0.0916,
+     "ex15_beat": 0.383,
+     "ex20_beat": 0.4074,
+     "boot_p": 0.558,
+     "max_dd": -0.3598,
+     "bench_max_dd": -0.5519,
+     "trades": 260,
+     "turnover": 4.7276,
+     "first_start": "2000-01-01",
+     "sharpe_matched": 0.5112,
+     "spy_sharpe_matched": 0.5993,
+     "p_sharpe_le_spy": 0.6485
+    },
+    "FED": {
+     "score": 0.0024,
+     "full_excess": 0.0073,
+     "ex5_mean": 0.0068,
+     "ex10_mean": 0.0022,
+     "ex10_beat": 0.5224,
+     "ex10_min": -0.0941,
+     "ex15_beat": 0.5106,
+     "ex20_beat": 0.4815,
+     "boot_p": 0.444,
+     "max_dd": -0.3497,
+     "bench_max_dd": -0.5519,
+     "trades": 260,
+     "turnover": 4.753,
+     "first_start": "2000-01-01",
+     "sharpe_matched": 0.6194,
+     "spy_sharpe_matched": 0.5993,
+     "p_sharpe_le_spy": 0.4845
+    },
+    "NONE": {
+     "score": 0.0334,
+     "full_excess": 0.0381,
+     "ex5_mean": 0.0371,
+     "ex10_mean": 0.0334,
+     "ex10_beat": 0.5373,
+     "ex10_min": -0.0777,
+     "ex15_beat": 0.7447,
+     "ex20_beat": 1,
+     "boot_p": 0.176,
+     "max_dd": -0.3239,
+     "bench_max_dd": -0.5519,
+     "trades": 259,
+     "turnover": 4.777,
+     "first_start": "2000-01-01",
+     "sharpe_matched": 0.8789,
+     "spy_sharpe_matched": 0.5993,
+     "p_sharpe_le_spy": 0.1465
+    }
+   },
+   "long_protocol": {
+    "note": "ADM-L-mom13612w|std, protocol long, 1986+ (Vanguard funds, VFINX benchmark)",
+    "CA": {
+     "score": 0.0034,
+     "full_excess": -0.0214,
+     "ho5_mean": -0.0322,
+     "ho5_beat": 0.0811,
+     "ho10_mean": -0.0396
+    },
+    "FED": {
+     "score": 0.0105,
+     "full_excess": -0.0092,
+     "ho5_mean": -0.0314,
+     "ho5_beat": 0.1351,
+     "ho10_mean": -0.0358
+    },
+    "NONE": {
+     "score": 0.0351,
+     "full_excess": 0.0215,
+     "ho5_mean": -0.0168,
+     "ho5_beat": 0.3514,
+     "ho10_mean": -0.0189
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "medium",
+   "robustness_notes": "The best NONE config among the original finalists, but ex10_beat is 0.54 and boot_p 0.18. Rebalance offsets: NONE mean +0.66 [-0.86, +3.34], where day 1 is the maximum; CA mean -2.18. On screen, the 15th-of-month rebalance gives -0.21 NONE and month-end sampling -0.35. One-day lag: NONE +2.70, CA -0.88. Costs 15 bps: NONE +1.25. Timing value vs its static twin: +5.11 NONE / +1.13 CA. Its 2000-2010 lead is +18.9 pp/yr in NONE, versus -7.0 in 2010-20 and -3.4 in 2020-26. The long-history version has a pre-2000 ho10 of -1.89 in NONE. Fails criteria 2, 3, 4 and 5 in NONE."
+  },
+  {
+   "label": "GEM-x|std",
+   "cfg": {
+    "name": "GEM-x|std",
+    "kind": "weights",
+    "signal": "taa_models.dual",
+    "params": {
+     "risky": [
+      "SPY",
+      "EFA|VGTSX"
+     ],
+     "safe": [
+      "AGG|VBMFX"
+     ],
+     "mom": "r12",
+     "abs_ref": "^IRX",
+     "abs_on": "first",
+     "top": 1
+    },
+    "rebalance": "M",
+    "execution": "standard",
+    "requires": [
+     "SPY",
+     "VGTSX",
+     "VBMFX"
+    ],
+    "require_days": 400,
+    "min_start": "1997-06-03"
+   },
+   "regime_target": "ALL",
+   "stats": {
+    "CA": {
+     "score": -0.0139,
+     "full_excess": -0.0082,
+     "ex5_mean": -0.0068,
+     "ex10_mean": -0.0153,
+     "ex10_beat": 0.3582,
+     "ex10_min": -0.0838,
+     "ex15_beat": 0.3191,
+     "ex20_beat": 0.2222,
+     "boot_p": 0.622,
+     "max_dd": -0.3372,
+     "bench_max_dd": -0.5519,
+     "trades": 109,
+     "turnover": 1.7592,
+     "first_start": "2000-01-01",
+     "sharpe_matched": 0.5723,
+     "spy_sharpe_matched": 0.5993,
+     "p_sharpe_le_spy": 0.5625
+    },
+    "FED": {
+     "score": -0.0121,
+     "full_excess": -0.0033,
+     "ex5_mean": -0.0057,
+     "ex10_mean": -0.0136,
+     "ex10_beat": 0.3731,
+     "ex10_min": -0.0878,
+     "ex15_beat": 0.3617,
+     "ex20_beat": 0.3333,
+     "boot_p": 0.549,
+     "max_dd": -0.3372,
+     "bench_max_dd": -0.5519,
+     "trades": 108,
+     "turnover": 1.778,
+     "first_start": "2000-01-01",
+     "sharpe_matched": 0.6671,
+     "spy_sharpe_matched": 0.5993,
+     "p_sharpe_le_spy": 0.3935
+    },
+    "NONE": {
+     "score": -0.0041,
+     "full_excess": 0.0075,
+     "ex5_mean": 0.0013,
+     "ex10_mean": -0.0056,
+     "ex10_beat": 0.4328,
+     "ex10_min": -0.0822,
+     "ex15_beat": 0.4681,
+     "ex20_beat": 0.4074,
+     "boot_p": 0.41,
+     "max_dd": -0.3372,
+     "bench_max_dd": -0.5519,
+     "trades": 85,
+     "turnover": 1.7934,
+     "first_start": "2000-01-01",
+     "sharpe_matched": 0.7951,
+     "spy_sharpe_matched": 0.5993,
+     "p_sharpe_le_spy": 0.2105
+    }
+   },
+   "long_protocol": {
+    "note": "GEM-L|std (VFINX vs VGTSX|PRITX, VBMFX|VFIIX safe), protocol long, 1986+",
+    "CA": {
+     "score": 0.0008,
+     "full_excess": -0.016,
+     "ho5_mean": -0.0194,
+     "ho5_beat": 0.0811,
+     "ho10_mean": -0.0258
+    },
+    "FED": {
+     "score": 0.0048,
+     "full_excess": -0.0058,
+     "ho5_mean": -0.0172,
+     "ho5_beat": 0.1892,
+     "ho10_mean": -0.0203
+    },
+    "NONE": {
+     "score": 0.0167,
+     "full_excess": 0.0139,
+     "ho5_mean": 0.0003,
+     "ho5_beat": 0.4865,
+     "ho10_mean": 0.0001
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "low",
+   "robustness_notes": "Faithful Antonacci GEM: SPY vs EFA by 12-month return, AGG when SPY's 12-month return trails T-bills, with index-fund proxies before the ETFs launched. Included as the reference published model; it loses in every regime. Screen scores by rebalance day 1/8/15/22: CA -1.15/-0.61/-1.40/-2.67, NONE -0.17/+0.57/-0.38/-2.14. The ETF-only version (from 2003-10) scores -3.29 in CA. The tax1 execution traps it in bonds (CA full -5.04), and lt gives -2.60 on screen. Timing value vs its static twin: +0.64 CA / +1.91 NONE. In the random-menu check (2005+) the published menu is at the 54th (CA) / 50th (NONE) percentile. In the long history, NONE roughly ties VFINX pre-2000 (ho10 +0.01)."
+  },
+  {
+   "label": "VAA-G4-x|lt",
+   "cfg": {
+    "name": "VAA-G4-x|lt",
+    "kind": "weights",
+    "signal": "taa_models.breadth",
+    "params": {
+     "risky": [
+      "SPY",
+      "EFA|VGTSX",
+      "EEM|VEIEX",
+      "AGG|VBMFX"
+     ],
+     "cash": [
+      "LQD|VWESX",
+      "IEF|VFITX",
+      "SHY|VFISX"
+     ],
+     "B": 1,
+     "top": 1,
+     "mom": "13612w"
+    },
+    "rebalance": "M",
+    "execution": "tax",
+    "gain_budget": 1,
+    "st_gains": false,
+    "requires": [
+     "SPY",
+     "VGTSX",
+     "VEIEX",
+     "VBMFX",
+     "VWESX",
+     "VFITX",
+     "VFISX"
+    ],
+    "require_days": 400,
+    "min_start": "1997-06-03"
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": -0.0161,
+     "full_excess": 0.0072,
+     "ex5_mean": -0.0182,
+     "ex10_mean": -0.013,
+     "ex10_beat": 0.3582,
+     "ex10_min": -0.0848,
+     "ex15_beat": 0.3617,
+     "ex20_beat": 0.3704,
+     "boot_p": 0.45,
+     "max_dd": -0.2967,
+     "bench_max_dd": -0.5519,
+     "trades": 97,
+     "turnover": 2.0496,
+     "first_start": "2000-01-01",
+     "sharpe_matched": 0.7461,
+     "spy_sharpe_matched": 0.5993,
+     "p_sharpe_le_spy": 0.308
+    },
+    "FED": {
+     "score": -0.0153,
+     "full_excess": 0.0142,
+     "ex5_mean": -0.0192,
+     "ex10_mean": -0.0116,
+     "ex10_beat": 0.3582,
+     "ex10_min": -0.0915,
+     "ex15_beat": 0.383,
+     "ex20_beat": 0.4074,
+     "boot_p": 0.371,
+     "max_dd": -0.276,
+     "bench_max_dd": -0.5519,
+     "trades": 97,
+     "turnover": 2.0647,
+     "first_start": "2000-01-01",
+     "sharpe_matched": 0.8676,
+     "spy_sharpe_matched": 0.5993,
+     "p_sharpe_le_spy": 0.182
+    },
+    "NONE": {
+     "score": 0.014,
+     "full_excess": 0.023,
+     "ex5_mean": 0.0219,
+     "ex10_mean": 0.0135,
+     "ex10_beat": 0.4925,
+     "ex10_min": -0.1125,
+     "ex15_beat": 0.5532,
+     "ex20_beat": 0.6296,
+     "boot_p": 0.312,
+     "max_dd": -0.2376,
+     "bench_max_dd": -0.5519,
+     "trades": 409,
+     "turnover": 7.5582,
+     "first_start": "2000-01-01",
+     "sharpe_matched": 0.9505,
+     "spy_sharpe_matched": 0.5993,
+     "p_sharpe_le_spy": 0.142
+    }
+   },
+   "long_protocol": {
+    "note": "VAA-G4-L|lt, protocol long, starts 1995-07 (EM fund VEIEX 1994), so no pre-2000 holdout windows; not run in NONE (identical to std there: VAA-G4-L|std NONE score +4.32, full +0.76)",
+    "CA": {
+     "score": -0.0133,
+     "full_excess": -0.0175,
+     "ho5_mean": null,
+     "ho5_beat": null,
+     "ho10_mean": null
+    },
+    "FED": {
+     "score": -0.0126,
+     "full_excess": -0.0184,
+     "ho5_mean": null,
+     "ho5_beat": null,
+     "ho10_mean": null
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "medium",
+   "robustness_notes": "Keller-Keuning VAA-G4 with no-short-term-gains execution. It has the best CA Sharpe among TAA models (0.75 vs 0.60, p=0.31) and a positive full-period excess (+0.72), but the window score is -1.61 and ex10_beat 0.36. It is fragile. Over the 4 weekly rebalance offsets the CA score averages -3.56 [-5.36, -1.61]. With a one-day lag the CA score is -3.45. At 0 bps cost it scores -2.29, worse than at 5 bps: the tax lot path is chaotic. With bond interest taxed yearly, CA full drops to +0.23. In CA it holds 68% bonds/cash on average. Without EEM (VAA-G3) it scores -2.59 CA. It beats its static twin in 94% of 10-year CA windows (+1.85), but that twin is about 75% bonds and scores -3.47. The engine's negative-cash artefact flatters it slightly: mean cash -0.75%, min -10.6%."
+  },
+  {
+   "label": "S-8020-x-A|tax1",
+   "cfg": {
+    "name": "S-8020-x-A|tax1",
+    "kind": "weights",
+    "signal": "taa_models.static",
+    "params": {
+     "weights": {
+      "SPY": 0.8,
+      "AGG|VBMFX": 0.2
+     }
+    },
+    "rebalance": "A",
+    "execution": "tax",
+    "gain_budget": 0.01,
+    "requires": [
+     "SPY",
+     "VBMFX"
+    ],
+    "require_days": 0,
+    "min_start": "1993-01-29"
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": -0.0087,
+     "full_excess": -0.0064,
+     "ex5_mean": -0.0081,
+     "ex10_mean": -0.0087,
+     "ex10_beat": 0.1642,
+     "ex10_min": -0.025,
+     "ex15_beat": 0.1277,
+     "ex20_beat": 0.037,
+     "boot_p": 0.781,
+     "max_dd": -0.4416,
+     "bench_max_dd": -0.5519,
+     "trades": 54,
+     "turnover": 0.0143,
+     "first_start": "2000-01-01",
+     "sharpe_matched": 0.6555,
+     "spy_sharpe_matched": 0.5993,
+     "p_sharpe_le_spy": 0.016
+    },
+    "FED": {
+     "score": -0.0093,
+     "full_excess": -0.0062,
+     "ex5_mean": -0.0091,
+     "ex10_mean": -0.0092,
+     "ex10_beat": 0.1642,
+     "ex10_min": -0.0261,
+     "ex15_beat": 0.1277,
+     "ex20_beat": 0.0741,
+     "boot_p": 0.776,
+     "max_dd": -0.4416,
+     "bench_max_dd": -0.5519,
+     "trades": 54,
+     "turnover": 0.0141,
+     "first_start": "2000-01-01",
+     "sharpe_matched": 0.6608,
+     "spy_sharpe_matched": 0.5993,
+     "p_sharpe_le_spy": 0.0105
+    },
+    "NONE": {
+     "note": "tax executions are identical to std without taxes; values are S-8020-x-A|std",
+     "score": -0.0097,
+     "full_excess": -0.0063,
+     "ex5_mean": -0.0099,
+     "ex10_mean": -0.0094,
+     "ex10_beat": 0.1642,
+     "ex10_min": -0.0275,
+     "ex15_beat": 0.1489,
+     "ex20_beat": 0.1111,
+     "boot_p": 0.774,
+     "max_dd": -0.4525,
+     "bench_max_dd": -0.5519,
+     "trades": 54,
+     "turnover": 0.0226,
+     "sharpe_matched": 0.6663,
+     "spy_sharpe_matched": 0.5993,
+     "p_sharpe_le_spy": 0.003
+    }
+   },
+   "long_protocol": {
+    "note": "S-8020-L-A|std (VFINX/VBMFX), protocol long, 1986+",
+    "CA": {
+     "score": -0.0068,
+     "full_excess": -0.0132,
+     "ho5_mean": -0.0116,
+     "ho5_beat": 0.0811,
+     "ho10_mean": -0.0129
+    },
+    "FED": {
+     "score": -0.0072,
+     "full_excess": -0.0115,
+     "ho5_mean": -0.0127,
+     "ho5_beat": 0.0811,
+     "ho10_mean": -0.0134
+    },
+    "NONE": {
+     "score": -0.0075,
+     "full_excess": -0.0097,
+     "ho5_mean": -0.0137,
+     "ho5_beat": 0.0811,
+     "ho10_mean": -0.0138
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "low",
+   "robustness_notes": "Answers the risk-adjusted question; it is not a return candidate. Static 80/20 SPY/AGG with annual rebalancing under the incumbent's 1% gain budget. Over 2000-2026 its Sharpe beats SPY's with p=0.016 (CA), 0.011 (FED) and 0.003 (NONE, std), and its maxDD is -44% vs -55%. It loses on return in every horizon: CA score -0.87, ex10_beat 0.16, boot_p 0.78. Neighbours behave the same way: 90/10 scores -0.43 and 60/40 -1.81 (full, CA). In the long history (1986+) it scores -0.68 in CA with ho10 -1.29. The engine taxes bond interest as deferred gains, which flatters it slightly in CA."
+  },
+  {
+   "label": "ENS-GEM-VAA4-ADM|std",
+   "cfg": {
+    "name": "ENS-GEM-VAA4-ADM|std",
+    "kind": "weights",
+    "signal": "taa_models.blend",
+    "params": {
+     "parts": [
+      {
+       "signal": "taa_models.dual",
+       "params": {
+        "risky": [
+         "SPY",
+         "EFA|VGTSX"
+        ],
+        "safe": [
+         "AGG|VBMFX"
+        ],
+        "mom": "r12",
+        "abs_ref": "^IRX",
+        "abs_on": "first",
+        "top": 1
+       },
+       "weight": 1,
+       "rdays": 400
+      },
+      {
+       "signal": "taa_models.breadth",
+       "params": {
+        "risky": [
+         "SPY",
+         "EFA|VGTSX",
+         "EEM|VEIEX",
+         "AGG|VBMFX"
+        ],
+        "cash": [
+         "LQD|VWESX",
+         "IEF|VFITX",
+         "SHY|VFISX"
+        ],
+        "B": 1,
+        "top": 1,
+        "mom": "13612w"
+       },
+       "weight": 1,
+       "rdays": 400
+      },
+      {
+       "signal": "taa_models.dual",
+       "params": {
+        "risky": [
+         "SPY",
+         "SCZ|EFA|VGTSX"
+        ],
+        "safe": [
+         "TLT|VUSTX"
+        ],
+        "mom": "sum1_3_6",
+        "abs_ref": "zero",
+        "abs_on": "each",
+        "top": 1
+       },
+       "weight": 1,
+       "rdays": 400
+      }
+     ]
+    },
+    "rebalance": "M",
+    "execution": "standard",
+    "requires": [
+     "SPY",
+     "VGTSX",
+     "VBMFX",
+     "VEIEX",
+     "VWESX",
+     "VFITX",
+     "VFISX",
+     "VUSTX"
+    ],
+    "require_days": 400,
+    "min_start": "1997-06-03"
+   },
+   "regime_target": "NONE",
+   "stats": {
+    "CA": {
+     "score": -0.0162,
+     "full_excess": -0.0103,
+     "ex5_mean": -0.0103,
+     "ex10_mean": -0.0167,
+     "ex10_beat": 0.4328,
+     "ex10_min": -0.1014,
+     "ex15_beat": 0.3617,
+     "ex20_beat": 0.2222,
+     "boot_p": 0.635,
+     "max_dd": -0.2777,
+     "bench_max_dd": -0.5519,
+     "trades": 1033,
+     "turnover": 4.0804,
+     "first_start": "2000-01-01",
+     "sharpe_matched": 0.6094,
+     "spy_sharpe_matched": 0.5993,
+     "p_sharpe_le_spy": 0.5075
+    },
+    "FED": {
+     "score": -0.012,
+     "full_excess": -0.0031,
+     "ex5_mean": -0.007,
+     "ex10_mean": -0.0124,
+     "ex10_beat": 0.4776,
+     "ex10_min": -0.1059,
+     "ex15_beat": 0.4043,
+     "ex20_beat": 0.2963,
+     "boot_p": 0.554,
+     "max_dd": -0.2637,
+     "bench_max_dd": -0.5519,
+     "trades": 1032,
+     "turnover": 4.0944,
+     "first_start": "2000-01-01",
+     "sharpe_matched": 0.7381,
+     "spy_sharpe_matched": 0.5993,
+     "p_sharpe_le_spy": 0.318
+    },
+    "NONE": {
+     "score": 0.0099,
+     "full_excess": 0.0203,
+     "ex5_mean": 0.0138,
+     "ex10_mean": 0.0096,
+     "ex10_beat": 0.5224,
+     "ex10_min": -0.095,
+     "ex15_beat": 0.5319,
+     "ex20_beat": 0.5926,
+     "boot_p": 0.308,
+     "max_dd": -0.2359,
+     "bench_max_dd": -0.5519,
+     "trades": 1033,
+     "turnover": 4.1132,
+     "first_start": "2000-01-01",
+     "sharpe_matched": 1.0058,
+     "spy_sharpe_matched": 0.5993,
+     "p_sharpe_le_spy": 0.056
+    }
+   },
+   "long_protocol": {},
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "low",
+   "robustness_notes": "Equal blend of three published models: GEM, VAA-G4 and ADM. It is the best risk-adjusted TAA result: NONE Sharpe 1.01 vs SPY 0.60 (p=0.056), maxDD -24% vs -55%, NONE score +0.99, full +2.03. But ex10_beat is 0.52, boot_p 0.31, and p=0.056 is not significant among ~20 finalists. In CA it scores -1.62, with Sharpe 0.61 vs 0.60 (p=0.51). Timing value vs its static twin: +3.56 NONE / +0.66 CA. Turnover is 4.1x/yr. It has no long-history version (two of its parts need EM/SCZ proxies)."
+  },
+  {
+   "label": "LEV-HAA-S-UPRO|lt",
+   "cfg": {
+    "name": "LEV-HAA-S-UPRO|lt",
+    "kind": "weights",
+    "signal": "taa_models.haa",
+    "params": {
+     "offensive": [
+      "UPRO"
+     ],
+     "cash": [
+      "BIL|SHY|VFISX",
+      "IEF|VFITX"
+     ],
+     "canary": "TIP|VIPSX",
+     "top": 1,
+     "mom": "13612u"
+    },
+    "rebalance": "M",
+    "execution": "tax",
+    "gain_budget": 1,
+    "st_gains": false,
+    "requires": [
+     "VFISX",
+     "VFITX",
+     "VIPSX",
+     "UPRO"
+    ],
+    "require_days": 400,
+    "min_start": "2010-07-30"
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.0616,
+     "full_excess": 0.0681,
+     "ex5_mean": 0.0468,
+     "ex10_mean": 0.0786,
+     "ex10_beat": 1,
+     "ex10_min": 0.0168,
+     "ex15_beat": 1,
+     "ex20_beat": null,
+     "boot_p": 0.08,
+     "max_dd": -0.5378,
+     "bench_max_dd": -0.5519,
+     "trades": 50,
+     "turnover": 0.9313,
+     "first_start": "2010-10-01",
+     "sharpe_matched": 0.771,
+     "spy_sharpe_matched": 1.0401,
+     "p_sharpe_le_spy": 0.9175,
+     "max_dd_monthly": -0.5288,
+     "spy_max_dd_matched_monthly": -0.2393
+    },
+    "FED": {
+     "score": 0.0752,
+     "full_excess": 0.0861,
+     "ex5_mean": 0.0555,
+     "ex10_mean": 0.0942,
+     "ex10_beat": 1,
+     "ex10_min": 0.0253,
+     "ex15_beat": 1,
+     "ex20_beat": null,
+     "boot_p": 0.052,
+     "max_dd": -0.5378,
+     "bench_max_dd": -0.5519,
+     "trades": 50,
+     "turnover": 0.8864,
+     "first_start": "2010-10-01",
+     "sharpe_matched": 0.85,
+     "spy_sharpe_matched": 1.0401,
+     "p_sharpe_le_spy": 0.827
+    },
+    "NONE": {
+     "score": 0.0204,
+     "full_excess": 0.021,
+     "ex5_mean": 0.0297,
+     "ex10_mean": 0.0174,
+     "ex10_beat": 0.7917,
+     "ex10_min": -0.0295,
+     "ex15_beat": 0.75,
+     "ex20_beat": null,
+     "boot_p": 0.381,
+     "max_dd": -0.7682,
+     "bench_max_dd": -0.5519,
+     "trades": 95,
+     "turnover": 2.9393,
+     "first_start": "2010-10-01",
+     "sharpe_matched": 0.6774,
+     "spy_sharpe_matched": 1.0401,
+     "p_sharpe_le_spy": 0.9115
+    }
+   },
+   "long_protocol": {},
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": true,
+   "hindsight_risk": "high",
+   "robustness_notes": "LEVERAGE (3x S&P 500 ETF): HAA-simple risk-on/off on UPRO, with the TIP 13612U canary and BIL/IEF as cash, and no short-term gains realized. Full-protocol windows start in 2010-10 only. It clears criteria 1-3 in CA (+6.16 score, ex10_beat 1.00 over 24 windows all inside 2010-2026, ex15 over only 4 windows, boot_p 0.080) and fails 4-7. (4) The family walk-forward is negative. (5) The neighbourhood fails: the same rule with std execution scores -2.54 CA; on 2x SSO from 2007 it scores +0.47 (boot 0.23); the DAA canary on UPRO lt gives +3.48 (boot 0.44); VAA/BAA canaries on UPRO lt are about 0 (screen). (6) UPRO exists only in a bull market (2009+), which is a hindsight tilt. (7) There is no long-history check. Risk-adjusted it is worse than SPY: Sharpe 0.77 vs 1.04 on matched months, vol 29.6% vs 14.1%, monthly maxDD -53% vs -24%. UPRO buy-and-hold scored +12.79. A static 55% UPRO / 45% bills-and-bonds twin scored +3.67 with Sharpe 0.83, and in NONE that twin (+4.99) beats the timed rule (+2.04). The excess is leverage beta plus lt path luck, not timing skill."
+  }
+ ],
+ "diagnostics": {
+  "CA": {
+   "grid": "screen protocol, CA: every strategy config of batches b1, b2, b3 (leverage), b4 in std/tax1/lt executions, de-duplicated by config content",
+   "all": {
+    "n_configs": 700,
+    "walk_forward_10_5": {
+     "oos_mean": -0.0606,
+     "oos_beat": 0,
+     "is_mean": 0.063,
+     "avg_config_oos_mean": -0.0732,
+     "mean_oos_rank_pct": 0.5726
+    },
+    "walk_forward_5_3": {
+     "oos_mean": -0.0288,
+     "oos_beat": 0.25,
+     "is_mean": 0.0984,
+     "avg_config_oos_mean": -0.0243,
+     "mean_oos_rank_pct": 0.5183
+    },
+    "pbo": {
+     "pbo": 0.1254,
+     "n_configs": 700,
+     "n_splits": 5000,
+     "is_best_mean": 0.0849,
+     "oos_of_is_best_mean": 0.0265,
+     "oos_of_is_best_p_pos": 0.7466,
+     "note": "common months only 2011-2026 (set by UPRO configs)"
+    },
+    "dsr_best": {
+     "sr_monthly": 0.1395,
+     "sr_annual": 0.4831,
+     "sr0_monthly": 0.1618,
+     "dsr": 0.3795,
+     "psr": 0.9723
+    },
+    "best_by_monthly_mean": "LEV-HAA-S-UPRO|lt"
+   },
+   "common_start_2000": {
+    "n_configs": 292,
+    "walk_forward_10_5": {
+     "oos_mean": -0.0608,
+     "oos_beat": 0,
+     "is_mean": 0.056
+    },
+    "walk_forward_5_3": {
+     "oos_mean": -0.0567,
+     "oos_beat": 0.25,
+     "is_mean": 0.066
+    },
+    "pbo": {
+     "pbo": 0.772,
+     "oos_of_is_best_mean": -0.0284,
+     "oos_of_is_best_p_pos": 0.1258
+    },
+    "dsr_best": {
+     "dsr": 0.1902,
+     "psr": 0.648,
+     "sr_annual": 0.0734
+    },
+    "best_by_monthly_mean": "VAA-G4-x-rm2|lt"
+   },
+   "no_leverage_all": {
+    "n_configs": 680,
+    "walk_forward_10_5": {
+     "oos_mean": -0.0695,
+     "oos_beat": 0
+    },
+    "walk_forward_5_3": {
+     "oos_mean": -0.0404,
+     "oos_beat": 0.25
+    },
+    "pbo": {
+     "pbo": 0.1872,
+     "oos_of_is_best_mean": -0.0394
+    },
+    "dsr_best": {
+     "dsr": 0,
+     "sr_annual": -1.0366
+    },
+    "best_by_monthly_mean": "HAA-S-e|tax1"
+   }
+  },
+  "NONE": {
+   "grid": "screen protocol, NONE: every std config of b1, b2, b3, b4, de-duplicated",
+   "all": {
+    "n_configs": 305,
+    "walk_forward_10_5": {
+     "oos_mean": -0.1154,
+     "oos_beat": 0,
+     "is_mean": 0.1215,
+     "avg_config_oos_mean": -0.0797,
+     "mean_oos_rank_pct": 0.3292
+    },
+    "walk_forward_5_3": {
+     "oos_mean": 0.0347,
+     "oos_beat": 0.5,
+     "is_mean": 0.1951,
+     "avg_config_oos_mean": -0.0101,
+     "mean_oos_rank_pct": 0.7448
+    },
+    "pbo": {
+     "pbo": 0.2806,
+     "n_configs": 305,
+     "n_splits": 5000,
+     "is_best_mean": 0.0815,
+     "oos_of_is_best_mean": -0.0297,
+     "oos_of_is_best_p_pos": 0.3958
+    },
+    "dsr_best": {
+     "sr_monthly": 0.087,
+     "sr_annual": 0.3015,
+     "sr0_monthly": 0.1605,
+     "dsr": 0.1767,
+     "psr": 0.8641
+    },
+    "best_by_monthly_mean": "LEV-CAN-DAA-UPRO|std"
+   },
+   "common_start_2000": {
+    "n_configs": 137,
+    "walk_forward_10_5": {
+     "oos_mean": -0.1084,
+     "oos_beat": 0,
+     "is_mean": 0.0932
+    },
+    "walk_forward_5_3": {
+     "oos_mean": -0.0277,
+     "oos_beat": 0.25,
+     "is_mean": 0.1125
+    },
+    "pbo": {
+     "pbo": 0.5816,
+     "oos_of_is_best_mean": 0.0013,
+     "oos_of_is_best_p_pos": 0.542
+    },
+    "dsr_best": {
+     "dsr": 0.4009,
+     "psr": 0.9183,
+     "sr_annual": 0.2618
+    },
+    "best_by_monthly_mean": "ADM13612w-x-rm5|std"
+   },
+   "no_leverage_all": {
+    "n_configs": 295,
+    "walk_forward_10_5": {
+     "oos_mean": -0.1324,
+     "oos_beat": 0
+    },
+    "walk_forward_5_3": {
+     "oos_mean": -0.0021,
+     "oos_beat": 0.25
+    },
+    "pbo": {
+     "pbo": 0.4334,
+     "oos_of_is_best_mean": -0.0742
+    },
+    "dsr_best": {
+     "dsr": 0
+    },
+    "best_by_monthly_mean": "ENS-GEM-SPY50|std"
+   }
+  },
+  "long_CA": {
+   "grid": "long_screen (1986+, VFINX), CA, 60 configs",
+   "walk_forward_10_5": {
+    "oos_mean": 0.0024,
+    "oos_beat": 0.5
+   },
+   "walk_forward_5_3": {
+    "oos_mean": -0.0163,
+    "oos_beat": 0.25
+   },
+   "pbo": 0.4886,
+   "dsr_best": 0.0079
+  },
+  "long_NONE": {
+   "grid": "long_screen, NONE, 20 configs",
+   "walk_forward_10_5": {
+    "oos_mean": 0.0213,
+    "oos_beat": 0.5
+   },
+   "walk_forward_5_3": {
+    "oos_mean": 0.0218,
+    "oos_beat": 0.25
+   },
+   "pbo": 0.3478,
+   "dsr_best": 0.1892
+  },
+  "FED_full_finalists": {
+   "grid": "full protocol, FED, 21 finalists",
+   "walk_forward_10_5": {
+    "oos_mean": -0.0901,
+    "oos_beat": 0
+   },
+   "pbo": 0.7216,
+   "dsr_best": 0.0133
+  }
+ },
+ "hindsight_checks": "PROTOCOL 5.3 was run for GEM, ADM, QUINT, VAA-G4 and DAA-G4. Each rule was re-run on 24 random menus per rule from common.BROAD_EQUITY_POOL_2003 (fixed seeds), with the bond/cash legs unchanged. Every config, the published menus included, was forced to start on 2005-01-15, so the screen windows run 2006-2023. In CA the random-menu median scores are -4.9 to -7.1 pp/yr, 0-4% of menus have a positive score, and none reaches a 10-year beat rate of 0.75. The published menus score -4.4 to -6.2, at the 46th-75th percentile of the random menus. In NONE the random medians are -3.9 to -6.6 (0-21% positive) and the published menus -4.0 to -5.2. Star removal (2005+): VAA-G4 without EEM scores -5.66 CA / -4.33 NONE, and QUINT with SPY instead of QQQ -6.67 / -5.98. On the full 2000+ windows, VAA-G3-x-noEEM scores -2.59 CA / -0.11 NONE vs -1.52 / +1.78 with EEM, so about 1.9 pp/yr of VAA-G4's NONE score is the EEM leg. QUINT-x-noQQQ (2000+) scores -2.05 / +0.81. Conclusion: the published menus are not cherry-picked. What flatters the models is the start date: 2000-2009 holds both of the crashes they dodge, plus the 2003-07 EM boom. The leveraged UPRO configs carry high hindsight risk, because UPRO has existed only since 2009. Controls included UPRO/SSO buy-and-hold and the same canary on SPY from the same start; buy-and-hold beat the timed versions.",
+ "concerns": [
+  "research/lab/results/taa_models.md was NOT written to disk: this session's subagent harness blocks writing report .md files (the Write tool refused). Its full content is the results_md field; write it verbatim to that path. research/lab/results/taa_models_table.csv WAS written (1630 rows, protocol column, including 80 verification-battery variant rows with comm/slip columns).",
+  "Engine negative cash: the January tax settlement is paid from cash, which can go negative and acts as an interest-free loan. The tax executions (lt/tax1) often cannot sell to repay it; for VAA-G4-x|lt in CA, cash averages -0.75% of equity, reaches a minimum of -10.6%, and is below -1% on 28% of days. This slightly flatters tax-managed configs relative to SPY.",
+  "Distributions are taxed as deferred gains (PROTOCOL 5.5). Bond-heavy TAA models (VAA-G4 57-68% bonds/cash) are flattered in CA/FED. The battery's stricter accounting lowers the full-period CA excess by 0.06-0.49 pp/yr, which only strengthens the negative.",
+  "Wash sales are not enforced for std execution, and TAA models often sell at a loss and rebuy within 30 days. Real CA results for std configs would be slightly worse.",
+  "The -x configs trade Vanguard index mutual funds (VGTSX, VEIEX, VBMFX, VUSTX, ...) before their ETFs launched. Vanguard's 30-day round-trip restriction would occasionally bind on monthly switching.",
+  "Start-date and rebalance-day sensitivity: full-period excess from January 2000 flatters every TAA model. Moving the rebalance by 1-3 weeks swings scores by 1-5 pp/yr, and several 'best' configs are the luckiest offset of their rule.",
+  "Signal at today's close, trade at today's close is the lab convention. With a one-day lag, CA scores move by -1.8 to +0.2 (VAA-G4 lt -1.61 -> -3.45).",
+  "Multiple testing: 925 strategy configs (700 distinct in the CA screen). The two near-zero positive CA scores are consistent with chance, and the DSR of the best non-leveraged CA config is 0.00-0.19.",
+  "The hindsight random menus start in 2005, so they cannot test 2000-02. Leveraged results come only from 2007+ (SSO) and 2010+ (UPRO) windows, with no long-history proxy.",
+  "Some configs behave identically despite different params: 13612U = avg(1,3,6,12); VAA taxhold under lt = VAA under lt; rel_margin 2% and 5% under lt for VAA. The diagnostics de-duplicate by config content only.",
+  "Bootstrap p-values differ by up to ~0.03 between the verify battery (500 draws) and the tables (1000 draws).",
+  "The previous researcher's queue was killed while the laptop slept. Compute was then shared with ~10 other agents under the battery throttle. All planned batches were completed, and nothing was skipped."
+ ],
+ "untested_ideas": [
+  "Tax-loss-harvesting overlay (WeightStrategy harvest + different-index substitutes, e.g. SPY<->VTI, EFA<->VEA, EEM<->VWO) on the closest CA configs (GEM3-x-rm5, ADM13612w-x-rm5).",
+  "Municipal-bond safe asset for CA (MUB / VWITX) in the risk-off legs. The engine cannot show the tax-exempt benefit, so this would need realism.py accounting.",
+  "Synthetic long-history leveraged S&P series (2x/3x from ^SP500TR or VFINX, with financing cost) to test the canary-timed leverage rules through 2000-02, 2008 and the pre-2000 holdout (criterion 7).",
+  "Partial de-risking (the canary sells only 1/3-1/2 of equity) with lt execution, to cap realized gains while keeping some crash protection.",
+  "Cross-family: a slow canary or absolute-momentum filter wrapped around the incumbent's tax-managed 12-1 momentum rotation (risky sleeve = incumbent).",
+  "Unimplemented published models: Keller's Lethargic AA (LAA, unemployment + SMA canary), Kipnis KDA, Antonacci's dual-momentum sector rotation, Faber Trinity, Alpha Architect's exact RAA weights, Bold Asset Allocation's aggressive variants, the 'Defense First' / Global Tactical models from newer SSRN papers.",
+  "Daily canary checks (crash protection) with monthly selection, and volatility-targeted GEM. Weekly evaluation was tested for 4 models and hurt.",
+  "Contribution-based rebalancing (directing new cash to the model's target instead of selling). The engine has no cash flows."
+ ],
+ "lab_bugs": [
+  "Engine/WeightStrategy: the annual tax settlement (backtester/engine.py, 'self.portfolio.cash -= tax') can drive cash negative with no interest charge. With execution='tax', blocked sells leave the debt in place for months: VAA-G4-x|lt in CA has mean cash -0.75%, min -10.6% of equity, and 28% of days below -1%. report.table shows negative avg_cash for many tax configs. This gives tax-managed strategies a small free leverage relative to SPY, which never pays tax before the end. Suggest forcing a sale to cover the tax, or charging margin interest.",
+  "metrics.summary: bench_sharpe and bench_max_dd always come from the protocol's first start (2000-01 / 1986-01), even when a config's first valid start is later. In report.table, SPY's -55% drawdown and its 2000-start Sharpe therefore sit next to models that start in 2007-2011. scratch/taa_models/risk.py:matched() recomputes both over matched months.",
+  "metrics.walk_forward: step_quarters=4 is applied as an index step over protocol.starts. On yearly-start protocols (screen, long_screen) that is a 4-YEAR step, so a screened grid's 10/5 walk-forward has only 3 decision dates (2012, 2016, 2020) and 5/3 only 4. The criterion-4 diagnostic is very coarse there.",
+  "metrics.monthly_matrix(...).dropna() keeps only the months common to ALL configs. A single late-starting config (e.g. one UPRO config starting in 2011) silently truncates PBO and DSR for the whole grid to 2011-2026. A per-config common-start subset (as done here) or pairwise handling would be safer."
+ ],
+ "results_md": "# Family `taa_models` \u2014 published tactical asset allocation models\n\nModule: `research/lab/families/taa_models.py` (signals `taa_models.dual`, `.sleeves`, `.breadth`,\n`.paa`, `.baa`, `.haa`, `.gpm`, `.eaa`, `.faa`, `.cdm`, `.aaa`, `.static`, and the wrappers\n`.blend`, `.confirm`, `.offset`). Scripts, config batches, logs: `research/lab/scratch/taa_models/`\n(`grids.py` builds every config; `b1_faithful.py`, `bL_long.py`, `b2_variants.py`, `b3_lev.py`,\n`b4_neigh.py`, `hind.py`, `twin.py`, `finals.py` are the batches). Every number below is a cached\nlab record (the website's engine, 5 bps commission + 5 bps slippage per side, after-tax liquidation\nvalue at each window end, SPY bought and held as the benchmark in the same regime). Full table of\nevery run: `research/lab/results/taa_models_table.csv` (one row per config x regime x protocol,\n`protocol` column; `m_*`/`b_*` columns are matched-period risk statistics of the model and SPY).\n\nUnits: excess and score are percentage points of after-tax CAGR per year vs SPY (\"+1.00\" = 1 pp/yr).\nscore = mean of the average excess over 5-, 10- and 15-year windows (the lab's pre-registered rank).\n\n## Verdict\n\n**No published tactical asset allocation model, and none of the 925 variants tried, beats\nbuying and holding SPY after California taxes with good confidence. None clears the PROTOCOL\nsection 3 bar in CA, FED or NONE.** This is a clean negative for the family.\n\n* **California (primary).** On the full protocol (95 quarterly starts 2000-2023) the closest is\n  three-way Global Equities Momentum with a 5% switching margin (`GEM3-x-rm5`: SPY / EFA / EEM by\n  12-month return, AGG when SPY trails T-bills): score **+0.03**, full-period excess +0.74, but\n  10-year beat rate 0.49, 15-year 0.47, boot_p 0.42, Sharpe 0.61 vs SPY's 0.60 (p = 0.51), and its\n  whole lead is 2000-2010 (+12.9 pp/yr; 2010-2020 -5.9, 2020-2026 -6.8). Next: 13612W Accelerating\n  Dual Momentum with the same margin (-0.03, the best of its four weekly rebalance offsets, which\n  average -1.94) and without it (-0.48), plain 3-way GEM (-0.72). The faithful published models all lose: GEM -1.39, VAA-G4 -1.81, DAA-G4 -1.92, ADM\n  -1.88, QUINT -2.26, HAA-simple -2.93, Faber GTAA-5 -7.60 (from 2007), and every G12-universe\n  model -5 to -10 pp/yr. Of the 680 distinct non-leveraged configs screened in CA, two have a\n  positive score and **none has a 10-year beat rate of 0.75** (the bar); in NONE, 70 of 295 have a\n  positive score and none has a 10-year beat rate of 0.75 either.\n* **Why: taxes plus regime.** A TAA model rotates (1-8x turnover a year) and realizes gains every\n  year, much of them short-term (48.1% in CA), while SPY defers everything to the end. Across the\n  112 ETF-era configs starting in 2000, CA costs a model 0.75 + 0.23 x turnover pp/yr of score\n  relative to SPY; 47 of them have a positive score untaxed and **none of those 47 stays positive\n  in CA** (median drag 2.6 pp/yr). And all of the models' edge is from 2000-2009: in CA every TAA\n  finalist leads by +4.6 to +13.6 pp/yr over 2000-2010 and trails by -4.6 to -8.9 over 2010-2020\n  and by -4.9 to -12.3 over 2020-2026.\n* **Tax-managed execution does not rescue them.** A gain budget (`tax1`, the incumbent preset's\n  1%/yr rule) freezes an all-or-nothing switcher in whatever it bought before its gains outgrew the\n  budget: GEM went to bonds in 2001 and was still 91% bonds in 2026 (CA full-period excess -5.0).\n  Forbidding short-term gains (`lt`) helps only the highest-turnover models (VAA-G4: +0.72 full,\n  score -1.61), and that is the luckiest of its rebalance days (averaged over four weekly offsets\n  it scores -3.56) and shrinks to +0.23 once bond interest is taxed yearly.\n* **FED (secondary).** Best: 13612W-ADM with a 5% margin, +0.73 score, boot_p 0.36, 10-year beat\n  0.52. Fails.\n* **Tax-deferred (NONE, diagnostic only).** Several models beat SPY on average over 2000-2026\n  (13612W-ADM +3.3 / +3.7 with a margin, QUINT in four tranches +2.2, VAA-G4 +1.4, 3-way GEM +1.1\n  on the full protocol), but 10-year beat rates are 0.49-0.54, boot_p 0.12-0.37, the family's\n  walk-forward selection loses out of sample (-11 pp/yr), and the best results are rebalance-day\n  luck: 13612W-ADM scores +3.3 on the 1st of the month and +0.7 averaged over four weekly offsets.\n  On random menus from 2006 every rule loses (median -3.9 to -6.6 pp/yr), and the published menus sit\n  at the 46th-75th percentile of random menus: the menus were not cherry-picked, the period was\n  kind to them (two crashes and the 2003-07 emerging-markets boom in the first decade).\n* **Pre-2000 holdout contradicts them.** In windows ending before 2000 the 1986+ Vanguard-fund\n  versions lose to VFINX in CA (GEM ho10 -2.58, 13612W-ADM -3.96, ADM -3.64) and at best tie it\n  without tax (GEM +0.01, 13612W-ADM -1.89, ADM -1.59); their 1986-2026 full-period excess is\n  negative in CA for every model.\n* **Risk-adjusted: smaller drawdowns, but no reliable Sharpe advantage after tax.** The models cut\n  SPY's -55% drawdown to -17..-42%. On matched months, no TAA model's Sharpe ratio beats SPY's with\n  bootstrap p <= 0.10 in CA or FED (best: VAA-G4 `lt`, 0.75 vs 0.60, p = 0.31). In NONE two do\n  at p < 0.10 (GEM + VAA-G4 + ADM blend, p = 0.056; DAA canary on SPY, p = 0.082), not significant\n  among ~20 finalists. The only configs with a reliable Sharpe edge in every regime are static\n  stock/bond mixes (60/40 p = 0.03 CA / 0.004 NONE; 80/20 p = 0.02-0.03 CA), which trail SPY on\n  return by 0.9-1.8 pp/yr. Versus their own average allocation held statically, the finalists'\n  timing adds a median +2.9 pp/yr in NONE (range -1.2 to +5.1; VAA-G4 beats its static twin in 84%\n  of 10-year windows) but a median +0.1 pp/yr in CA (range -1.4 to +1.9): the signal is real\n  untaxed, and the tax bill takes it.\n* **Leverage (labelled).** A 3x S&P fund (UPRO) held while TIP's momentum is positive, with `lt`\n  execution, scores +6.16 in CA on the full protocol (starts from 2010-10) with boot_p 0.08 and a\n  10-year beat rate of 1.00, i.e. it clears criteria 1-3. It fails 4-7: the family's walk-forward is\n  negative, the same rule with standard execution scores -2.54 and on the 2x fund (2007+) +0.47\n  (boot_p 0.23), UPRO has existed only in a bull market, and there is no long-history check. Its\n  Sharpe ratio is below SPY's over the same months (0.77 vs 1.04), with twice SPY's volatility and a\n  -53% vs -24% monthly drawdown; UPRO bought and held scored +12.8, and its own average mix held\n  statically (55% UPRO, 45% bills/bonds) +3.7 with a higher Sharpe. It is leverage in a bull market,\n  not timing skill.\n\n## What was tested (all of it)\n\nEvery model is a target-weight signal run through the lab's `WeightStrategy`, so commission,\nslippage, tax lots, the January tax settlement and the terminal liquidation tax are the site's.\nExecution variants: `std` (trade to targets on each rebalance), `tax1` (losses always sold, gains\nonly within 1% of the portfolio per year: the incumbent preset's rule), `lt` (losses always sold,\nno short-term gain ever realized, long-term gains unlimited).\n\nUniverses and launch dates. `-e` = the published ETFs only; windows start when every ETF and its\n12-month signal history exist (2004-2010). `-x` = the same ETFs with an index-mutual-fund proxy\nchain before launch (EFA|VGTSX, EEM|VEIEX, AGG|VBMFX, TLT|VUSTX, IEF|VFITX, SHY|VFISX, LQD|VWESX,\nHYG|VWEHX, VNQ|IYR|VGSIX, TIP|VIPSX, IWM|NAESX, SCZ|EFA|VGTSX, ...); a chain member that is held\nkeeps being used, so an ETF launch never forces a taxable switch. `requires`/`min_start` = the\nearliest member of every chain plus 400 days of signal history, so no window starts before every\nsleeve has an instrument (no \"waiting in cash for a launch\"). GLD (2004) and DBC/GSG (2006) have no\nproxies, so the G12-universe models start in 2008-2009 even with chains. `-L` = mutual funds only,\n1986+, benchmark VFINX (long protocols). Momentum is sampled at calendar-month offsets from today's\nclose (`cal`, default) or at completed month-ends (`me`, the papers' monthly data, traded the next\ntrading day).\n\n| group | models (faithful published parameters first, then variants) | configs |\n|---|---|---|\n| Dual momentum | Antonacci GEM (SPY/EFA, 12-month vs T-bills, AGG), GEM 3-way (+EEM), Accelerating Dual Momentum (SPY/SCZ, 1+3+6-month, TLT), Quint switching (QQQ/MDY/IEV/EEM/TLT, 3-month) | 237 |\n| Breadth momentum (Keller-Keuning) | VAA-G4 (B=1), VAA-G12 (B=4, top 2), DAA-G4/G12 (canary VWO+BND), DAA/BAA/VAA canaries applied to SPY alone | 192 |\n| Protective / bold / hybrid | PAA (a=0/1/2), BAA-G4/G12, HAA (TIP canary), HAA-simple (SPY) | 111 |\n| Correlation / volatility aware | Generalized Protective Momentum, Elastic AA, Flexible AA, Adaptive AA (min-variance) | 72 |\n| Trend-filtered sleeves | Faber GTAA-5 (= Ivy 5 timing), GTAA-13 and its top-1/2/3/6 (GTAA aggressive), Robust Asset Allocation (SMA + T-bill momentum filters, 40% bonds), Composite Dual Momentum | 117 |\n| Static allocations | 60/40, 70/30, 80/20, SPY/AGG 30-90%, Permanent Portfolio, All-Weather, Golden Butterfly, Ivy 5 B&H, Swensen, No-Brainer, 3-fund, 60/40 US/intl stocks; annual, quarterly, monthly and 5%/10%-band rebalancing; Vanguard Wellington and PRPFX (long) | 164 |\n| Ensembles | GEM+VAA-G4, GEM+VAA-G4+ADM, six models, GEM+SPY | 12 |\n| Leverage (labelled) | SSO (2x) / UPRO (3x) held while a VAA/DAA/BAA/HAA/GEM risk-on rule (on unlevered canaries) says so | 20 |\n| Controls (not strategies) | static twins of the finalists (18), random-menu hindsight checks (127), leverage controls (4) | 149 |\n| **total** | **925 strategy configs** (of which 64 long-history 1986+ versions) + 149 controls; 1630 (incl. 80 verification-battery variants) runs (config x regime x protocol), every one in the CSV | 1074 |\n\nScreening: `screen` (24 yearly starts 2000-2023, SPY) in CA and NONE (tax executions in CA only:\nwithout taxes they are identical to `std`); `long_screen` for the 1986+ versions. Finalists:\n`full` (95 quarterly starts) x CA/FED/NONE; `long` (151 quarterly starts 1986-2023) x CA/NONE/FED.\n\n## Faithful models (screen, standard execution)\n\n`-x` rows start in 2000 (proxy chains), `-e` rows when the ETFs exist. maxDD is the strategy's on\nthe NONE first-start run (SPY from January 2000: -55%).\n\n| model-universe | 1st start | CA score | CA full | CA 10y beat | NONE score | NONE full | NONE 10y beat | NONE boot_p | maxDD % | turnover/yr |\n|---|---|---|---|---|---|---|---|---|---|---|\n| S-8020-x-A | 2000-01 | -0.82 | -0.72 | 0.18 | -0.90 | -0.63 | 0.18 | 0.77 | -45 | 0.0 |\n| GEM-x | 2000-01 | -1.15 | -0.82 | 0.35 | -0.17 | +0.75 | 0.47 | 0.41 | -34 | 1.8 |\n| S-8020-e-A | 2004-01 | -1.19 | -1.41 | 0.00 | -1.32 | -1.34 | 0.00 | 0.95 | -45 | 0.0 |\n| S-7030-x-A | 2000-01 | -1.25 | -1.10 | 0.18 | -1.39 | -1.00 | 0.18 | 0.79 | -40 | 0.0 |\n| S-EQ2-x-A | 2000-01 | -1.42 | -1.14 | 0.24 | -1.61 | -1.12 | 0.24 | 0.89 | -57 | 0.0 |\n| VAA-G4-x | 2000-01 | -1.52 | -1.29 | 0.41 | +1.78 | +2.30 | 0.53 | 0.31 | -24 | 7.6 |\n| ADM-x | 2000-01 | -1.63 | -1.32 | 0.53 | +1.22 | +1.89 | 0.53 | 0.34 | -39 | 3.6 |\n| S-6040-x-A | 2000-01 | -1.69 | -1.48 | 0.18 | -1.91 | -1.40 | 0.18 | 0.80 | -34 | 0.0 |\n| S-EQ2-e-A | 2002-01 | -1.71 | -1.21 | 0.13 | -1.95 | -1.12 | 0.13 | 0.91 | -57 | 0.0 |\n| DAA-G4-x | 2000-01 | -1.72 | -1.78 | 0.47 | +0.73 | +0.85 | 0.53 | 0.42 | -28 | 6.0 |\n| S-3FUND-x-A | 2000-01 | -1.74 | -1.49 | 0.24 | -1.96 | -1.40 | 0.29 | 0.89 | -47 | 0.0 |\n| S-7030-e-A | 2004-01 | -1.79 | -2.11 | 0.00 | -2.02 | -2.05 | 0.00 | 0.96 | -40 | 0.0 |\n| S-NOBRAINER-x-A | 2000-01 | -1.96 | -1.38 | 0.24 | -2.21 | -1.25 | 0.24 | 0.80 | -45 | 0.0 |\n| S-SWENSEN-x-A | 2001-01 | -1.99 | -1.82 | 0.25 | -2.20 | -1.62 | 0.25 | 0.83 | -45 | 0.0 |\n| QUINT-x | 2001-01 | -2.40 | -1.76 | 0.38 | +0.91 | +1.87 | 0.50 | 0.35 | -38 | 6.0 |\n| S-6040-e-A | 2004-01 | -2.41 | -2.81 | 0.00 | -2.75 | -2.79 | 0.00 | 0.97 | -34 | 0.0 |\n| HAA-S-x | 2002-01 | -2.80 | -2.26 | 0.13 | -0.97 | +0.37 | 0.40 | 0.47 | -34 | 2.4 |\n| S-NOBRAINER-e-A | 2004-01 | -3.13 | -3.07 | 0.00 | -3.63 | -3.06 | 0.00 | 0.99 | -45 | 0.0 |\n| GEM-e | 2004-01 | -3.21 | -2.70 | 0.15 | -2.54 | -1.07 | 0.31 | 0.67 | -34 | 1.8 |\n| S-GB-x-A | 2005-01 | -3.53 | -3.10 | 0.08 | -4.02 | -3.00 | 0.17 | 0.88 | -19 | 0.0 |\n| S-GB-e-A | 2005-01 | -3.53 | -3.10 | 0.08 | -4.02 | -3.00 | 0.17 | 0.88 | -19 | 0.0 |\n| S-3FUND-e-A | 2012-01 | -4.02 | -4.42 | 0.00 | -4.78 | -4.64 | 0.00 | 1.00 | -28 | 0.0 |\n| S-PP-x-A | 2005-01 | -4.17 | -3.54 | 0.08 | -4.83 | -3.53 | 0.08 | 0.87 | -19 | 0.0 |\n| S-SWENSEN-e-A | 2008-01 | -4.43 | -3.91 | 0.00 | -5.12 | -4.13 | 0.00 | 0.99 | -43 | 0.0 |\n| S-AW-x-A | 2007-01 | -4.94 | -4.11 | 0.00 | -5.76 | -4.29 | 0.10 | 0.90 | -24 | 0.0 |\n| S-AW-e-A | 2007-01 | -4.94 | -4.11 | 0.00 | -5.76 | -4.29 | 0.10 | 0.90 | -24 | 0.0 |\n| QUINT-e | 2005-01 | -5.00 | -3.46 | 0.17 | -2.88 | -0.16 | 0.33 | 0.53 | -38 | 6.0 |\n| VAA-G4-e | 2005-01 | -5.29 | -4.54 | 0.17 | -3.86 | -1.94 | 0.33 | 0.69 | -24 | 7.6 |\n| S-IVY5-x-A | 2007-01 | -5.29 | -4.67 | 0.00 | -6.18 | -4.94 | 0.00 | 0.99 | -46 | 0.0 |\n| S-IVY5-e-A | 2007-01 | -5.29 | -4.67 | 0.00 | -6.18 | -4.94 | 0.00 | 0.99 | -46 | 0.0 |\n| HAA-S-e | 2009-01 | -5.72 | -6.95 | 0.00 | -4.31 | -5.18 | 0.00 | 0.98 | -34 | 2.5 |\n| BAA-G4-x | 2008-01 | -5.83 | -5.20 | 0.00 | -4.34 | -3.12 | 0.11 | 0.78 | -17 | 5.7 |\n| S-PP-e-A | 2008-01 | -5.89 | -4.42 | 0.00 | -6.92 | -4.66 | 0.00 | 0.92 | -18 | 0.0 |\n| GTAA13-T6-x | 2008-01 | -6.10 | -4.57 | 0.00 | -6.42 | -3.79 | 0.00 | 0.85 | -19 | 2.9 |\n| GTAA13-T6-e | 2008-01 | -6.10 | -4.57 | 0.00 | -6.42 | -3.79 | 0.00 | 0.85 | -19 | 2.9 |\n| CDM-x | 2006-01 | -6.11 | -5.36 | 0.00 | -6.79 | -5.02 | 0.09 | 0.94 | -22 | 2.0 |\n| HAA-x | 2008-01 | -6.19 | -4.74 | 0.00 | -5.42 | -3.03 | 0.00 | 0.79 | -19 | 3.3 |\n| BAA-G4-e | 2009-01 | -6.67 | -8.50 | 0.00 | -5.37 | -6.79 | 0.00 | 0.99 | -17 | 5.7 |\n| HAA-e | 2009-01 | -7.01 | -7.91 | 0.00 | -6.38 | -6.44 | 0.00 | 0.99 | -19 | 3.3 |\n| BAA-G12-x | 2008-01 | -7.17 | -5.76 | 0.00 | -6.92 | -4.37 | 0.00 | 0.84 | -16 | 4.9 |\n| FAA-x | 2007-01 | -7.32 | -5.61 | 0.00 | -7.71 | -4.54 | 0.10 | 0.83 | -19 | 3.6 |\n| FAA-e | 2007-01 | -7.32 | -5.61 | 0.00 | -7.71 | -4.54 | 0.10 | 0.83 | -19 | 3.6 |\n| AAA-x | 2008-01 | -7.59 | -6.45 | 0.00 | -7.34 | -5.40 | 0.00 | 0.95 | -24 | 4.8 |\n| AAA-e | 2008-01 | -7.59 | -6.45 | 0.00 | -7.34 | -5.40 | 0.00 | 0.95 | -24 | 4.8 |\n| GTAA13-x | 2008-01 | -7.77 | -6.43 | 0.00 | -9.14 | -6.72 | 0.00 | 0.96 | -15 | 1.8 |\n| GTAA13-e | 2008-01 | -7.77 | -6.43 | 0.00 | -9.14 | -6.72 | 0.00 | 0.96 | -15 | 1.8 |\n| GTAA13-T3-x | 2008-01 | -7.77 | -5.48 | 0.00 | -7.98 | -4.36 | 0.00 | 0.85 | -24 | 4.0 |\n| GTAA13-T3-e | 2008-01 | -7.77 | -5.48 | 0.00 | -7.98 | -4.36 | 0.00 | 0.85 | -24 | 4.0 |\n| DAA-G12-x | 2008-01 | -7.84 | -6.05 | 0.00 | -7.81 | -5.10 | 0.00 | 0.89 | -25 | 6.1 |\n| RAA-x | 2008-01 | -7.86 | -6.54 | 0.00 | -9.33 | -7.03 | 0.00 | 0.97 | -12 | 0.9 |\n| RAA-e | 2008-01 | -7.86 | -6.54 | 0.00 | -9.33 | -7.03 | 0.00 | 0.97 | -12 | 0.9 |\n| GTAA5-x | 2008-01 | -7.91 | -6.61 | 0.00 | -9.30 | -6.86 | 0.00 | 0.96 | -17 | 1.8 |\n| GTAA5-e | 2008-01 | -7.91 | -6.61 | 0.00 | -9.30 | -6.86 | 0.00 | 0.96 | -17 | 1.8 |\n| PAA2-x | 2008-01 | -7.94 | -6.29 | 0.00 | -8.23 | -5.42 | 0.00 | 0.90 | -21 | 2.7 |\n| EAA-x | 2008-01 | -8.00 | -6.38 | 0.00 | -8.30 | -5.17 | 0.00 | 0.89 | -18 | 3.9 |\n| CDM-e | 2009-01 | -8.12 | -8.86 | 0.00 | -9.25 | -9.04 | 0.00 | 1.00 | -22 | 2.1 |\n| BAA-G12-e | 2009-01 | -8.14 | -9.15 | 0.00 | -8.14 | -8.20 | 0.00 | 1.00 | -16 | 5.0 |\n| DAA-G4-e | 2009-01 | -8.27 | -8.26 | 0.00 | -8.00 | -6.87 | 0.00 | 1.00 | -28 | 6.1 |\n| ADM-e | 2010-01 | -8.29 | -7.90 | 0.00 | -8.09 | -6.24 | 0.00 | 0.98 | -39 | 3.7 |\n| GPM-x | 2008-01 | -8.69 | -6.96 | 0.00 | -9.51 | -6.33 | 0.00 | 0.93 | -13 | 4.4 |\n| VAA-G12-x | 2008-01 | -8.70 | -7.17 | 0.00 | -8.91 | -6.57 | 0.00 | 0.93 | -32 | 7.7 |\n| PAA2-e | 2009-01 | -8.71 | -9.75 | 0.00 | -9.14 | -9.25 | 0.00 | 1.00 | -21 | 2.7 |\n| DAA-G12-e | 2009-01 | -8.75 | -8.98 | 0.00 | -8.94 | -8.13 | 0.00 | 1.00 | -25 | 6.1 |\n| EAA-e | 2009-01 | -8.82 | -9.64 | 0.00 | -9.29 | -8.80 | 0.00 | 0.99 | -18 | 3.9 |\n| GPM-e | 2009-01 | -9.50 | -10.18 | 0.00 | -10.51 | -9.87 | 0.00 | 1.00 | -13 | 4.4 |\n| VAA-G12-e | 2009-01 | -9.60 | -10.57 | 0.00 | -10.05 | -10.46 | 0.00 | 1.00 | -32 | 7.8 |\n\nThe `-e` versions are all worse than their `-x` twins because they start after the 2000-02 bear\nmarket, the one period these models were built for (see sub-periods below). The G12-universe models\n(VAA-G12, DAA-G12, PAA, BAA-G12, GPM, EAA, GTAA-13, HAA) cannot start before 2008 for want of gold\nand commodity history and lose 5-10 pp/yr to SPY in both regimes.\n\n## Standard vs tax-managed execution (CA, screen)\n\n| config (CA, screen) | score std | score tax1 | score lt | full std | full tax1 | full lt | turnover std | turnover tax1 | turnover lt |\n|---|---|---|---|---|---|---|---|---|---|\n| GEM-x | -1.15 | -1.74 | -2.60 | -0.82 | -5.04 | -2.25 | 1.76 | 0.09 | 0.96 |\n| ADM-x | -1.63 | -2.29 | -2.47 | -1.32 | -4.37 | -1.78 | 3.46 | 0.10 | 1.68 |\n| QUINT-x | -2.40 | -2.43 | -2.38 | -1.76 | -5.42 | -2.05 | 5.88 | 0.19 | 1.89 |\n| VAA-G4-x | -1.52 | -2.81 | -0.97 | -1.29 | -4.27 | +0.72 | 7.50 | 0.20 | 2.05 |\n| VAA-G12-x | -8.70 | -7.24 | -6.79 | -7.17 | -7.40 | -4.72 | 7.73 | 0.17 | 2.02 |\n| DAA-G4-x | -1.72 | -1.91 | -3.76 | -1.78 | -1.79 | -4.06 | 5.89 | 0.31 | 1.32 |\n| DAA-G12-x | -7.84 | -4.83 | -7.09 | -6.05 | +1.09 | -5.97 | 6.15 | 0.18 | 1.15 |\n| PAA2-x | -7.94 | -7.60 | -7.53 | -6.29 | -7.55 | -6.01 | 2.69 | 0.13 | 0.90 |\n| BAA-G4-x | -5.83 | -2.45 | -6.13 | -5.20 | -0.83 | -5.64 | 5.62 | 0.20 | 1.58 |\n| BAA-G12-x | -7.17 | -6.57 | -7.72 | -5.76 | -2.47 | -7.26 | 4.88 | 0.22 | 1.33 |\n| HAA-x | -6.19 | -6.46 | -6.02 | -4.74 | -5.45 | -3.79 | 3.30 | 0.21 | 0.99 |\n| HAA-S-x | -2.80 | -1.59 | -1.95 | -2.26 | -5.37 | -2.22 | 2.39 | 0.09 | 1.14 |\n| GPM-x | -8.69 | -7.74 | -7.79 | -6.96 | -6.51 | -6.49 | 4.36 | 0.16 | 1.36 |\n| EAA-x | -8.00 | -7.37 | -6.26 | -6.38 | -4.66 | -4.60 | 3.87 | 0.44 | 1.30 |\n| FAA-x | -7.32 | -6.31 | -7.53 | -5.61 | -4.74 | -6.07 | 3.63 | 0.24 | 1.02 |\n| CDM-x | -6.11 | -5.35 | -5.26 | -5.36 | -4.95 | -3.40 | 2.04 | 0.21 | 0.54 |\n| GTAA5-x | -7.91 | -7.25 | -7.01 | -6.61 | -5.36 | -5.51 | 1.82 | 0.37 | 0.47 |\n| GTAA13-x | -7.77 | -6.80 | -7.36 | -6.43 | -3.82 | -5.25 | 1.81 | 0.22 | 0.43 |\n| GTAA13-T3-x | -7.77 | -6.13 | -7.83 | -5.48 | -3.60 | -6.07 | 3.99 | 0.22 | 1.42 |\n| GTAA13-T6-x | -6.10 | -5.51 | -6.17 | -4.57 | -2.17 | -4.77 | 2.92 | 0.16 | 0.63 |\n| RAA-x | -7.86 | -7.13 | -8.29 | -6.54 | -4.61 | -6.97 | 0.93 | 0.15 | 0.49 |\n| AAA-x | -7.59 | -3.96 | -6.52 | -6.45 | -3.51 | -4.87 | 4.75 | 0.08 | 1.35 |\n| S-6040-x-A | -1.69 | -1.64 | -1.67 | -1.48 | -1.19 | -1.44 | 0.04 | 0.02 | 0.04 |\n| S-7030-x-A | -1.25 | -1.22 | -1.23 | -1.10 | -0.93 | -1.07 | 0.03 | 0.02 | 0.03 |\n| S-8020-x-A | -0.82 | -0.81 | -0.80 | -0.72 | -0.64 | -0.70 | 0.02 | 0.01 | 0.02 |\n| S-PP-x-A | -4.17 | -4.07 | -4.14 | -3.54 | -3.02 | -3.53 | 0.05 | 0.02 | 0.05 |\n| S-AW-x-A | -4.94 | -4.82 | -4.91 | -4.11 | -3.70 | -4.09 | 0.05 | 0.02 | 0.05 |\n| S-GB-x-A | -3.53 | -3.49 | -3.49 | -3.10 | -2.81 | -3.09 | 0.05 | 0.02 | 0.05 |\n| S-IVY5-x-A | -5.29 | -5.18 | -5.24 | -4.67 | -4.62 | -4.60 | 0.05 | 0.02 | 0.05 |\n| S-SWENSEN-x-A | -1.99 | -2.01 | -1.97 | -1.82 | -1.54 | -1.78 | 0.04 | 0.02 | 0.04 |\n| S-NOBRAINER-x-A | -1.96 | -1.97 | -1.94 | -1.38 | -1.28 | -1.34 | 0.04 | 0.02 | 0.04 |\n| S-3FUND-x-A | -1.74 | -1.71 | -1.72 | -1.49 | -1.34 | -1.45 | 0.03 | 0.02 | 0.03 |\n| S-EQ2-x-A | -1.42 | -1.40 | -1.41 | -1.14 | -1.08 | -1.14 | 0.03 | 0.02 | 0.03 |\n\n`tax1` (gain budget) collapses turnover to 0.1-0.4x a year, but an all-or-nothing model then stays\nin whatever it bought before its gains outgrew the budget: for GEM, ADM, QUINT and HAA-S that is\nthe bond fund bought in 2000-01 (holdings trace: GEM-x `tax1` was 100% VBMFX in 2001-03 and still\n91% bonds in 2026). `lt` cuts turnover to 0.5-2x and helps only VAA-G4/G12, GTAA and CDM.\n\n## Best and worst of the screen\n\nCA (all executions), best 20:\n\n| config | 1st start | score | full | 10y beat | 15y beat | boot_p | maxDD % | turnover/yr |\n|---|---|---|---|---|---|---|---|---|\n| GEM3-x-rm5 [std] | 2000-01 | +0.25 | +0.74 | 0.47 | 0.50 | 0.424 | -42 | 1.3 |\n| ADM13612w-x-rm5 [std] | 2000-01 | +0.06 | +0.38 | 0.53 | 0.50 | 0.468 | -36 | 3.8 |\n| ADM13612w-x-EFA [std] | 2000-01 | -0.13 | +0.08 | 0.53 | 0.42 | 0.525 | -36 | 4.2 |\n| ADM13612w-x-rm2 [std] | 2000-01 | -0.15 | +0.13 | 0.53 | 0.42 | 0.510 | -36 | 4.2 |\n| ADM-x-day15 [lt] | 2000-01 | -0.21 | -0.14 | 0.53 | 0.58 | 0.534 | -41 | 1.6 |\n| GEM3-x-day15 [std] | 2000-01 | -0.34 | -0.21 | 0.47 | 0.50 | 0.539 | -34 | 1.9 |\n| ADM-x-mom13612w [std] | 2000-01 | -0.34 | -0.21 | 0.53 | 0.42 | 0.558 | -36 | 4.7 |\n| ADM13612w-x-irx [std] | 2000-01 | -0.35 | -0.34 | 0.53 | 0.42 | 0.578 | -36 | 5.0 |\n| ADM13612w-x-M2 [std] | 2000-01 | -0.40 | -0.21 | 0.41 | 0.42 | 0.546 | -48 | 2.4 |\n| VAA-G4-x-rm2 [lt] | 2000-01 | -0.45 | +1.13 | 0.47 | 0.42 | 0.390 | -30 | 2.0 |\n| VAA-G4-x-rm5 [lt] | 2000-01 | -0.45 | +1.13 | 0.47 | 0.42 | 0.390 | -30 | 2.0 |\n| GEM-x-3way [std] | 2000-01 | -0.48 | -0.03 | 0.41 | 0.50 | 0.505 | -39 | 2.1 |\n| GEM3-x-safeIEF [std] | 2000-01 | -0.48 | +0.02 | 0.41 | 0.50 | 0.504 | -40 | 2.1 |\n| GEM-x-day8 [std] | 2000-01 | -0.61 | -0.73 | 0.41 | 0.42 | 0.610 | -30 | 1.5 |\n| GEM-x-rm5 [std] | 2000-01 | -0.61 | -0.20 | 0.41 | 0.42 | 0.550 | -36 | 1.1 |\n| ADM13612w-x-3way [std] | 2000-01 | -0.67 | -0.22 | 0.41 | 0.42 | 0.546 | -36 | 5.9 |\n| ADM13612w-x-safeIEF [std] | 2000-01 | -0.68 | -0.50 | 0.53 | 0.33 | 0.601 | -34 | 4.7 |\n| GEM-x-USonly [std] | 2000-01 | -0.70 | -0.17 | 0.53 | 0.33 | 0.551 | -36 | 0.8 |\n| GEM-x-conf2 [std] | 2000-01 | -0.71 | -0.84 | 0.41 | 0.42 | 0.632 | -34 | 1.3 |\n| ADM13612w-x-safeIEF [lt] | 2000-01 | -0.73 | +0.17 | 0.47 | 0.50 | 0.505 | -33 | 1.5 |\n\nCA, worst 8:\n\n| config | 1st start | score | full | 10y beat | 15y beat | boot_p | maxDD % | turnover/yr |\n|---|---|---|---|---|---|---|---|---|\n| GTAA13-x-T1 [lt] | 2008-01 | -10.86 | -7.67 | 0.00 | 0.00 | 0.962 | -49 | 2.4 |\n| GTAA13-x-T1 [std] | 2008-01 | -10.59 | -5.35 | 0.00 | 0.00 | 0.866 | -58 | 5.3 |\n| VAA-G12-e-13612u [lt] | 2009-01 | -10.18 | -12.45 | 0.00 | 0.00 | 1.000 | -24 | 1.7 |\n| DAA-G12-e-B1T2 [std] | 2009-01 | -10.07 | -10.02 | 0.00 | 0.00 | 1.000 | -33 | 8.1 |\n| VAA-G12-e-B1T1 [std] | 2009-01 | -9.96 | -12.54 | 0.00 | 0.00 | 1.000 | -42 | 6.9 |\n| VAA-G12-e-B3T2 [std] | 2009-01 | -9.86 | -11.06 | 0.00 | 0.00 | 1.000 | -33 | 7.8 |\n| VAA-G12-e-B4T1 [std] | 2009-01 | -9.83 | -10.82 | 0.00 | 0.00 | 1.000 | -36 | 8.0 |\n| PAA2-e-T1 [std] | 2009-01 | -9.77 | -10.24 | 0.00 | 0.00 | 1.000 | -32 | 4.0 |\n\nNONE, best 20:\n\n| config | 1st start | score | full | 10y beat | 15y beat | boot_p | maxDD % | turnover/yr |\n|---|---|---|---|---|---|---|---|---|\n| ADM13612w-x-EFA [std] | 2000-01 | +3.85 | +4.38 | 0.53 | 0.75 | 0.122 | -32 | 4.1 |\n| ADM13612w-x-rm5 [std] | 2000-01 | +3.78 | +4.40 | 0.53 | 0.75 | 0.121 | -32 | 3.7 |\n| ADM13612w-x-rm2 [std] | 2000-01 | +3.53 | +4.14 | 0.53 | 0.75 | 0.156 | -32 | 4.2 |\n| ADM-x-mom13612w [std] | 2000-01 | +3.48 | +3.81 | 0.53 | 0.75 | 0.176 | -32 | 4.8 |\n| ADM13612w-x-irx [std] | 2000-01 | +3.43 | +3.58 | 0.53 | 0.75 | 0.186 | -32 | 5.0 |\n| ADM13612w-x-safeIEF [std] | 2000-01 | +2.78 | +3.31 | 0.53 | 0.75 | 0.197 | -25 | 4.8 |\n| ADM13612w-x-3way [std] | 2000-01 | +2.52 | +3.35 | 0.47 | 0.58 | 0.229 | -32 | 6.0 |\n| QUINT-x-day8 [std] | 2001-01 | +2.28 | +1.93 | 0.50 | 0.73 | 0.286 | -35 | 5.2 |\n| ADM13612w-x-M2 [std] | 2000-01 | +2.08 | +2.41 | 0.53 | 0.75 | 0.221 | -40 | 2.4 |\n| QUINT-x-day22 [std] | 2001-01 | +2.03 | +1.57 | 0.56 | 0.73 | 0.370 | -39 | 5.5 |\n| QUINT-x-tr4 [std] | 2001-01 | +2.00 | +2.03 | 0.50 | 0.73 | 0.302 | -30 | 5.6 |\n| VAA-G4-x-rm2 [std] | 2000-01 | +1.84 | +2.32 | 0.53 | 0.58 | 0.309 | -24 | 7.4 |\n| ADM-x-rm5 [std] | 2000-01 | +1.83 | +2.12 | 0.53 | 0.67 | 0.301 | -35 | 2.8 |\n| VAA-G4-x-B2 [std] | 2000-01 | +1.81 | +2.50 | 0.53 | 0.58 | 0.286 | -25 | 7.3 |\n| VAA-G4-x-taxhold [std] | 2000-01 | +1.78 | +2.30 | 0.53 | 0.58 | 0.312 | -24 | 7.6 |\n| VAA-G4-x [std] | 2000-01 | +1.78 | +2.30 | 0.53 | 0.58 | 0.312 | -24 | 7.6 |\n| QUINT-x-day15 [std] | 2001-01 | +1.69 | +1.55 | 0.56 | 0.73 | 0.356 | -37 | 5.7 |\n| ADM13612w-x-Q [std] | 2000-01 | +1.62 | +2.23 | 0.53 | 0.58 | 0.313 | -36 | 2.2 |\n| GEM3-x-day15 [std] | 2000-01 | +1.62 | +2.26 | 0.53 | 0.58 | 0.275 | -34 | 1.9 |\n| VAA-G4-x-rm5 [std] | 2000-01 | +1.53 | +2.13 | 0.53 | 0.58 | 0.323 | -24 | 7.1 |\n\nNONE, worst 8:\n\n| config | 1st start | score | full | 10y beat | 15y beat | boot_p | maxDD % | turnover/yr |\n|---|---|---|---|---|---|---|---|---|\n| GTAA13-x-T1 [std] | 2008-01 | -11.56 | -4.61 | 0.00 | 0.00 | 0.782 | -52 | 5.4 |\n| DAA-G12-e-B1T2 [std] | 2009-01 | -10.84 | -9.61 | 0.00 | 0.00 | 0.997 | -31 | 8.1 |\n| PAA2-e-T1 [std] | 2009-01 | -10.77 | -9.99 | 0.00 | 0.00 | 0.999 | -28 | 4.0 |\n| VAA-G12-e-B4T1 [std] | 2009-01 | -10.61 | -10.99 | 0.00 | 0.00 | 1.000 | -34 | 8.0 |\n| VAA-G12-e-B3T2 [std] | 2009-01 | -10.51 | -11.22 | 0.00 | 0.00 | 1.000 | -31 | 7.8 |\n| GPM-e [std] | 2009-01 | -10.51 | -9.87 | 0.00 | 0.00 | 0.997 | -13 | 4.4 |\n| GPM-e-T6 [std] | 2009-01 | -10.45 | -10.57 | 0.00 | 0.00 | 1.000 | -14 | 4.3 |\n| VAA-G12-e-B1T1 [std] | 2009-01 | -10.35 | -12.61 | 0.00 | 0.00 | 1.000 | -36 | 7.0 |\n\n## Parameter neighbourhoods by model group (screen)\n\n| group | CA std n | CA tax n | CA std median score | CA tax median score | CA share score>0 | CA best | CA n with 10y beat>=0.75 | NONE n | NONE median score | NONE share score>0 | NONE best |\n|---|---|---|---|---|---|---|---|---|---|---|---|\n| AAA | 2 | 4 | -7.59 | -5.24 | 0.00 | AAA-x [tax1] -3.96 | 0 | 2 | -7.34 | 0.00 | AAA-x [std] -7.34 |\n| ADM | 21 | 23 | -1.88 | -2.47 | 0.00 | ADM-x-day15 [lt] -0.21 | 0 | 21 | +0.88 | 0.71 | ADM-x-mom13612w [std] +3.48 |\n| ADM (13612W nbhd, b4) | 15 | 15 | -0.78 | -2.26 | 0.03 | ADM13612w-x-rm5 [std] +0.06 | 0 | 15 | +1.62 | 0.73 | ADM13612w-x-EFA [std] +3.85 |\n| BAA-G12 | 7 | 9 | -7.75 | -7.64 | 0.00 | BAA-G10x [lt] -3.94 | 0 | 7 | -8.10 | 0.00 | BAA-G10x [std] -2.69 |\n| BAA-G4 | 4 | 6 | -6.68 | -6.58 | 0.00 | BAA-G4-e [tax1] -2.42 | 0 | 4 | -5.69 | 0.00 | BAA-G4-x [std] -4.34 |\n| CDM | 6 | 8 | -6.25 | -5.85 | 0.00 | CDM3x [std] -3.30 | 0 | 6 | -6.78 | 0.00 | CDM3x [std] -3.35 |\n| DAA-G12 | 10 | 12 | -8.69 | -7.72 | 0.00 | DAA-G10x [std] -3.81 | 0 | 10 | -8.84 | 0.00 | DAA-G10x [std] -2.32 |\n| DAA-G4 | 14 | 16 | -2.40 | -3.94 | 0.00 | DAA-G4-x-rm2 [std] -1.67 | 0 | 14 | +0.00 | 0.50 | DAA-G4-x-rm2 [std] +0.91 |\n| EAA | 6 | 8 | -8.66 | -7.39 | 0.00 | EAA-G10x [lt] -4.06 | 0 | 6 | -8.99 | 0.00 | EAA-G10x [std] -4.29 |\n| FAA | 7 | 9 | -7.32 | -7.45 | 0.00 | FAA-x [tax1] -6.31 | 0 | 7 | -7.71 | 0.00 | FAA-x-Ronly [std] -6.69 |\n| GEM | 35 | 37 | -1.59 | -2.78 | 0.00 | GEM-x-3way [std] -0.48 | 0 | 35 | -0.66 | 0.20 | GEM-x-3way [std] +1.28 |\n| GEM 3-way (nbhd, b4) | 8 | 8 | -1.31 | -1.98 | 0.06 | GEM3-x-rm5 [std] +0.25 | 0 | 8 | +0.47 | 0.62 | GEM3-x-day15 [std] +1.62 |\n| GPM | 7 | 9 | -9.06 | -8.51 | 0.00 | GPM-G10x [lt] -4.78 | 0 | 7 | -9.73 | 0.00 | GPM-G10x [std] -5.43 |\n| GTAA13 | 11 | 17 | -6.78 | -6.53 | 0.00 | GTAA10x-T3 [std] -2.31 | 0 | 11 | -6.48 | 0.00 | GTAA10x-T3 [std] -0.65 |\n| GTAA5 | 15 | 17 | -7.75 | -6.99 | 0.00 | GTAA4x [std] -3.00 | 0 | 15 | -9.12 | 0.00 | GTAA4x [std] -3.08 |\n| HAA | 7 | 9 | -6.62 | -6.46 | 0.00 | HAA-G7x [std] -2.91 | 0 | 7 | -6.12 | 0.00 | HAA-G7x [std] -1.24 |\n| HAA-S | 6 | 8 | -3.16 | -2.27 | 0.00 | HAA-S-x-13612w [lt] -1.23 | 0 | 6 | -1.34 | 0.00 | HAA-S-x [std] -0.97 |\n| PAA | 12 | 14 | -8.77 | -8.06 | 0.00 | PAA2-G10x [lt] -3.47 | 0 | 12 | -9.15 | 0.00 | PAA2-G10x [std] -2.23 |\n| QUINT | 10 | 12 | -1.99 | -3.63 | 0.00 | QUINT-x-day8 [std] -1.41 | 0 | 10 | +1.01 | 0.70 | QUINT-x-day8 [std] +2.28 |\n| RAA | 4 | 6 | -7.87 | -7.72 | 0.00 | RAA-x [tax1] -7.13 | 0 | 4 | -9.33 | 0.00 | RAA-e [std] -9.33 |\n| VAA-G12 | 11 | 13 | -9.63 | -7.81 | 0.00 | VAA-G10x [lt] -3.56 | 0 | 11 | -10.14 | 0.00 | VAA-G10x [std] -2.51 |\n| VAA-G4 | 22 | 24 | -2.09 | -2.82 | 0.00 | VAA-G4-x-rm2 [lt] -0.45 | 0 | 22 | +0.09 | 0.55 | VAA-G4-x-rm2 [std] +1.84 |\n| canary on SPY | 5 | 5 | -2.41 | -2.08 | 0.00 | CAN-DAA-SPY-x [std] -1.68 | 0 | 5 | +0.13 | 0.60 | CAN-DAA-SPY-x [std] +0.67 |\n| ensembles | 4 | 4 | -1.39 | -2.47 | 0.00 | ENS-GEM-SPY50 [std] -0.82 | 0 | 4 | +0.57 | 0.75 | ENS-GEM-VAA4-ADM [std] +1.28 |\n| leverage (2x/3x S&P) | 10 | 10 | -3.91 | -0.10 | 0.30 | LEV-HAA-S-UPRO [lt] +6.75 | 2 | 10 | +0.04 | 0.50 | LEV-CAN-DAA-UPRO [std] +8.44 |\n| static | 46 | 92 | -3.44 | -3.48 | 0.00 | S-8020-x-A [lt] -0.80 | 0 | 46 | -3.78 | 0.00 | S-8020-x-A [std] -0.90 |\n\nAcross every group only two CA configs have a positive screen score (both with a 5% switching\nmargin) and none has a 10-year beat rate of 0.75. The NONE winners are clustered in the\ndual-momentum and VAA/DAA groups that hold emerging markets or intl small caps; every\nG12-universe model (gold/commodities, 2008+ windows) loses 2-10 pp/yr in both regimes. The\n13612W-ADM NONE lead is a spike: the same rule with 13612U / avg(1,3,6,12) momentum scores -2.17\n(both are the same signal), the faithful ADM (1+3+6) +1.22, month-end sampling -0.35 and\nrebalancing on the 15th -0.21 (+3.48 on the 1st). The 5% hysteresis margin is the only change that\nhelps consistently (fewer switches).\n\n## Rebalance-timing luck (screen score, pp/yr)\n\n| model | regime | day 1 | day 8 | day 15 | day 22 | 4 tranches | max-min |\n|---|---|---|---|---|---|---|---|\n| GEM-x | NONE | -0.17 | +0.57 | -0.38 | -2.14 | -0.49 | +2.71 |\n| GEM-x | CA | -1.15 | -0.61 | -1.40 | -2.67 | -1.29 | +2.07 |\n| GEM-x | CA lt | -2.60 | -1.50 | -3.45 | -4.41 | -2.78 | +2.91 |\n| VAA-G4-x | NONE | +1.78 | -2.11 | +0.79 | -0.85 | +0.11 | +3.89 |\n| VAA-G4-x | CA | -1.52 | -3.79 | -1.93 | -3.03 | -2.36 | +2.27 |\n| VAA-G4-x | CA lt | -0.97 | -4.67 | -2.82 | -5.74 | -3.74 | +4.77 |\n| ADM-x | NONE | +1.22 | -0.40 | +1.03 | +0.91 | +0.87 | +1.62 |\n| ADM-x | CA | -1.63 | -2.55 | -1.88 | -2.05 | -1.94 | +0.92 |\n| ADM-x | CA lt | -2.47 | -1.86 | -0.21 | -3.42 | -2.70 | +3.21 |\n| DAA-G4-x | NONE | +0.73 | -1.62 | +0.81 | -0.57 | -0.05 | +2.43 |\n| DAA-G4-x | CA | -1.72 | -3.28 | -1.70 | -2.57 | -2.31 | +1.58 |\n| DAA-G4-x | CA lt | -3.76 | -4.34 | -3.71 | -4.65 | -4.12 | +0.95 |\n| QUINT-x | NONE | +0.91 | +2.28 | +1.69 | +2.03 | +2.00 | +1.37 |\n| QUINT-x | CA | -2.40 | -1.41 | -1.64 | -1.84 | -1.62 | +0.99 |\n| QUINT-x | CA lt | -2.38 | -3.01 | -2.94 | -4.33 | -3.76 | +1.94 |\n\nThe spread between rebalance days (1-5 pp/yr) is as large as the models' average edge in NONE.\n\n## Finalists on the full protocol (95 quarterly starts, 2000-2026)\n\nSub-period columns are the excess over the exact window (2000-01 to 2010-01, etc.). Sharpe =\nmonthly after-tax account value (net of taxes paid) vs SPY over the same months; p = stationary-\nbootstrap probability that the model's Sharpe is not above SPY's.\n\nCA:\n\n| config | 1st start | score | full | 10y mean | 10y beat | 10y worst | 15y beat | 20y beat | boot_p | maxDD % | 2000-10 | 2010-20 | 2020-26 | Sharpe | SPY Sharpe (same months) | p(Sharpe<=SPY) | trades | turnover/yr |\n|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n| ADM-x-mom13612w [std] | 2000-01 | -0.48 | -0.21 | -0.51 | 0.51 | -9.2 | 0.38 | 0.41 | 0.558 | -36 | +11.7 | -7.5 | -5.6 | 0.51 | 0.60 | 0.648 | 260 | 4.7 |\n| GEM-x-3way [std] | 2000-01 | -0.72 | -0.03 | -0.87 | 0.39 | -8.4 | 0.45 | 0.37 | 0.505 | -39 | +10.9 | -6.3 | -5.7 | 0.57 | 0.60 | 0.569 | 131 | 2.1 |\n| S-8020-x-A [tax1] | 2000-01 | -0.87 | -0.64 | -0.87 | 0.16 | -2.5 | 0.13 | 0.04 | 0.781 | -44 | +1.4 | -1.6 | -2.4 | 0.66 | 0.60 | 0.016 | 54 | 0.0 |\n| S-8020-x-A [std] | 2000-01 | -0.87 | -0.72 | -0.87 | 0.16 | -2.6 | 0.13 | 0.07 | 0.808 | -45 | +1.5 | -1.7 | -2.4 | 0.65 | 0.60 | 0.034 | 54 | 0.0 |\n| ADM-x-rm5 [std] | 2000-01 | -1.26 | -0.98 | -1.20 | 0.51 | -10.8 | 0.38 | 0.15 | 0.633 | -36 | +8.6 | -5.8 | -7.6 | 0.47 | 0.60 | 0.720 | 169 | 2.7 |\n| GEM-x [std] | 2000-01 | -1.39 | -0.82 | -1.53 | 0.36 | -8.4 | 0.32 | 0.22 | 0.622 | -34 | +8.5 | -6.1 | -5.9 | 0.57 | 0.60 | 0.562 | 109 | 1.8 |\n| QUINT-x-tr4 [std] | 2000-07 | -1.50 | -1.31 | -1.46 | 0.49 | -10.6 | 0.38 | 0.12 | 0.691 | -34 | \u2013 | -5.5 | -7.0 | 0.44 | 0.61 | 0.782 | 1658 | 5.6 |\n| VAA-G4-x [lt] | 2000-01 | -1.61 | +0.72 | -1.30 | 0.36 | -8.5 | 0.36 | 0.37 | 0.450 | -30 | +13.5 | -7.1 | -7.7 | 0.75 | 0.60 | 0.308 | 97 | 2.0 |\n| ENS-GEM-VAA4-ADM [std] | 2000-01 | -1.62 | -1.03 | -1.67 | 0.43 | -10.1 | 0.36 | 0.22 | 0.635 | -28 | +10.6 | -7.1 | -8.0 | 0.61 | 0.60 | 0.507 | 1033 | 4.1 |\n| VAA-G4-x-B2 [std] | 2000-01 | -1.67 | -1.12 | -1.73 | 0.40 | -10.7 | 0.36 | 0.26 | 0.633 | -27 | +13.0 | -8.9 | -9.1 | 0.55 | 0.60 | 0.602 | 521 | 7.2 |\n| CAN-DAA-SPY-x [std] | 2000-01 | -1.79 | -2.26 | -1.61 | 0.52 | -7.9 | 0.23 | 0.15 | 0.839 | -33 | +4.6 | -4.6 | -8.4 | 0.49 | 0.60 | 0.723 | 437 | 3.9 |\n| S-6040-x-A [std] | 2000-01 | -1.81 | -1.48 | -1.79 | 0.16 | -5.0 | 0.13 | 0.04 | 0.819 | -34 | +2.6 | -3.3 | -4.7 | 0.72 | 0.60 | 0.032 | 54 | 0.0 |\n| VAA-G4-x [std] | 2000-01 | -1.81 | -1.29 | -1.85 | 0.42 | -10.7 | 0.36 | 0.26 | 0.651 | -28 | +13.1 | -8.7 | -10.1 | 0.54 | 0.60 | 0.611 | 400 | 7.5 |\n| ADM-x [std] | 2000-01 | -1.88 | -1.32 | -1.85 | 0.51 | -11.5 | 0.32 | 0.15 | 0.663 | -39 | +9.2 | -6.2 | -8.4 | 0.46 | 0.60 | 0.728 | 198 | 3.5 |\n| DAA-G4-x [std] | 2000-01 | -1.92 | -1.78 | -1.88 | 0.43 | -9.7 | 0.32 | 0.22 | 0.725 | -31 | +9.8 | -8.0 | -9.2 | 0.52 | 0.60 | 0.641 | 1011 | 5.9 |\n| QUINT-x [std] | 2000-07 | -2.26 | -1.69 | -2.30 | 0.35 | -11.4 | 0.22 | 0.20 | 0.678 | -42 | \u2013 | -8.8 | -6.2 | 0.40 | 0.61 | 0.790 | 306 | 5.9 |\n| ADM-x-mom13612w [lt] | 2000-01 | -2.55 | -1.85 | -2.58 | 0.42 | -11.0 | 0.26 | 0.15 | 0.712 | -40 | +9.1 | -8.3 | -12.3 | 0.44 | 0.60 | 0.746 | 94 | 1.8 |\n| HAA-S-x [std] | 2001-10 | -2.93 | -2.75 | -3.14 | 0.13 | -8.2 | 0.05 | 0.00 | 0.883 | -34 | \u2013 | -5.8 | -4.9 | 0.65 | 0.73 | 0.651 | 144 | 2.4 |\n| GEM-e [std] | 2003-10 | -3.29 | -2.52 | -3.60 | 0.17 | -8.4 | 0.06 | 0.00 | 0.818 | -34 | \u2013 | -6.1 | -5.9 | 0.62 | 0.80 | 0.822 | 97 | 1.8 |\n| HAA-x [std] | 2007-04 | -5.85 | -4.21 | -6.20 | 0.00 | -9.7 | 0.00 | \u2013 | 0.894 | -20 | \u2013 | -7.3 | -6.0 | 0.57 | 0.75 | 0.771 | 881 | 3.3 |\n| GTAA5-x [std] | 2007-04 | -7.60 | -6.20 | -7.86 | 0.00 | -11.6 | 0.00 | \u2013 | 0.965 | -17 | \u2013 | -8.8 | -8.5 | 0.54 | 0.75 | 0.778 | 1072 | 1.8 |\n\nFED:\n\n| config | 1st start | score | full | 10y mean | 10y beat | 10y worst | 15y beat | 20y beat | boot_p | maxDD % | 2000-10 | 2010-20 | 2020-26 | Sharpe | SPY Sharpe (same months) | p(Sharpe<=SPY) | trades | turnover/yr |\n|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n| ADM-x-mom13612w [std] | 2000-01 | +0.24 | +0.73 | +0.22 | 0.52 | -9.4 | 0.51 | 0.48 | 0.444 | -35 | +13.9 | -7.9 | -5.7 | 0.62 | 0.60 | 0.484 | 260 | 4.8 |\n| GEM-x-3way [std] | 2000-01 | -0.33 | +0.69 | -0.50 | 0.42 | -8.8 | 0.47 | 0.41 | 0.429 | -37 | +12.6 | -6.7 | -6.0 | 0.66 | 0.60 | 0.427 | 132 | 2.1 |\n| ADM-x-rm5 [std] | 2000-01 | -0.75 | -0.26 | -0.68 | 0.52 | -11.4 | 0.47 | 0.22 | 0.537 | -35 | +10.2 | -5.8 | -8.3 | 0.56 | 0.60 | 0.586 | 169 | 2.7 |\n| QUINT-x-tr4 [std] | 2000-07 | -0.86 | -0.52 | -0.81 | 0.51 | -11.1 | 0.44 | 0.36 | 0.578 | -34 | \u2013 | -5.5 | -7.3 | 0.52 | 0.61 | 0.666 | 1658 | 5.6 |\n| S-8020-x-A [std] | 2000-01 | -0.93 | -0.69 | -0.91 | 0.16 | -2.7 | 0.13 | 0.07 | 0.797 | -45 | +1.6 | -1.8 | -2.6 | 0.66 | 0.60 | 0.011 | 54 | 0.0 |\n| S-8020-x-A [tax1] | 2000-01 | -0.93 | -0.62 | -0.92 | 0.16 | -2.6 | 0.13 | 0.07 | 0.776 | -44 | +1.5 | -1.7 | -2.6 | 0.66 | 0.60 | 0.011 | 54 | 0.0 |\n| VAA-G4-x-B2 [std] | 2000-01 | -1.18 | -0.34 | -1.23 | 0.45 | -11.3 | 0.45 | 0.37 | 0.553 | -27 | +15.8 | -9.7 | -9.9 | 0.67 | 0.60 | 0.425 | 521 | 7.3 |\n| ENS-GEM-VAA4-ADM [std] | 2000-01 | -1.20 | -0.31 | -1.24 | 0.48 | -10.6 | 0.40 | 0.30 | 0.554 | -26 | +12.5 | -7.4 | -8.6 | 0.74 | 0.60 | 0.318 | 1032 | 4.1 |\n| GEM-x [std] | 2000-01 | -1.21 | -0.33 | -1.36 | 0.37 | -8.8 | 0.36 | 0.33 | 0.549 | -34 | +9.6 | -6.4 | -6.3 | 0.67 | 0.60 | 0.394 | 108 | 1.8 |\n| VAA-G4-x [std] | 2000-01 | -1.31 | -0.53 | -1.34 | 0.46 | -11.4 | 0.45 | 0.37 | 0.571 | -27 | +15.9 | -9.5 | -11.1 | 0.66 | 0.60 | 0.427 | 400 | 7.5 |\n| CAN-DAA-SPY-x [std] | 2000-01 | -1.40 | -1.79 | -1.18 | 0.52 | -8.3 | 0.36 | 0.19 | 0.777 | -32 | +5.4 | -4.4 | -9.2 | 0.59 | 0.60 | 0.536 | 437 | 3.9 |\n| ADM-x [std] | 2000-01 | -1.42 | -0.60 | -1.38 | 0.52 | -12.3 | 0.38 | 0.19 | 0.571 | -39 | +10.9 | -6.3 | -9.1 | 0.55 | 0.60 | 0.608 | 197 | 3.5 |\n| VAA-G4-x [lt] | 2000-01 | -1.53 | +1.42 | -1.16 | 0.36 | -9.2 | 0.38 | 0.41 | 0.371 | -28 | +15.7 | -7.7 | -8.4 | 0.87 | 0.60 | 0.182 | 97 | 2.1 |\n| DAA-G4-x [std] | 2000-01 | -1.55 | -1.21 | -1.51 | 0.46 | -10.3 | 0.38 | 0.30 | 0.659 | -30 | +11.7 | -8.5 | -10.0 | 0.64 | 0.60 | 0.463 | 1011 | 5.9 |\n| QUINT-x [std] | 2000-07 | -1.70 | -1.02 | -1.77 | 0.37 | -12.2 | 0.33 | 0.28 | 0.605 | -42 | \u2013 | -9.3 | -6.4 | 0.47 | 0.61 | 0.711 | 306 | 5.9 |\n| S-6040-x-A [std] | 2000-01 | -1.94 | -1.45 | -1.91 | 0.16 | -5.3 | 0.13 | 0.04 | 0.812 | -34 | +2.9 | -3.5 | -5.2 | 0.74 | 0.60 | 0.013 | 54 | 0.0 |\n| ADM-x-mom13612w [lt] | 2000-01 | -2.54 | -1.54 | -2.58 | 0.42 | -12.0 | 0.34 | 0.15 | 0.666 | -38 | +10.5 | -9.1 | -13.9 | 0.50 | 0.60 | 0.675 | 94 | 1.8 |\n| HAA-S-x [std] | 2001-10 | -2.75 | -2.13 | -2.97 | 0.15 | -8.3 | 0.07 | 0.00 | 0.808 | -34 | \u2013 | -5.8 | -5.1 | 0.77 | 0.73 | 0.454 | 144 | 2.4 |\n| GEM-e [std] | 2003-10 | -3.30 | -2.01 | -3.63 | 0.19 | -8.8 | 0.06 | 0.00 | 0.751 | -34 | \u2013 | -6.4 | -6.3 | 0.73 | 0.80 | 0.653 | 97 | 1.8 |\n| HAA-x [std] | 2007-04 | -6.07 | -3.90 | -6.45 | 0.00 | -10.1 | 0.00 | \u2013 | 0.869 | -19 | \u2013 | -7.7 | -6.3 | 0.67 | 0.75 | 0.641 | 881 | 3.3 |\n| GTAA5-x [std] | 2007-04 | -8.31 | -6.40 | -8.58 | 0.00 | -12.5 | 0.00 | \u2013 | 0.966 | -17 | \u2013 | -9.6 | -9.4 | 0.62 | 0.75 | 0.698 | 1073 | 1.8 |\n\nNONE:\n\n| config | 1st start | score | full | 10y mean | 10y beat | 10y worst | 15y beat | 20y beat | boot_p | maxDD % | 2000-10 | 2010-20 | 2020-26 | Sharpe | SPY Sharpe (same months) | p(Sharpe<=SPY) | trades | turnover/yr |\n|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n| ADM-x-mom13612w [std] | 2000-01 | +3.34 | +3.81 | +3.34 | 0.54 | -7.8 | 0.74 | 1.00 | 0.176 | -32 | +18.9 | -7.0 | -3.4 | 0.88 | 0.60 | 0.146 | 259 | 4.8 |\n| QUINT-x-tr4 [std] | 2000-07 | +2.24 | +2.40 | +2.29 | 0.52 | -10.2 | 0.76 | 0.96 | 0.268 | -34 | \u2013 | -3.6 | -5.8 | 0.73 | 0.61 | 0.316 | 1652 | 5.6 |\n| ADM-x-rm5 [std] | 2000-01 | +1.68 | +2.12 | +1.78 | 0.54 | -10.9 | 0.66 | 0.93 | 0.301 | -35 | +13.8 | -4.0 | -8.3 | 0.76 | 0.60 | 0.252 | 149 | 2.8 |\n| VAA-G4-x-B2 [std] | 2000-01 | +1.50 | +2.50 | +1.41 | 0.49 | -10.6 | 0.55 | 0.67 | 0.286 | -25 | +22.7 | -9.7 | -9.7 | 0.93 | 0.60 | 0.139 | 521 | 7.3 |\n| VAA-G4-x [lt] | 2000-01 | +1.40 | +2.30 | +1.35 | 0.49 | -11.3 | 0.55 | 0.63 | 0.312 | -24 | +23.2 | -9.4 | -11.5 | 0.95 | 0.60 | 0.142 | 409 | 7.6 |\n| VAA-G4-x [std] | 2000-01 | +1.40 | +2.30 | +1.35 | 0.49 | -11.3 | 0.55 | 0.63 | 0.312 | -24 | +23.2 | -9.4 | -11.5 | 0.95 | 0.60 | 0.142 | 409 | 7.6 |\n| QUINT-x [std] | 2000-07 | +1.13 | +1.55 | +0.97 | 0.51 | -12.1 | 0.62 | 0.72 | 0.370 | -42 | \u2013 | -8.7 | -4.4 | 0.64 | 0.61 | 0.478 | 303 | 6.0 |\n| GEM-x-3way [std] | 2000-01 | +1.08 | +2.41 | +0.87 | 0.49 | -8.4 | 0.49 | 0.70 | 0.268 | -34 | +15.5 | -6.5 | -5.0 | 0.79 | 0.60 | 0.237 | 115 | 2.1 |\n| ADM-x [std] | 2000-01 | +1.00 | +1.89 | +1.08 | 0.54 | -12.1 | 0.53 | 0.56 | 0.337 | -39 | +14.8 | -4.7 | -8.5 | 0.74 | 0.60 | 0.293 | 182 | 3.6 |\n| ENS-GEM-VAA4-ADM [std] | 2000-01 | +0.99 | +2.03 | +0.96 | 0.52 | -9.5 | 0.53 | 0.59 | 0.308 | -24 | +16.4 | -6.4 | -8.0 | 1.01 | 0.60 | 0.056 | 1033 | 4.1 |\n| CAN-DAA-SPY-x [std] | 2000-01 | +0.56 | -0.12 | +0.81 | 0.54 | -7.8 | 0.70 | 0.52 | 0.522 | -31 | +7.2 | -2.3 | -9.0 | 0.81 | 0.60 | 0.082 | 432 | 4.0 |\n| DAA-G4-x [std] | 2000-01 | +0.53 | +0.85 | +0.56 | 0.52 | -9.9 | 0.55 | 0.59 | 0.420 | -28 | +16.2 | -8.1 | -9.9 | 0.89 | 0.60 | 0.113 | 1011 | 6.0 |\n| GEM-x [std] | 2000-01 | -0.41 | +0.75 | -0.56 | 0.43 | -8.2 | 0.47 | 0.41 | 0.410 | -34 | +10.8 | -5.8 | -5.9 | 0.80 | 0.60 | 0.210 | 85 | 1.8 |\n| S-8020-x-A [std] | 2000-01 | -0.97 | -0.63 | -0.94 | 0.16 | -2.8 | 0.15 | 0.11 | 0.774 | -45 | +1.7 | -1.8 | -2.8 | 0.67 | 0.60 | 0.003 | 54 | 0.0 |\n| HAA-S-x [std] | 2001-10 | -1.13 | -0.21 | -1.36 | 0.42 | -6.7 | 0.38 | 0.30 | 0.567 | -34 | \u2013 | -3.9 | -4.8 | 1.01 | 0.73 | 0.121 | 119 | 2.4 |\n| S-6040-x-A [std] | 2000-01 | -2.05 | -1.40 | -2.00 | 0.16 | -5.5 | 0.13 | 0.07 | 0.801 | -34 | +3.3 | -3.7 | -5.6 | 0.76 | 0.60 | 0.004 | 54 | 0.0 |\n| GEM-e [std] | 2003-10 | -2.60 | -0.81 | -2.92 | 0.27 | -8.2 | 0.22 | 0.00 | 0.595 | -34 | \u2013 | -5.8 | -5.9 | 0.87 | 0.80 | 0.410 | 77 | 1.8 |\n| HAA-x [std] | 2007-04 | -5.00 | -2.30 | -5.44 | 0.05 | -9.2 | 0.06 | \u2013 | 0.748 | -19 | \u2013 | -6.9 | -5.4 | 0.90 | 0.75 | 0.296 | 877 | 3.3 |\n| GTAA5-x [std] | 2007-04 | -8.89 | -6.35 | -9.19 | 0.00 | -13.4 | 0.00 | \u2013 | 0.953 | -17 | \u2013 | -10.4 | -10.0 | 0.71 | 0.75 | 0.579 | 1073 | 1.8 |\n\nAverage bond/cash weight (NONE, first-start run): GEM 24%, 3-way GEM 24%, ADM 21-23%, VAA-G4 57%\n(`lt` in CA: 68%), DAA-G4 39%, QUINT 30-32%, HAA-simple 37%, GTAA-5 46%, 60/40 40%. PROTOCOL 5.5:\nthe engine taxes bond interest as a deferred capital gain, which flatters these bond-heavy models\nin CA/FED; the stricter accounting (verification battery) lowers the full-period CA excess by\n0.06-0.49 pp/yr (most for VAA-G4 `lt`). The SPY Sharpe column is computed over each model's own\nmonths (2001-10 for HAA-simple, 2003-10 for GEM-e, 2007-04 for HAA-G7 and GTAA-5).\n\n## Long history (Vanguard index funds, 1986-2026, benchmark VFINX)\n\n`ho5`/`ho10` = windows that end before 2000: a true holdout for models published 2012-2018.\nModels needing emerging markets (VEIEX, 1994) start in 1996 and have no holdout windows.\n\nlong_screen (38 yearly starts), CA (standard execution plus two `lt` rows; the other `tax1`/`lt` rows are in the CSV, none has a positive score):\n\n| config | 1st start | score | full (1986/96-2026) | 10y beat | 15y beat | 20y beat | boot_p | ho5 mean | ho5 beat | ho10 mean | ho10 beat | maxDD % | turnover/yr |\n|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n| GEM-L-3way [std] | 1996-01 | +0.88 | -0.82 | 0.52 | 0.62 | 0.64 | 0.622 | \u2013 | \u2013 | \u2013 | \u2013 | -35 | 2.3 |\n| ADM-L-mom13612w [std] | 1986-01 | +0.22 | -2.14 | 0.48 | 0.58 | 0.71 | 0.814 | -3.70 | 0.10 | -4.35 | 0.00 | -36 | 4.4 |\n| VAA-G4-L [std] | 1996-01 | +0.08 | -3.12 | 0.57 | 0.56 | 0.55 | 0.822 | \u2013 | \u2013 | \u2013 | \u2013 | -30 | 7.2 |\n| GEM-L [std] | 1986-01 | +0.01 | -1.60 | 0.45 | 0.58 | 0.81 | 0.767 | -2.32 | 0.10 | -2.97 | 0.00 | -34 | 1.6 |\n| DAA-G4-L [std] | 1996-01 | -0.14 | -3.18 | 0.57 | 0.56 | 0.55 | 0.870 | \u2013 | \u2013 | \u2013 | \u2013 | -30 | 5.7 |\n| S-WELLINGTON-L-A [std] | 1986-01 | -0.64 | -1.25 | 0.48 | 0.50 | 0.62 | 0.811 | -2.89 | 0.00 | -3.01 | 0.00 | -36 | 0.0 |\n| ADM-L [std] | 1986-01 | -0.65 | -2.99 | 0.48 | 0.54 | 0.57 | 0.903 | -3.39 | 0.20 | -4.03 | 0.00 | -39 | 3.2 |\n| S-8020-L-A [std] | 1986-01 | -0.71 | -1.32 | 0.16 | 0.27 | 0.05 | 0.964 | -1.33 | 0.00 | -1.42 | 0.00 | -45 | 0.0 |\n| GEM-L [lt] | 1986-01 | -0.84 | -2.21 | 0.45 | 0.62 | 0.67 | 0.818 | -2.90 | 0.30 | -3.02 | 0.00 | -38 | 0.8 |\n| S-7030-L-A [std] | 1986-01 | -1.09 | -1.93 | 0.16 | 0.27 | 0.00 | 0.969 | -2.00 | 0.00 | -2.12 | 0.00 | -39 | 0.0 |\n| CAN-DAA-SPY-L [std] | 1996-01 | -1.20 | -3.71 | 0.52 | 0.50 | 0.18 | 0.957 | \u2013 | \u2013 | \u2013 | \u2013 | -37 | 3.7 |\n| S-EQ2-L-A [std] | 1986-01 | -1.29 | -1.65 | 0.26 | 0.08 | 0.00 | 0.988 | -1.64 | 0.10 | -1.76 | 0.20 | -58 | 0.0 |\n| VAA-G4-L [lt] | 1996-01 | -1.38 | -1.89 | 0.38 | 0.31 | 0.27 | 0.715 | \u2013 | \u2013 | \u2013 | \u2013 | -31 | 1.7 |\n| S-6040-L-A [std] | 1986-01 | -1.49 | -2.53 | 0.16 | 0.27 | 0.00 | 0.973 | -2.66 | 0.00 | -2.83 | 0.00 | -33 | 0.0 |\n| S-NOBRAINER-L-A [std] | 1986-01 | -1.74 | -2.97 | 0.26 | 0.27 | 0.10 | 0.991 | -3.73 | 0.10 | -4.00 | 0.00 | -45 | 0.0 |\n| GTAA4-L [std] | 1998-01 | -1.90 | -3.28 | 0.42 | 0.36 | 0.33 | 0.896 | \u2013 | \u2013 | \u2013 | \u2013 | -20 | 1.6 |\n| CAN-DAA-SPY-L-intl [std] | 1986-01 | -2.26 | -4.13 | 0.32 | 0.35 | 0.10 | 0.995 | -5.48 | 0.00 | -6.12 | 0.00 | -33 | 3.4 |\n| VAA-G3-L [std] | 1986-01 | -2.46 | -4.86 | 0.35 | 0.35 | 0.38 | 0.970 | -6.65 | 0.00 | -7.35 | 0.00 | -34 | 6.5 |\n| FAA-L [std] | 1997-01 | -2.64 | -4.77 | 0.35 | 0.33 | 0.10 | 0.949 | \u2013 | \u2013 | \u2013 | \u2013 | -22 | 3.3 |\n| S-PRPFX-L-A [std] | 1986-01 | -2.79 | -3.61 | 0.26 | 0.35 | 0.24 | 0.931 | -9.14 | 0.00 | -9.73 | 0.00 | -27 | 0.0 |\n| PAA2-G10-L [std] | 1986-01 | -2.84 | -4.72 | 0.23 | 0.31 | 0.19 | 0.969 | -6.42 | 0.00 | -7.10 | 0.00 | -22 | 2.8 |\n| GTAA3-L [std] | 1986-01 | -2.88 | -4.81 | 0.23 | 0.31 | 0.05 | 0.982 | -6.13 | 0.00 | -6.73 | 0.00 | -19 | 1.5 |\n| CDM-L [std] | 1986-01 | -3.02 | -5.09 | 0.23 | 0.31 | 0.00 | 0.978 | -6.17 | 0.00 | -6.78 | 0.00 | -17 | 1.8 |\n| DAA-G10-L [std] | 1986-01 | -3.27 | -5.41 | 0.23 | 0.31 | 0.05 | 0.988 | -7.54 | 0.00 | -8.20 | 0.00 | -30 | 5.5 |\n| VAA-G10-L [std] | 1986-01 | -4.17 | -6.47 | 0.19 | 0.23 | 0.00 | 0.992 | -6.76 | 0.00 | -7.43 | 0.00 | -32 | 7.5 |\n| GPM-G10-L [std] | 1986-01 | -4.57 | -6.66 | 0.13 | 0.15 | 0.00 | 0.996 | -7.36 | 0.00 | -8.01 | 0.00 | -17 | 4.3 |\n\nlong_screen, NONE:\n\n| config | 1st start | score | full (1986/96-2026) | 10y beat | 15y beat | 20y beat | boot_p | ho5 mean | ho5 beat | ho10 mean | ho10 beat | maxDD % | turnover/yr |\n|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n| VAA-G4-L [std] | 1996-01 | +4.32 | +0.89 | 0.62 | 0.69 | 0.82 | 0.422 | \u2013 | \u2013 | \u2013 | \u2013 | -27 | 7.3 |\n| ADM-L-mom13612w [std] | 1986-01 | +3.39 | +2.15 | 0.55 | 0.81 | 1.00 | 0.238 | -2.09 | 0.30 | -2.07 | 0.00 | -35 | 4.5 |\n| GEM-L-3way [std] | 1996-01 | +2.96 | +2.05 | 0.57 | 0.62 | 0.82 | 0.254 | \u2013 | \u2013 | \u2013 | \u2013 | -35 | 2.4 |\n| DAA-G4-L [std] | 1996-01 | +2.94 | +0.03 | 0.62 | 0.69 | 0.82 | 0.506 | \u2013 | \u2013 | \u2013 | \u2013 | -26 | 5.8 |\n| ADM-L [std] | 1986-01 | +2.09 | +0.85 | 0.58 | 0.69 | 0.86 | 0.397 | -1.81 | 0.40 | -1.77 | 0.20 | -37 | 3.3 |\n| GEM-L [std] | 1986-01 | +1.64 | +1.39 | 0.55 | 0.73 | 0.86 | 0.280 | -0.28 | 0.40 | -0.19 | 0.20 | -34 | 1.7 |\n| CAN-DAA-SPY-L [std] | 1996-01 | +1.24 | -0.84 | 0.67 | 0.81 | 0.73 | 0.658 | \u2013 | \u2013 | \u2013 | \u2013 | -30 | 3.8 |\n| VAA-G3-L [std] | 1986-01 | +0.58 | -1.04 | 0.52 | 0.69 | 0.86 | 0.643 | -4.77 | 0.00 | -4.70 | 0.00 | -24 | 6.5 |\n| CAN-DAA-SPY-L-intl [std] | 1986-01 | +0.02 | -0.99 | 0.52 | 0.65 | 0.71 | 0.732 | -3.56 | 0.00 | -3.53 | 0.00 | -27 | 3.5 |\n| S-WELLINGTON-L-A [std] | 1986-01 | -0.71 | -1.27 | 0.48 | 0.50 | 0.62 | 0.801 | -3.50 | 0.00 | -3.38 | 0.00 | -36 | 0.0 |\n| S-8020-L-A [std] | 1986-01 | -0.77 | -0.97 | 0.16 | 0.31 | 0.19 | 0.937 | -1.57 | 0.00 | -1.52 | 0.00 | -45 | 0.0 |\n| FAA-L [std] | 1997-01 | -1.01 | -2.66 | 0.50 | 0.40 | 0.50 | 0.783 | \u2013 | \u2013 | \u2013 | \u2013 | -17 | 3.4 |\n| DAA-G10-L [std] | 1986-01 | -1.13 | -2.32 | 0.48 | 0.58 | 0.62 | 0.820 | -6.41 | 0.00 | -6.27 | 0.00 | -26 | 5.6 |\n| PAA2-G10-L [std] | 1986-01 | -1.14 | -1.71 | 0.45 | 0.50 | 0.67 | 0.744 | -5.30 | 0.10 | -5.16 | 0.00 | -17 | 2.8 |\n| S-7030-L-A [std] | 1986-01 | -1.20 | -1.50 | 0.16 | 0.31 | 0.14 | 0.942 | -2.36 | 0.00 | -2.29 | 0.00 | -39 | 0.0 |\n| S-EQ2-L-A [std] | 1986-01 | -1.43 | -1.23 | 0.29 | 0.08 | 0.00 | 0.948 | -1.87 | 0.10 | -1.80 | 0.20 | -57 | 0.0 |\n| GTAA4-L [std] | 1998-01 | -1.59 | -2.44 | 0.47 | 0.36 | 0.33 | 0.783 | \u2013 | \u2013 | \u2013 | \u2013 | -20 | 1.6 |\n| S-6040-L-A [std] | 1986-01 | -1.66 | -2.06 | 0.16 | 0.27 | 0.00 | 0.946 | -3.16 | 0.00 | -3.08 | 0.00 | -33 | 0.0 |\n| S-NOBRAINER-L-A [std] | 1986-01 | -1.92 | -2.48 | 0.26 | 0.27 | 0.14 | 0.980 | -4.45 | 0.10 | -4.35 | 0.00 | -44 | 0.0 |\n| VAA-G10-L [std] | 1986-01 | -2.43 | -3.68 | 0.32 | 0.38 | 0.48 | 0.898 | -4.92 | 0.20 | -4.74 | 0.00 | -31 | 7.6 |\n| CDM-L [std] | 1986-01 | -2.57 | -3.47 | 0.29 | 0.35 | 0.33 | 0.914 | -6.14 | 0.00 | -6.00 | 0.00 | -17 | 1.8 |\n| GTAA3-L [std] | 1986-01 | -2.69 | -3.47 | 0.32 | 0.35 | 0.38 | 0.930 | -6.87 | 0.00 | -6.72 | 0.00 | -19 | 1.5 |\n| S-PRPFX-L-A [std] | 1986-01 | -3.30 | -3.68 | 0.26 | 0.35 | 0.24 | 0.919 | -11.48 | 0.00 | -11.34 | 0.00 | -27 | 0.0 |\n| GPM-G10-L [std] | 1986-01 | -3.48 | -4.45 | 0.23 | 0.31 | 0.24 | 0.945 | -6.08 | 0.10 | -5.90 | 0.00 | -15 | 4.4 |\n\nlong_screen, FED:\n\n| config | 1st start | score | full (1986/96-2026) | 10y beat | 15y beat | 20y beat | boot_p | ho5 mean | ho5 beat | ho10 mean | ho10 beat | maxDD % | turnover/yr |\n|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n| GEM-L-3way [std] | 1996-01 | +1.40 | +0.08 | 0.57 | 0.62 | 0.64 | 0.490 | \u2013 | \u2013 | \u2013 | \u2013 | -35 | 2.3 |\n| ADM-L-mom13612w [std] | 1986-01 | +0.93 | -0.92 | 0.52 | 0.69 | 0.86 | 0.659 | -3.65 | 0.20 | -3.94 | 0.00 | -35 | 4.4 |\n| VAA-G4-L [std] | 1996-01 | +0.91 | -2.23 | 0.57 | 0.62 | 0.64 | 0.741 | \u2013 | \u2013 | \u2013 | \u2013 | -29 | 7.2 |\n| DAA-G4-L [std] | 1996-01 | +0.47 | -2.44 | 0.57 | 0.62 | 0.64 | 0.789 | \u2013 | \u2013 | \u2013 | \u2013 | -29 | 5.7 |\n| GEM-L [std] | 1986-01 | +0.42 | -0.58 | 0.48 | 0.69 | 0.81 | 0.606 | -2.12 | 0.20 | -2.40 | 0.00 | -34 | 1.7 |\n| ADM-L [std] | 1986-01 | -0.10 | -1.92 | 0.55 | 0.62 | 0.71 | 0.802 | -3.31 | 0.20 | -3.60 | 0.00 | -37 | 3.3 |\n| S-8020-L-A [std] | 1986-01 | -0.75 | -1.15 | 0.16 | 0.31 | 0.05 | 0.951 | -1.46 | 0.00 | -1.48 | 0.00 | -45 | 0.0 |\n| CAN-DAA-SPY-L [std] | 1996-01 | -0.77 | -3.06 | 0.52 | 0.62 | 0.45 | 0.918 | \u2013 | \u2013 | \u2013 | \u2013 | -34 | 3.8 |\n| VAA-G4-L [lt] | 1996-01 | -1.31 | -1.27 | 0.38 | 0.31 | 0.27 | 0.634 | \u2013 | \u2013 | \u2013 | \u2013 | -29 | 1.7 |\n| S-6040-L-A [std] | 1986-01 | -1.58 | -2.30 | 0.16 | 0.27 | 0.00 | 0.959 | -2.92 | 0.00 | -2.97 | 0.00 | -33 | 0.0 |\n| CAN-DAA-SPY-L-intl [std] | 1986-01 | -1.91 | -3.28 | 0.35 | 0.38 | 0.38 | 0.970 | -5.57 | 0.00 | -5.86 | 0.00 | -31 | 3.4 |\n| VAA-G3-L [std] | 1986-01 | -2.05 | -4.00 | 0.39 | 0.46 | 0.62 | 0.937 | -6.89 | 0.00 | -7.22 | 0.00 | -32 | 6.5 |\n\nlong protocol (151 quarterly starts), finalists, CA:\n\n| config | 1st start | score | full (1986/96-2026) | 10y beat | 15y beat | 20y beat | boot_p | ho5 mean | ho5 beat | ho10 mean | ho10 beat | maxDD % | turnover/yr |\n|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n| GEM-L-3way [std] | 1995-07 | +0.87 | -0.88 | 0.55 | 0.60 | 0.64 | 0.624 | \u2013 | \u2013 | \u2013 | \u2013 | -35 | 2.3 |\n| ADM-L-mom13612w [std] | 1986-01 | +0.34 | -2.14 | 0.50 | 0.60 | 0.75 | 0.814 | -3.22 | 0.08 | -3.96 | 0.00 | -36 | 4.4 |\n| GEM-L [std] | 1986-01 | +0.08 | -1.60 | 0.48 | 0.61 | 0.78 | 0.767 | -1.94 | 0.08 | -2.58 | 0.00 | -34 | 1.6 |\n| VAA-G4-L [std] | 1995-07 | +0.06 | -3.35 | 0.58 | 0.60 | 0.56 | 0.837 | \u2013 | \u2013 | \u2013 | \u2013 | -30 | 7.1 |\n| ADM-L [std] | 1986-01 | -0.60 | -2.99 | 0.51 | 0.56 | 0.63 | 0.903 | -2.89 | 0.14 | -3.64 | 0.00 | -39 | 3.2 |\n| S-8020-L-A [std] | 1986-01 | -0.68 | -1.32 | 0.17 | 0.29 | 0.10 | 0.964 | -1.16 | 0.08 | -1.29 | 0.00 | -45 | 0.0 |\n| VAA-G4-L [lt] | 1995-07 | -1.33 | -1.75 | 0.38 | 0.40 | 0.33 | 0.729 | \u2013 | \u2013 | \u2013 | \u2013 | -31 | 1.7 |\n\nlong, NONE:\n\n| config | 1st start | score | full (1986/96-2026) | 10y beat | 15y beat | 20y beat | boot_p | ho5 mean | ho5 beat | ho10 mean | ho10 beat | maxDD % | turnover/yr |\n|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n| VAA-G4-L [std] | 1995-07 | +4.32 | +0.76 | 0.61 | 0.69 | 0.78 | 0.460 | \u2013 | \u2013 | \u2013 | \u2013 | -27 | 7.3 |\n| ADM-L-mom13612w [std] | 1986-01 | +3.51 | +2.15 | 0.56 | 0.83 | 1.00 | 0.238 | -1.68 | 0.35 | -1.89 | 0.00 | -35 | 4.5 |\n| GEM-L-3way [std] | 1995-07 | +2.95 | +2.02 | 0.59 | 0.63 | 0.84 | 0.298 | \u2013 | \u2013 | \u2013 | \u2013 | -35 | 2.4 |\n| ADM-L [std] | 1986-01 | +2.15 | +0.85 | 0.59 | 0.72 | 0.84 | 0.397 | -1.32 | 0.49 | -1.59 | 0.12 | -37 | 3.3 |\n| GEM-L [std] | 1986-01 | +1.67 | +1.39 | 0.58 | 0.75 | 0.84 | 0.280 | +0.03 | 0.49 | +0.01 | 0.35 | -34 | 1.7 |\n| S-8020-L-A [std] | 1986-01 | -0.75 | -0.97 | 0.16 | 0.31 | 0.16 | 0.937 | -1.37 | 0.08 | -1.38 | 0.00 | -45 | 0.0 |\n\nlong, FED:\n\n| config | 1st start | score | full (1986/96-2026) | 10y beat | 15y beat | 20y beat | boot_p | ho5 mean | ho5 beat | ho10 mean | ho10 beat | maxDD % | turnover/yr |\n|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n| GEM-L-3way [std] | 1995-07 | +1.40 | +0.04 | 0.58 | 0.62 | 0.64 | 0.517 | \u2013 | \u2013 | \u2013 | \u2013 | -35 | 2.3 |\n| ADM-L-mom13612w [std] | 1986-01 | +1.05 | -0.92 | 0.53 | 0.69 | 0.86 | 0.659 | -3.14 | 0.14 | -3.58 | 0.00 | -35 | 4.4 |\n| VAA-G4-L [std] | 1995-07 | +0.89 | -2.44 | 0.59 | 0.62 | 0.64 | 0.749 | \u2013 | \u2013 | \u2013 | \u2013 | -29 | 7.2 |\n| GEM-L [std] | 1986-01 | +0.48 | -0.58 | 0.50 | 0.69 | 0.81 | 0.606 | -1.72 | 0.19 | -2.03 | 0.00 | -34 | 1.7 |\n| ADM-L [std] | 1986-01 | -0.04 | -1.92 | 0.53 | 0.62 | 0.71 | 0.802 | -2.78 | 0.24 | -3.23 | 0.00 | -37 | 3.3 |\n| S-8020-L-A [std] | 1986-01 | -0.72 | -1.15 | 0.16 | 0.30 | 0.11 | 0.951 | -1.27 | 0.08 | -1.34 | 0.00 | -45 | 0.0 |\n| VAA-G4-L [lt] | 1995-07 | -1.26 | -1.84 | 0.39 | 0.40 | 0.36 | 0.726 | \u2013 | \u2013 | \u2013 | \u2013 | -25 | 1.7 |\n\nThe long-history versions confirm the ETF-era picture with an independent 14 years: in windows\nending before 2000 (a long bull market) every model with history there lost to VFINX in CA and FED,\nand without tax only GEM roughly tied it (ho10 +0.01); the other TAA models lost 1.6-6.7 pp/yr. The positive\nlong-protocol scores of 3-way GEM, 13612W-ADM and VAA-G4 (all with negative 1986/1996-2026\nfull-period excess in CA) again come from windows that contain 2000-02 and 2008. No long-history\nconfig has a 10-year beat rate above 0.67 or a boot_p below 0.23 in any regime.\n\n## Does the timing add anything? Static twins and the stock/bond frontier (full protocol)\n\nEach finalist's static twin holds the finalist's own average weights (measured over its first-start\nrun: NONE for `std`, CA for `lt`) all the time, rebalanced annually, through the same proxy chains\nand from the same first start. Timing value = model minus twin (after-tax CAGR), averaged over\n5/10/15-year windows.\n\nCA:\n\n| model | model score | twin score | timing value (score diff) | 10y windows model > twin | model full | twin full | full diff | model vol % | twin vol % | model maxDD % | twin maxDD % |\n|---|---|---|---|---|---|---|---|---|---|---|---|\n| GEM-x [std] | -1.39 | -2.03 | +0.64 | 0.52 | -0.82 | -1.64 | +0.82 | 12.4 | 11.6 | -24 | -42 |\n| GEM-e [std] | -3.29 | -2.55 | -0.74 | 0.37 | -2.52 | -2.36 | -0.16 | 12.9 | 12.4 | -24 | -46 |\n| GEM-x-3way [std] | -0.72 | -1.83 | +1.11 | 0.57 | -0.03 | -1.33 | +1.30 | 14.9 | 12.6 | -30 | -46 |\n| ADM-x [std] | -1.88 | -1.61 | -0.27 | 0.52 | -1.32 | -1.65 | +0.34 | 15.3 | 11.9 | -34 | -42 |\n| ADM-x-mom13612w [std] | -0.48 | -1.61 | +1.13 | 0.52 | -0.21 | -1.65 | +1.44 | 15.7 | 12.1 | -33 | -43 |\n| ADM-x-rm5 [std] | -1.26 | -1.57 | +0.31 | 0.52 | -0.98 | -1.61 | +0.63 | 15.3 | 11.8 | -31 | -42 |\n| VAA-G4-x [std] | -1.81 | -3.13 | +1.32 | 0.58 | -1.29 | -2.34 | +1.05 | 12.0 | 8.1 | -25 | -27 |\n| VAA-G4-x-B2 [std] | -1.67 | -2.76 | +1.09 | 0.54 | -1.12 | -2.05 | +0.92 | 12.5 | 9.5 | -27 | -34 |\n| DAA-G4-x [std] | -1.92 | -2.66 | +0.75 | 0.55 | -1.78 | -2.11 | +0.33 | 11.4 | 10.3 | -31 | -38 |\n| QUINT-x [std] | -2.26 | -0.85 | -1.41 | 0.35 | -1.69 | -0.85 | -0.84 | 18.4 | 12.2 | -38 | -38 |\n| QUINT-x-tr4 [std] | -1.50 | -0.79 | -0.71 | 0.45 | -1.31 | -0.77 | -0.54 | 16.8 | 12.5 | -33 | -39 |\n| HAA-S-x [std] | -2.93 | -2.16 | -0.77 | 0.17 | -2.75 | -2.41 | -0.34 | 10.6 | 9.2 | -24 | -32 |\n| CAN-DAA-SPY-x [std] | -1.79 | -1.36 | -0.43 | 0.54 | -2.26 | -1.07 | -1.18 | 11.2 | 10.7 | -32 | -36 |\n| ENS-GEM-VAA4-ADM [std] | -1.62 | -2.27 | +0.66 | 0.54 | -1.03 | -1.85 | +0.83 | 11.1 | 10.3 | -26 | -37 |\n| HAA-x [std] | -5.85 | -5.81 | -0.04 | 0.50 | -4.21 | -4.89 | +0.68 | 10.6 | 9.5 | -13 | -31 |\n| GTAA5-x [std] | -7.60 | -6.47 | -1.14 | 0.13 | -6.20 | -5.57 | -0.63 | 6.9 | 8.1 | -14 | -29 |\n| VAA-G4-x [lt] | -1.61 | -3.47 | +1.85 | 0.94 | +0.72 | -2.62 | +3.35 | 11.6 | 6.9 | -26 | -20 |\n| ADM-x-mom13612w [lt] | -2.55 | -1.77 | -0.77 | 0.42 | -1.85 | -1.81 | -0.04 | 14.5 | 10.6 | -35 | -36 |\n\n| SPY/AGG mix (annual rebalance) | score | full | 10y beat | CAGR 2000-26 (after tax) | vol % | maxDD % | Sharpe |\n|---|---|---|---|---|---|---|---|\n| S-3070-x-A | -3.28 | -2.69 | 0.16 | +5.09 | 5.6 | -18 | 0.92 |\n| S-4060-x-A | -2.78 | -2.27 | 0.16 | +5.53 | 6.7 | -20 | 0.84 |\n| S-5050-x-A | -2.29 | -1.87 | 0.16 | +5.99 | 7.9 | -25 | 0.77 |\n| S-6040-x-A | -1.81 | -1.48 | 0.16 | +6.45 | 9.3 | -31 | 0.72 |\n| S-8020-x-A | -0.87 | -0.72 | 0.16 | +7.36 | 12.1 | -41 | 0.65 |\n| S-9010-x-A | -0.43 | -0.36 | 0.16 | +7.81 | 13.6 | -46 | 0.62 |\n| S-SPY-x-A | -0.00 | -0.00 | 0.00 | +8.25 | 15.2 | -51 | 0.60 |\n\nNONE:\n\n| model | model score | twin score | timing value (score diff) | 10y windows model > twin | model full | twin full | full diff | model vol % | twin vol % | model maxDD % | twin maxDD % |\n|---|---|---|---|---|---|---|---|---|---|---|---|\n| GEM-x [std] | -0.41 | -2.32 | +1.91 | 0.63 | +0.75 | -1.56 | +2.31 | 11.7 | 11.6 | -22 | -42 |\n| GEM-e [std] | -2.60 | -2.93 | +0.33 | 0.44 | -0.81 | -2.28 | +1.47 | 12.1 | 12.4 | -22 | -45 |\n| GEM-x-3way [std] | +1.08 | -2.01 | +3.08 | 0.78 | +2.41 | -1.09 | +3.50 | 14.1 | 12.6 | -24 | -45 |\n| ADM-x [std] | +1.00 | -1.76 | +2.77 | 0.54 | +1.89 | -1.51 | +3.40 | 14.4 | 11.9 | -32 | -42 |\n| ADM-x-mom13612w [std] | +3.34 | -1.77 | +5.11 | 0.66 | +3.81 | -1.51 | +5.32 | 14.1 | 12.1 | -29 | -43 |\n| ADM-x-rm5 [std] | +1.68 | -1.71 | +3.40 | 0.54 | +2.12 | -1.46 | +3.58 | 14.3 | 11.8 | -29 | -42 |\n| VAA-G4-x [std] | +1.40 | -3.64 | +5.04 | 0.84 | +2.30 | -2.24 | +4.55 | 11.2 | 8.1 | -23 | -26 |\n| VAA-G4-x-B2 [std] | +1.50 | -3.17 | +4.67 | 0.69 | +2.50 | -1.88 | +4.38 | 11.6 | 9.5 | -24 | -33 |\n| DAA-G4-x [std] | +0.53 | -3.05 | +3.57 | 0.73 | +0.85 | -1.97 | +2.82 | 10.4 | 10.3 | -27 | -37 |\n| QUINT-x [std] | +1.13 | -0.76 | +1.89 | 0.52 | +1.55 | -0.52 | +2.07 | 17.1 | 12.1 | -37 | -37 |\n| QUINT-x-tr4 [std] | +2.24 | -0.70 | +2.93 | 0.62 | +2.40 | -0.43 | +2.83 | 15.6 | 12.5 | -31 | -38 |\n| HAA-S-x [std] | -1.13 | -2.45 | +1.32 | 0.75 | -0.21 | -2.31 | +2.10 | 9.9 | 9.2 | -23 | -31 |\n| CAN-DAA-SPY-x [std] | +0.56 | -1.53 | +2.09 | 0.76 | -0.12 | -0.97 | +0.85 | 10.4 | 10.7 | -27 | -36 |\n| ENS-GEM-VAA4-ADM [std] | +0.99 | -2.57 | +3.56 | 0.57 | +2.03 | -1.71 | +3.74 | 10.3 | 10.3 | -21 | -37 |\n| HAA-x [std] | -5.00 | -6.83 | +1.83 | 0.84 | -2.30 | -5.21 | +2.92 | 9.8 | 9.5 | -12 | -31 |\n| GTAA5-x [std] | -8.89 | -7.66 | -1.23 | 0.18 | -6.35 | -6.05 | -0.30 | 6.7 | 8.1 | -13 | -29 |\n| VAA-G4-x [lt] | +1.40 | -4.07 | +5.47 | 0.91 | +2.30 | -2.60 | +4.90 | 11.2 | 6.8 | -23 | -19 |\n\n| SPY/AGG mix (annual rebalance) | score | full | 10y beat | CAGR 2000-26 (after tax) | vol % | maxDD % | Sharpe |\n|---|---|---|---|---|---|---|---|\n| S-3070-x-A | -3.86 | -2.78 | 0.16 | +5.47 | 5.6 | -17 | 0.98 |\n| S-4060-x-A | -3.23 | -2.29 | 0.16 | +5.96 | 6.7 | -20 | 0.90 |\n| S-5050-x-A | -2.63 | -1.83 | 0.16 | +6.42 | 7.9 | -25 | 0.82 |\n| S-6040-x-A | -2.05 | -1.40 | 0.16 | +6.85 | 9.3 | -31 | 0.76 |\n| S-8020-x-A | -0.97 | -0.63 | 0.16 | +7.62 | 12.1 | -41 | 0.67 |\n| S-9010-x-A | -0.47 | -0.30 | 0.16 | +7.95 | 13.6 | -46 | 0.63 |\n| S-SPY-x-A | -0.00 | -0.00 | 0.00 | +8.25 | 15.2 | -51 | 0.60 |\n\nFED (table in the CSV, batch `twin.json`): the same pattern, median timing value +0.6 pp/yr (range\n-1.2 to +2.3); every SPY/AGG mix trails SPY (90/10 -0.45 ... 30/70 -3.58).\n\nReading: without tax the trend/momentum timing is worth a median +2.9 pp/yr over the same average\nmix (15 of 16 standard-execution finalists positive, up to +5.1 for VAA-G4 and 13612W-ADM; only\nGTAA-5 negative) and beats it in most 10- and 15-year windows: the published claim that these rules\nadd value over a static allocation of the same assets survives in the lab. After CA tax the median\nis +0.1 pp/yr (VAA-G4 `lt` +1.9, beating its twin in 94% of 10-year windows; 3-way GEM, 13612W-ADM\nand VAA-G4 +1.1 to +1.3), and it is negative for GEM-e, ADM, QUINT, HAA, GTAA-5 and the canary on\nSPY. But the twins are defensive portfolios (21-75% bonds, emerging markets, intl small caps) that\ntrail SPY (2000-start twins: -0.8 to -3.5 pp/yr in CA), so +1 pp/yr of timing still leaves the\nmodels behind SPY. On the\nstock/bond frontier every SPY/AGG mix trails SPY on return in every regime while having a higher\nSharpe ratio; most TAA models sit on or below that frontier in CA (exception: VAA-G4 `lt`, whose\nfull-period advantage depends on starting in January 2000 and on the 1st-of-month rebalance).\n\n## Hindsight checks (PROTOCOL 5.3): random menus and the star removed\n\nEach rule re-run on 24 menus drawn at random (fixed seeds) from `common.BROAD_EQUITY_POOL_2003`\n(equity ETFs that existed by 2003), bond/cash legs unchanged, every config (published menus too)\nstarting 2005-01-15 so every menu has history: screen windows start 2006-2023.\n\nCA:\n\n| rule | random menus | score p10 | score median | score p90 | share score>0 | share 10y beat>=0.75 | published menu score | published menu percentile |\n|---|---|---|---|---|---|---|---|---|\n| ADM | 24 | -7.97 | -5.98 | -2.51 | 0.00 | 0.00 | -5.81 | 0.54 |\n| DAA-G4 | 24 | -6.81 | -5.91 | -4.83 | 0.00 | 0.00 | -5.42 | 0.67 |\n| GEM | 24 | -7.50 | -4.93 | -2.40 | 0.04 | 0.00 | -4.44 | 0.54 |\n| QUINT | 24 | -7.42 | -5.55 | -4.28 | 0.00 | 0.00 | -5.82 | 0.46 |\n| VAA-G4 | 24 | -8.25 | -7.12 | -5.78 | 0.00 | 0.00 | -6.15 | 0.75 |\n\n| star removed (2005+ starts) | score | full | 10y beat |\n|---|---|---|---|\n| H-NOSTAR-VAA-G3 [std] | -5.66 | -4.93 | 0.00 |\n| H-NOSTAR-QUINT [std] | -6.67 | -4.61 | 0.09 |\n\nNONE:\n\n| rule | random menus | score p10 | score median | score p90 | share score>0 | share 10y beat>=0.75 | published menu score | published menu percentile |\n|---|---|---|---|---|---|---|---|---|\n| ADM | 24 | -8.06 | -4.86 | +0.42 | 0.21 | 0.00 | -4.98 | 0.50 |\n| DAA-G4 | 24 | -6.39 | -4.76 | -2.91 | 0.00 | 0.00 | -4.09 | 0.67 |\n| GEM | 24 | -7.94 | -4.18 | -1.00 | 0.08 | 0.04 | -3.99 | 0.50 |\n| QUINT | 24 | -6.77 | -3.92 | -1.98 | 0.04 | 0.00 | -4.07 | 0.46 |\n| VAA-G4 | 24 | -8.75 | -6.61 | -4.27 | 0.00 | 0.00 | -5.16 | 0.75 |\n\n| star removed (2005+ starts) | score | full | 10y beat |\n|---|---|---|---|\n| H-NOSTAR-VAA-G3 [std] | -4.33 | -2.55 | 0.27 |\n| H-NOSTAR-QUINT [std] | -5.98 | -2.25 | 0.27 |\n\nThe published menus are typical, not cherry-picked: across 24 random menus per rule the published\nmenu sits at the 46th-75th percentile, and almost every random menu also loses to SPY after\n2005 (share with score > 0: 0-4% in CA, 0-21% in NONE; no menu reaches a 10-year beat rate of 0.75\nin CA). Removing the obvious stars changes little in the 2005+ windows (VAA without EEM -5.66 CA /\n-4.33 NONE; QUINT with SPY for QQQ -6.67 / -5.98); over the full 2000+ windows VAA without EEM\n(`VAA-G3-x-noEEM`) scores -2.59 CA / -0.11 NONE vs -1.52 / +1.78 with it, so about 1.9 pp/yr of\nVAA-G4's NONE score is the emerging-markets leg; QUINT with SPY instead of QQQ (`QUINT-x-noQQQ`,\n2000+) scores -2.05 / +0.81. So hindsight in the menus is not what flatters these models; the\nstart date is (2000-2009 contains both of the crashes they were designed to dodge).\n\n## Leverage (labelled: 2x / 3x S&P 500 ETFs; more risk is not skill)\n\nThe leveraged fund is held only while the rule's unlevered canaries are risk-on, else the rule's\nbond/cash assets. SSO configs can start once SSO has 400 days of history (screen windows from\n2008-01, full from 2007-10), UPRO configs from 2011-01 / 2010-10: UPRO's whole history is after the\n2008 crash, a hindsight tilt.\n\nCA (std and lt):\n\n| config | 1st start | score | full | 10y beat | 15y beat | boot_p | maxDD % | turnover/yr |\n|---|---|---|---|---|---|---|---|---|\n| LEV-HAA-S-UPRO [lt] | 2011-01 | +6.75 | +6.93 | 1.00 | 1.00 | 0.046 | -47 | 0.9 |\n| LEV-CAN-DAA-UPRO [lt] | 2011-01 | +3.53 | +1.42 | 0.83 | 1.00 | 0.378 | -58 | 1.3 |\n| LEV-CAN-DAA-UPRO [std] | 2011-01 | +0.92 | -0.45 | 0.50 | 1.00 | 0.530 | -65 | 4.2 |\n| LEV-HAA-S-SSO [lt] | 2008-01 | +0.59 | +2.72 | 0.67 | 0.50 | 0.235 | -37 | 1.1 |\n| LEV-CAN-DAA-SSO [lt] | 2008-01 | +0.05 | -0.52 | 0.67 | 0.25 | 0.577 | -43 | 1.1 |\n| LEV-CAN-BAA-UPRO [lt] | 2011-01 | +0.01 | +0.54 | 0.50 | 1.00 | 0.420 | -53 | 2.4 |\n| LEV-CAN-VAA4-UPRO [lt] | 2011-01 | -0.21 | +0.54 | 0.50 | 1.00 | 0.420 | -53 | 2.4 |\n| LEV-CAN-DAA-SSO [std] | 2008-01 | -0.99 | -0.44 | 0.33 | 0.25 | 0.588 | -50 | 4.1 |\n| LEV-HAA-S-UPRO [std] | 2011-01 | -2.13 | -3.81 | 0.00 | 0.00 | 0.711 | -78 | 3.0 |\n| LEV-CAN-BAA-SSO [lt] | 2008-01 | -2.25 | +0.25 | 0.11 | 0.25 | 0.505 | -42 | 2.2 |\n| LEV-CAN-VAA4-SSO [lt] | 2008-01 | -2.28 | +0.25 | 0.11 | 0.25 | 0.505 | -42 | 2.2 |\n| LEV-HAA-S-SSO [std] | 2008-01 | -2.84 | -1.36 | 0.11 | 0.00 | 0.620 | -59 | 2.6 |\n| LEV-CAN-VAA4-UPRO [std] | 2011-01 | -3.60 | -4.95 | 0.17 | 0.00 | 0.904 | -61 | 6.2 |\n| LEV-GEM-SSO [std] | 2008-01 | -4.22 | -1.37 | 0.11 | 0.00 | 0.604 | -69 | 1.1 |\n| LEV-CAN-VAA4-SSO [std] | 2008-01 | -4.22 | -2.85 | 0.22 | 0.00 | 0.760 | -49 | 6.1 |\n| LEV-CAN-BAA-UPRO [std] | 2011-01 | -4.25 | -5.89 | 0.17 | 0.00 | 0.951 | -61 | 6.0 |\n| LEV-CAN-BAA-SSO [std] | 2008-01 | -4.57 | -3.07 | 0.11 | 0.00 | 0.776 | -49 | 5.9 |\n| LEV-GEM-SSO [lt] | 2008-01 | -5.75 | -1.96 | 0.11 | 0.00 | 0.640 | -68 | 0.5 |\n| LEV-GEM-UPRO [std] | 2011-01 | -10.85 | -7.92 | 0.00 | 0.00 | 0.757 | -84 | 1.2 |\n| LEV-GEM-UPRO [lt] | 2011-01 | -12.08 | -9.14 | 0.00 | 0.00 | 0.800 | -85 | 0.7 |\n\nNONE:\n\n| config | 1st start | score | full | 10y beat | 15y beat | boot_p | maxDD % | turnover/yr |\n|---|---|---|---|---|---|---|---|---|\n| LEV-CAN-DAA-UPRO [std] | 2011-01 | +8.44 | +6.08 | 1.00 | 1.00 | 0.114 | -56 | 4.1 |\n| LEV-CAN-DAA-SSO [std] | 2008-01 | +4.13 | +4.07 | 0.78 | 1.00 | 0.157 | -42 | 4.1 |\n| LEV-HAA-S-UPRO [std] | 2011-01 | +2.68 | +0.63 | 0.83 | 1.00 | 0.425 | -77 | 3.0 |\n| LEV-CAN-VAA4-UPRO [std] | 2011-01 | +0.66 | -1.25 | 0.50 | 0.00 | 0.579 | -53 | 6.1 |\n| LEV-HAA-S-SSO [std] | 2008-01 | +0.38 | +2.35 | 0.78 | 0.25 | 0.296 | -59 | 2.5 |\n| LEV-CAN-BAA-UPRO [std] | 2011-01 | -0.30 | -2.51 | 0.50 | 0.00 | 0.662 | -53 | 6.0 |\n| LEV-CAN-VAA4-SSO [std] | 2008-01 | -0.78 | +0.97 | 0.33 | 0.25 | 0.433 | -40 | 6.1 |\n| LEV-CAN-BAA-SSO [std] | 2008-01 | -1.85 | -0.19 | 0.33 | 0.25 | 0.518 | -40 | 5.9 |\n| LEV-GEM-SSO [std] | 2008-01 | -4.43 | -0.49 | 0.11 | 0.00 | 0.520 | -67 | 1.1 |\n| LEV-GEM-UPRO [std] | 2011-01 | -11.93 | -8.51 | 0.00 | 0.00 | 0.756 | -84 | 1.2 |\n\nFull protocol (quarterly starts from 2007-10 / 2010-10), with matched-period risk (monthly; SPY over the same months):\n\n| regime | config | 1st start | score | full | 10y beat | 10y windows | boot_p | CAGR | SPY CAGR | vol % | SPY vol % | maxDD % | SPY maxDD % | Sharpe | SPY Sharpe | p(Sharpe<=SPY) |\n|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n| CA | LEVCTL-UPRO-BH [std] | 2010-10 | +12.79 | +15.71 | 1.00 | 24 | 0.009 | +30.95 | +14.63 | 43.8 | 14.1 | -63 | -24 | 0.84 | 1.04 | 1.000 |\n| CA | LEVCTL-SSO-BH [std] | 2007-10 | +6.81 | +3.58 | 1.00 | 36 | 0.199 | +14.57 | +10.78 | 31.9 | 15.6 | -81 | -51 | 0.59 | 0.73 | 1.000 |\n| CA | TWIN-LEV-CAN-DAA-UPRO [std] | 2010-10 | +6.33 | +7.18 | 1.00 | 24 | 0.006 | +21.48 | +14.63 | 28.4 | 14.1 | -45 | -24 | 0.83 | 1.04 | 1.000 |\n| CA | LEV-HAA-S-UPRO [lt] | 2010-10 | +6.16 | +6.81 | 1.00 | 24 | 0.080 | +20.38 | +14.63 | 29.6 | 14.1 | -53 | -24 | 0.77 | 1.04 | 0.917 |\n| CA | TWIN-LEV-HAA-S-UPRO-lt [std] | 2010-10 | +3.67 | +3.92 | 1.00 | 24 | 0.016 | +17.88 | +14.63 | 22.9 | 14.1 | -37 | -24 | 0.83 | 1.04 | 1.000 |\n| CA | LEV-CAN-DAA-UPRO [lt] | 2010-10 | +3.48 | +0.66 | 0.88 | 24 | 0.436 | +13.45 | +14.63 | 29.5 | 14.1 | -50 | -24 | 0.58 | 1.04 | 1.000 |\n| CA | LEV-CAN-DAA-UPRO [std] | 2010-10 | +0.58 | -0.22 | 0.42 | 24 | 0.517 | +12.62 | +14.63 | 29.0 | 14.1 | -61 | -24 | 0.56 | 1.04 | 1.000 |\n| CA | LEV-HAA-S-SSO [lt] | 2007-10 | +0.47 | +2.52 | 0.67 | 36 | 0.233 | +12.29 | +10.78 | 19.4 | 15.6 | -25 | -51 | 0.69 | 0.73 | 0.597 |\n| CA | LEV-HAA-S-UPRO [std] | 2010-10 | -2.54 | -3.19 | 0.08 | 24 | 0.698 | +10.30 | +14.63 | 30.8 | 14.1 | -72 | -24 | 0.48 | 1.04 | 0.986 |\n| FED | LEVCTL-UPRO-BH [std] | 2010-10 | +13.46 | +16.03 | 1.00 | 24 | 0.008 | +30.95 | +14.63 | 43.8 | 14.1 | -63 | -24 | 0.84 | 1.04 | 1.000 |\n| FED | LEV-HAA-S-UPRO [lt] | 2010-10 | +7.52 | +8.61 | 1.00 | 24 | 0.052 | +22.73 | +14.63 | 28.9 | 14.1 | -53 | -24 | 0.85 | 1.04 | 0.827 |\n| FED | LEVCTL-SSO-BH [std] | 2007-10 | +7.23 | +3.69 | 1.00 | 36 | 0.200 | +14.57 | +10.78 | 31.9 | 15.6 | -81 | -51 | 0.59 | 0.73 | 1.000 |\n| FED | TWIN-LEV-CAN-DAA-UPRO [std] | 2010-10 | +7.05 | +7.96 | 1.00 | 24 | 0.005 | +22.43 | +14.63 | 28.4 | 14.1 | -45 | -24 | 0.86 | 1.04 | 1.000 |\n| FED | LEV-CAN-DAA-UPRO [lt] | 2010-10 | +4.46 | +1.53 | 0.88 | 24 | 0.371 | +15.24 | +14.63 | 29.0 | 14.1 | -47 | -24 | 0.64 | 1.04 | 1.000 |\n| FED | TWIN-LEV-HAA-S-UPRO-lt [std] | 2010-10 | +4.26 | +4.67 | 1.00 | 24 | 0.011 | +18.97 | +14.63 | 22.9 | 14.1 | -37 | -24 | 0.87 | 1.04 | 1.000 |\n| FED | LEV-CAN-DAA-UPRO [std] | 2010-10 | +2.28 | +1.54 | 0.67 | 24 | 0.344 | +15.33 | +14.63 | 28.2 | 14.1 | -58 | -24 | 0.65 | 1.04 | 1.000 |\n| FED | LEV-HAA-S-SSO [lt] | 2007-10 | +1.00 | +3.50 | 0.67 | 36 | 0.173 | +13.79 | +10.78 | 18.8 | 15.6 | -25 | -51 | 0.78 | 0.73 | 0.463 |\n| FED | LEV-HAA-S-UPRO [std] | 2010-10 | -1.72 | -2.11 | 0.21 | 24 | 0.619 | +12.16 | +14.63 | 30.3 | 14.1 | -70 | -24 | 0.54 | 1.04 | 0.978 |\n| NONE | LEVCTL-UPRO-BH [std] | 2010-10 | +14.11 | +16.32 | 1.00 | 24 | 0.011 | +30.95 | +14.63 | 43.8 | 14.1 | -63 | -24 | 0.84 | 1.04 | 1.000 |\n| NONE | TWIN-LEV-CAN-DAA-UPRO [std] | 2010-10 | +7.88 | +8.82 | 1.00 | 24 | 0.005 | +23.46 | +14.63 | 28.5 | 14.1 | -45 | -24 | 0.89 | 1.04 | 1.000 |\n| NONE | LEV-CAN-DAA-UPRO [lt] | 2010-10 | +7.76 | +6.95 | 0.96 | 24 | 0.110 | +21.58 | +14.63 | 27.3 | 14.1 | -52 | -24 | 0.86 | 1.04 | 0.898 |\n| NONE | LEV-CAN-DAA-UPRO [std] | 2010-10 | +7.76 | +6.95 | 0.96 | 24 | 0.110 | +21.58 | +14.63 | 27.3 | 14.1 | -52 | -24 | 0.86 | 1.04 | 0.898 |\n| NONE | LEVCTL-SSO-BH [std] | 2007-10 | +7.64 | +3.79 | 1.00 | 36 | 0.198 | +14.57 | +10.78 | 31.9 | 15.6 | -81 | -51 | 0.59 | 0.73 | 1.000 |\n| NONE | TWIN-LEV-HAA-S-UPRO-lt [std] | 2010-10 | +4.99 | +5.53 | 1.00 | 24 | 0.006 | +20.16 | +14.63 | 23.0 | 14.1 | -37 | -24 | 0.92 | 1.04 | 1.000 |\n| NONE | LEV-HAA-S-UPRO [lt] | 2010-10 | +2.04 | +2.10 | 0.79 | 24 | 0.381 | +16.73 | +14.63 | 29.9 | 14.1 | -69 | -24 | 0.68 | 1.04 | 0.911 |\n| NONE | LEV-HAA-S-UPRO [std] | 2010-10 | +2.04 | +2.10 | 0.79 | 24 | 0.381 | +16.73 | +14.63 | 29.9 | 14.1 | -69 | -24 | 0.68 | 1.04 | 0.911 |\n| NONE | LEV-HAA-S-SSO [lt] | 2007-10 | +0.13 | +2.00 | 0.58 | 36 | 0.319 | +12.78 | +10.78 | 20.4 | 15.6 | -46 | -51 | 0.69 | 0.73 | 0.573 |\n\nThe best leveraged config, `LEV-HAA-S-UPRO|lt` (UPRO while TIP's 13612U momentum is positive, else\nBIL/IEF; no short-term gain ever realized), clears criteria 1-3 in CA on the full protocol (score\n+6.16, full +6.81, 10-year beat 1.00 over 24 windows that all lie in 2010-2026, boot_p 0.080) and fails\n4-7: the family's walk-forward selection is negative; its neighbourhood fails (the same rule with\nstandard execution -2.54, on the 2x fund from 2007 +0.47 with boot_p 0.23, with the DAA canary +3.48\nwith boot_p 0.44); it depends on an instrument that has only existed in a bull market; there is no\nlong-history check. Its Sharpe ratio is lower than SPY's over the same months (0.77 vs 1.04) with\ntwice SPY's volatility and a -53% vs -24% monthly drawdown. Holding UPRO all the time scored +12.8,\nand a static 55% UPRO / 45% bills-and-bonds mix (its own average allocation) +3.7 with a higher Sharpe\n(0.83) and a smaller drawdown (-37%); in NONE that static mix beats the timed rule (+4.99 vs +2.04).\nThe CA score is leverage beta in a bull market plus `lt` path luck (being unable to sell UPRO lots\nwith short-term gains kept it invested through false alarms), not timing skill. The canary rules\ncut the leveraged funds' drawdowns only partly and not always (monthly, full protocol: UPRO held\n-63%, timed -50% to -72%; SSO held -81%, HAA-timed -25% in CA / -46% in NONE), at the cost of most of\ntheir return.\n\n## Verification battery (research.lab.verify) on the closest candidates\n\nFull protocol x CA/FED/NONE, rebalance boundaries shifted by 0/7/14/21 days (CA, NONE), one-day\nexecution lag, costs 0/15/35 bps per side, stricter tax accounting (annual tax on dividends and\ninterest at their real character; collectibles rate for gold), sub-periods. (The battery draws 500\nbootstrap samples, the other tables 1000, so boot_p differs by up to ~0.03 between sections.)\n\n### ADM-x-mom13612w|std\n\n\n| regime | score | full | 10y mean | 10y beat | 15y beat | 20y beat | boot p | maxDD (SPY) |\n|---|---|---|---|---|---|---|---|---|\n| CA | -0.48 | -0.21 | -0.51 | 51% | 38% | 41% | 0.554 | -36% (-55%) |\n| FED | +0.24 | +0.73 | +0.22 | 52% | 51% | 48% | 0.442 | -35% (-55%) |\n| NONE | +3.34 | +3.81 | +3.34 | 54% | 74% | 100% | 0.176 | -32% (-55%) |\n\nRebalance-timing luck (all boundary offsets):\n\n- CA: score mean -2.18 [min -3.08, max -0.48], full mean -1.98 [min -2.77, max -0.21], 0% of 4 offsets positive\n- NONE: score mean +0.66 [min -0.86, max +3.34], full mean +0.91 [min -0.31, max +3.81], 50% of 4 offsets positive\n\nOne-day execution lag: CA score -0.88 full -0.78, NONE score +2.70 full +2.86\n\nCosts per side: 0bps: NONE score +4.41, CA score +0.12; 15bps: CA score -1.66, NONE score +1.25; 35bps: CA score -4.08, NONE score -2.83\n\nStricter tax accounting (engine -> with annual distribution tax):\n- CA: from 2000: -0.21 -> -0.27; from 2005: -2.89 -> -2.85; from 2010: -7.59 -> -7.53; from 2015: -6.90 -> -6.88\n- FED: from 2000: +0.73 -> +0.57; from 2005: -2.11 -> -2.18; from 2010: -7.47 -> -7.51; from 2015: -7.01 -> -7.06\n\nSub-periods: CA: 2000-2010 +11.65, 2010-2020 -7.52, 2020-2026 -5.62; FED: 2000-2010 +13.89, 2010-2020 -7.91, 2020-2026 -5.68; NONE: 2000-2010 +18.94, 2010-2020 -6.99, 2020-2026 -3.42\n\n### ADM13612w-x-rm5|std\n\n\n| regime | score | full | 10y mean | 10y beat | 15y beat | 20y beat | boot p | maxDD (SPY) |\n|---|---|---|---|---|---|---|---|---|\n| NONE | +3.72 | +4.40 | +3.70 | 54% | 74% | 100% | 0.136 | -32% (-55%) |\n| CA | -0.03 | +0.38 | -0.05 | 51% | 49% | 41% | 0.488 | -36% (-55%) |\n| FED | +0.73 | +1.39 | +0.71 | 52% | 57% | 56% | 0.386 | -35% (-55%) |\n\nRebalance-timing luck (all boundary offsets):\n\n- CA: score mean -1.94 [min -2.95, max -0.03], full mean -1.71 [min -3.00, max +0.38], 0% of 4 offsets positive\n- NONE: score mean +0.67 [min -0.51, max +3.72], full mean +1.04 [min -0.72, max +4.40], 25% of 4 offsets positive\n\nOne-day execution lag: CA score -0.50 full -0.23, NONE score +2.93 full +3.35\n\nCosts per side: 0bps: NONE score +4.60, CA score +0.47; 15bps: CA score -1.03, NONE score +1.97; 35bps: NONE score -1.44, CA score -2.99\n\nStricter tax accounting (engine -> with annual distribution tax):\n- CA: from 2000: +0.38 -> +0.24; from 2005: -1.62 -> -1.66; from 2010: -6.52 -> -6.54; from 2015: -5.37 -> -5.40\n- FED: from 2000: +1.39 -> +1.18; from 2005: -0.73 -> -0.84; from 2010: -6.26 -> -6.34; from 2015: -5.27 -> -5.35\n\nSub-periods: NONE: 2000-2010 +18.25, 2010-2020 -6.63, 2020-2026 -0.56; CA: 2000-2010 +11.41, 2010-2020 -7.26, 2020-2026 -3.20; FED: 2000-2010 +13.57, 2010-2020 -7.61, 2020-2026 -2.94\n\n### GEM-x-3way|std\n\n\n| regime | score | full | 10y mean | 10y beat | 15y beat | 20y beat | boot p | maxDD (SPY) |\n|---|---|---|---|---|---|---|---|---|\n| CA | -0.72 | -0.03 | -0.87 | 39% | 45% | 37% | 0.534 | -39% (-55%) |\n| FED | -0.33 | +0.69 | -0.50 | 42% | 47% | 41% | 0.426 | -37% (-55%) |\n| NONE | +1.08 | +2.41 | +0.87 | 49% | 49% | 70% | 0.258 | -34% (-55%) |\n\nRebalance-timing luck (all boundary offsets):\n\n- NONE: score mean +0.76 [min -0.91, max +1.47], full mean +1.78 [min +0.14, max +2.41], 75% of 4 offsets positive\n- CA: score mean -0.96 [min -2.15, max -0.41], full mean -0.48 [min -1.56, max -0.03], 0% of 4 offsets positive\n\nOne-day execution lag: NONE score +1.08 full +2.57, CA score -0.73 full +0.06\n\nCosts per side: 0bps: CA score -0.43, NONE score +1.58; 15bps: CA score -1.31, NONE score +0.08; 35bps: NONE score -1.88, CA score -2.52\n\nStricter tax accounting (engine -> with annual distribution tax):\n- CA: from 2000: -0.03 -> -0.30; from 2005: -2.20 -> -2.25; from 2010: -6.91 -> -6.91; from 2015: -5.24 -> -5.27\n- FED: from 2000: +0.69 -> +0.43; from 2005: -1.55 -> -1.64; from 2010: -6.87 -> -6.90; from 2015: -5.24 -> -5.30\n\nSub-periods: CA: 2000-2010 +10.90, 2010-2020 -6.33, 2020-2026 -5.65; FED: 2000-2010 +12.62, 2010-2020 -6.70, 2020-2026 -5.96; NONE: 2000-2010 +15.48, 2010-2020 -6.51, 2020-2026 -5.00\n\n### GEM3-x-rm5|std\n\n\n| regime | score | full | 10y mean | 10y beat | 15y beat | 20y beat | boot p | maxDD (SPY) |\n|---|---|---|---|---|---|---|---|---|\n| FED | +0.34 | +1.34 | +0.15 | 51% | 47% | 52% | 0.360 | -40% (-55%) |\n| NONE | +1.23 | +2.49 | +1.03 | 51% | 49% | 67% | 0.264 | -39% (-55%) |\n| CA | +0.03 | +0.74 | -0.13 | 49% | 47% | 48% | 0.418 | -42% (-55%) |\n\nRebalance-timing luck (all boundary offsets):\n\n- NONE: score mean +1.12 [min -1.67, max +2.88], full mean +2.22 [min -0.23, max +3.37], 75% of 4 offsets positive\n- CA: score mean +0.10 [min -1.98, max +1.60], full mean +0.58 [min -1.23, max +1.52], 75% of 4 offsets positive\n\nOne-day execution lag: NONE score +1.55 full +2.83, CA score +0.21 full +0.94\n\nCosts per side: 0bps: NONE score +1.52, CA score +0.22; 15bps: NONE score +0.65, CA score -0.38; 35bps: NONE score -0.51, CA score -1.24\n\nStricter tax accounting (engine -> with annual distribution tax):\n- CA: from 2000: +0.74 -> +0.47; from 2005: -1.93 -> -1.96; from 2010: -7.00 -> -6.97; from 2015: -6.15 -> -6.18\n- FED: from 2000: +1.34 -> +1.08; from 2005: -1.39 -> -1.47; from 2010: -7.04 -> -7.06; from 2015: -6.36 -> -6.42\n\nSub-periods: FED: 2000-2010 +14.45, 2010-2020 -6.23, 2020-2026 -7.37; NONE: 2000-2010 +16.78, 2010-2020 -6.04, 2020-2026 -7.33; CA: 2000-2010 +12.85, 2010-2020 -5.91, 2020-2026 -6.78\n\n### VAA-G4-x|lt\n\n\n| regime | score | full | 10y mean | 10y beat | 15y beat | 20y beat | boot p | maxDD (SPY) |\n|---|---|---|---|---|---|---|---|---|\n| CA | -1.61 | +0.72 | -1.30 | 36% | 36% | 37% | 0.442 | -30% (-55%) |\n| FED | -1.53 | +1.42 | -1.16 | 36% | 38% | 41% | 0.384 | -28% (-55%) |\n| NONE | +1.40 | +2.30 | +1.35 | 49% | 55% | 63% | 0.326 | -24% (-55%) |\n\nRebalance-timing luck (all boundary offsets):\n\n- CA: score mean -3.56 [min -5.36, max -1.61], full mean -1.55 [min -3.81, max +0.72], 0% of 4 offsets positive\n- NONE: score mean -0.39 [min -2.51, max +1.40], full mean +0.79 [min -0.01, max +2.30], 50% of 4 offsets positive\n\nOne-day execution lag: CA score -3.45 full -2.73, NONE score +0.40 full +1.44\n\nCosts per side: 0bps: CA score -2.29, NONE score +3.09; 15bps: CA score -2.75, NONE score -1.89; 35bps: NONE score -8.18, CA score -5.02\n\nStricter tax accounting (engine -> with annual distribution tax):\n- CA: from 2000: +0.72 -> +0.23; from 2005: -3.19 -> -3.30; from 2010: -7.51 -> -7.70; from 2015: -6.22 -> -6.32\n- FED: from 2000: +1.42 -> +0.82; from 2005: -2.87 -> -3.17; from 2010: -7.65 -> -7.97; from 2015: -6.46 -> -6.72\n\nSub-periods: CA: 2000-2010 +13.55, 2010-2020 -7.07, 2020-2026 -7.73; FED: 2000-2010 +15.66, 2010-2020 -7.65, 2020-2026 -8.41; NONE: 2000-2010 +23.18, 2010-2020 -9.40, 2020-2026 -11.55\n\n\n## Diagnostics (report.diagnostics)\n\nWalk-forward = choose the family's best config on the trailing 10 (5) years, score it on the next\n5 (3); PBO = probability the in-sample best lands below the out-of-sample median (CSCV); DSR =\ndeflated Sharpe of the best config's monthly after-tax excess given the number of configs. \"common\nstart\" = only configs whose first start is the protocol's first start (PBO uses the months common\nto all configs, so the `all` rows cover only the latest starter's period).\n\n| grid | protocol | subset | configs | WF 10/5 OOS mean | WF 10/5 OOS beat | WF 10/5 IS mean | WF 5/3 OOS mean | WF 5/3 OOS beat | PBO | OOS of IS-best (pp/yr) | DSR of best | best by monthly mean |\n|---|---|---|---|---|---|---|---|---|---|---|---|---|\n| CA | screen | all | 700 | -6.06 | 0.00 | +6.30 | -2.88 | 0.25 | 0.125 | +2.65 | 0.380 | LEV-HAA-S-UPRO|lt |\n| CA | screen | common start | 292 | -6.08 | 0.00 | +5.60 | -5.67 | 0.25 | 0.772 | -2.84 | 0.190 | VAA-G4-x-rm2|lt |\n| CA_noLev | screen | all | 680 | -6.95 | 0.00 | +5.91 | -4.04 | 0.25 | 0.187 | -3.94 | 0.000 | HAA-S-e|tax1 |\n| CA_noLev | screen | common start | 292 | -6.08 | 0.00 | +5.60 | -5.67 | 0.25 | 0.772 | -2.84 | 0.190 | VAA-G4-x-rm2|lt |\n| FED_full_finalists | full | all | 21 | -9.01 | 0.00 | +5.67 | -2.42 | 0.21 | 0.722 | -4.54 | 0.013 | S-8020-x-A|tax1 |\n| FED_full_finalists | full | common start | 15 | -8.07 | 0.00 | +5.51 | -0.25 | 0.21 | 0.674 | -1.11 | 0.341 | VAA-G4-x|lt |\n| NONE | screen | all | 305 | -11.54 | 0.00 | +12.15 | +3.47 | 0.50 | 0.281 | -2.97 | 0.177 | LEV-CAN-DAA-UPRO|std |\n| NONE | screen | common start | 137 | -10.84 | 0.00 | +9.32 | -2.77 | 0.25 | 0.582 | +0.13 | 0.401 | ADM13612w-x-rm5|std |\n| NONE_noLev | screen | all | 295 | -13.24 | 0.00 | +9.69 | -0.21 | 0.25 | 0.433 | -7.42 | 0.000 | ENS-GEM-SPY50|std |\n| NONE_noLev | screen | common start | 137 | -10.84 | 0.00 | +9.32 | -2.77 | 0.25 | 0.582 | +0.13 | 0.401 | ADM13612w-x-rm5|std |\n| long_CA | long_screen | all | 60 | +0.24 | 0.50 | +3.77 | -1.63 | 0.25 | 0.489 | -2.92 | 0.008 | VAA-G4-L|tax1 |\n| long_CA | long_screen | common start | 48 | +0.32 | 0.50 | +2.84 | -1.90 | 0.25 | 0.340 | -2.66 | 0.001 | S-8020-L-A|tax1 |\n| long_NONE | long_screen | all | 20 | +2.13 | 0.50 | +8.34 | +2.18 | 0.25 | 0.348 | -0.88 | 0.189 | VAA-G4-L|std |\n| long_NONE | long_screen | common start | 16 | +0.43 | 0.50 | +6.03 | +0.33 | 0.25 | 0.170 | -0.30 | 0.202 | GEM-L|std |\n\nCriterion 4 fails in every ETF-era grid: picking the family's best trailing-10-year config and\nholding it for the next 5 years lost 6-7 pp/yr in CA and 11-13 pp/yr in NONE (0 of 3 decision dates\nbeat SPY), because the best 2000-2010 configs are the most defensive and the next 5 years were a\nbull market. In the small 1986+ long grids the 10/5 walk-forward is about break-even in CA (+0.2\npp/yr, half the decision dates positive) and positive in NONE (+2.1), but the 5/3 walk-forward is\nnegative in CA (-1.6) and the best long config's deflated Sharpe is 0.01 (CA) / 0.19 (NONE). The deflated Sharpe of the best non-leveraged CA config is 0.00-0.19. The `all` PBO\nvalues (0.13-0.43) cover only the months common to every config (2011-2026 with the UPRO configs,\n2012-2026 without them, set by the latest ETF-only starter) and the CA one is driven by the\nleveraged configs; on the 2000-2026 common-start subsets PBO is 0.58-0.77 (overfit).\n\n## Concerns and caveats\n\n1. **Negative cash after the January tax settlement (engine).** The engine pays each year's tax\n   from cash; a fully invested strategy goes to negative cash (an interest-free loan) until it next\n   sells. Standard execution repays it at the next monthly rebalance, but the tax-managed executions\n   may not be allowed to sell: `VAA-G4-x|lt` in CA averages -0.75% cash, reaches -10.6% of equity, and\n   spends 28% of days below -1%. This flatters tax-managed configs slightly (order of 0.05 pp/yr\n   here) relative to SPY, which never pays tax before the end. Reported as a lab issue.\n2. **Distributions taxed as deferred gains (PROTOCOL 5.5).** Bond-heavy models are flattered in\n   CA/FED; the battery's stricter accounting lowers full-period CA excess by 0.06-0.49 pp/yr. It\n   would make every CA conclusion here more negative, not less.\n3. **Wash sales.** Standard execution does not enforce the wash-sale rule; TAA models regularly\n   sell at a loss in a risk-off month and rebuy within 30 days. Real CA results for `std` configs\n   would be slightly worse (deferred loss deductions). `tax1`/`lt` executions have the 31-day guard.\n4. **Mutual-fund proxies before ETF launch.** `-x` configs trade Vanguard index funds before the\n   ETFs existed (2000-2007). Fund NAVs are total-return like the ETFs, but Vanguard restricts round\n   trips within 30 days; monthly switching would occasionally breach that. The `-e` (ETF-only)\n   versions start later and are uniformly worse, because they miss 2000-02.\n5. **Start-date and rebalance-day sensitivity.** Full-period excess from January 2000 flatters every\n   TAA model (it starts at the top of a bubble); the score (5/10/15-year windows) is the fairer\n   number and is negative in CA for every model. Moving the monthly rebalance by one to three weeks\n   moves scores by 1-5 pp/yr; several \"best\" configs are the luckiest offset of their rule.\n6. **Signal at today's close, trade at today's close** (the lab's convention). With a one-day lag\n   the CA scores move by -1.8 to +0.2 pp/yr (VAA-G4 `lt` -1.61 -> -3.45; 13612W-ADM -0.48 -> -0.88,\n   with margin -0.03 -> -0.50; 3-way GEM -0.72 -> -0.73, with margin +0.03 -> +0.21): the lag never\n   turns a negative CA score into a meaningful positive one, and VAA-G4 (which relies on same-close\n   execution) loses most.\n7. **Multiple testing.** 925 strategy configs (700 distinct in the CA screen). With that\n   many tries a couple of near-zero positive CA scores are expected by chance; the deflated Sharpe\n   of the best non-leveraged CA config is 0.00-0.19.\n8. **Duplicates.** Some configs are byte-different but behave identically (13612U = avg(1,3,6,12);\n   VAA `taxhold` = VAA under `lt`; rel_margin 2% = 5% for VAA under `lt`; `-e`/`-x` statics with\n   no chain). They are counted once in the diagnostics (de-duplicated by config content, not by\n   behaviour).\n9. **Hindsight checks use 2005+ starts** (so every random menu has history); they cannot test the\n   2000-02 period, where the published menus did best. Star removal on the full 2000+ windows covers\n   VAA-G4 (EEM) and QUINT (QQQ).\n10. **Leveraged-fund results** come from 2007+ (SSO) and 2010+ (UPRO) windows only, with no\n    long-history proxy in this family.\n\n## Conclusion\n\nFor a taxable California account the answer from this family is **no**: none of the published\ntactical asset allocation models (GEM, Accelerating Dual Momentum, Quint, VAA, DAA, PAA, BAA, HAA,\nGPM, EAA, FAA, AAA, Faber GTAA-5/13 and their aggressive top-k versions, Ivy, Robust Asset\nAllocation, Composite Dual Momentum) or the static allocations (60/40, Permanent Portfolio,\nAll-Weather, Golden Butterfly, Swensen, 3-fund) beats buying and holding SPY after CA tax with\nconfidence, and neither do the ~900 variants, ensembles, hysteresis / confirmation / tax-hold rules\nand tax-managed executions tried. The best unleveraged CA config is a coin flip against SPY (3-way\nGEM with a 5% switching margin: score +0.03, 10-year beat 0.49, boot_p 0.42) whose entire lead was\nearned in 2000-2010. The incumbent site preset (tax-managed 12-1 momentum over 22 ETFs, CA score\n+0.66, boot_p 0.025) is better than anything unleveraged in this family. The one large CA number in\nthe family (UPRO, a 3x S&P fund, timed by HAA's TIP canary with `lt` execution: +6.16) is leverage\nin a 2010-2026 bull market with a lower Sharpe ratio than SPY, and it fails the bar's neighbourhood,\nhindsight and walk-forward tests.\n\nWhat these models genuinely deliver is risk reduction: max drawdowns of -17% to -42% instead of\n-55%, and a timing signal that beats a static mix of the same assets by a median 2.9 pp/yr without\ntax. In CA most of that timing value goes to taxes (median +0.1 pp/yr left), and the models'\ndefensive average allocation costs more than that against SPY in rising markets. If the goal is a smaller\ndrawdown rather than a higher after-tax return, a static stock/bond mix is the statistically\nreliable way to buy it in this sample (higher Sharpe than SPY at p = 0.02-0.03 in CA, near-zero\nturnover), at a cost of about 0.9 pp/yr (80/20) to 1.8 pp/yr (60/40) of after-tax return. In a\ntax-deferred account the dual-momentum and VAA models are plausible risk-reducers with a positive but\nstatistically unproven return edge that came from one decade.\n"
+}

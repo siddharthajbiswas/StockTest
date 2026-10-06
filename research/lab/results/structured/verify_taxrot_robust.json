@@ -1,0 +1,411 @@
+{
+ "key": "taxrot_robust",
+ "results_md": "# Verifying KX3 / KX1 (tax-managed rotation): robustness, hindsight, structure vs signal\n\nFull report: /Users/siddhartha/dev/StockTest/research/lab/results/verify_taxrot_robust.md\nModule: /Users/siddhartha/dev/StockTest/research/lab/families/verify_taxrot_robust.py. It adds rebalance-boundary offset_days and a 1-day lag to the unchanged tax_rotation.TRStrategy. At offset 0 / lag 0 it gives identical results (max liquidation-value difference 0.0).\nScripts, logs and CSVs: /Users/siddhartha/dev/StockTest/research/lab/scratch/verify_taxrot_robust/ (h.py, q.py, an_rm.py, an_rest.py, e_conc.py, bat_extra.py; rm_screen_CA.csv, rm_full_CA.csv, nb_full_CA.csv, e_conc_2000/2010.log).\n\n## Verdict\n\nBoth KX3 and KX1 fail. Neither beats SPY after tax with good confidence, in CA or in FED. KX1 is the more robust of the two.\n\nCA, all numbers in pp/yr:\n\n| candidate | score | full | ex10_beat | ex15_beat | boot_p | DSR (12k trials) |\n|---|---|---|---|---|---|---|\n| KX3, as reported | +0.99 | +1.84 | 0.90 | 0.85 | 0.011 | 0.038 |\n| KX3, scored from starts \u2265 2002 | +0.81 | +0.83 | 0.88 | 0.82 | 0.173 (fails 1-3) | |\n| KX1, as reported | +0.93 | +1.82 | 0.91 | 0.89 | 0.011 | 0.051 |\n| KX1, scored from starts \u2265 2002 | +0.80 | +1.55 | 0.90 | 0.87 | 0.051 (passes 1-3) | |\n\n## What holds\n\n- The round-1 numbers reproduce exactly.\n- No look-ahead and no code bug was found.\n- Stricter distribution-tax accounting, the 1-day lag and costs up to 35 bps barely move the score.\n- On the incumbent menu a positive score is a broad plateau: 61 of 62 neighbours on the full protocol.\n- Momentum beats random picks under the identical execution:\n  - +0.7 to +0.8 of score on 30 random menus (t 5.8-6.9);\n  - +0.8 to +0.9 on the incumbent menu;\n  - +0.6 to +0.9 on PRE20.\n\n## What breaks\n\n- **Hindsight.**\n  - Without QQQ: score +0.30 (KX3) / +0.50 (KX1), and both fail.\n  - Without QQQ and XLK: \u22120.26 / +0.12, with ex10_beat about 0.47.\n  - Random menus: 1 in 30 passes. The mean score is +0.3 to +0.4, and zero or below from 2002 on.\n  - KX3's score rises with the tech funds in the menu: \u22120.91 with none, +1.21 with three.\n- **Pre-2000 holdout (VFINX, 1-day lag).**\n  - PRE20: KX3 ho5 +0.5 / ho10 +0.1; KX1 0.0 / 0.0; boot_p 0.42-0.58.\n  - Sector menus: equal-weight buy-and-hold beats the rules. On FSEL32, KX3's ho10 is \u22121.9.\n- **Start-date artifact.** On 2000-01-03 only SPY, MDY and DIA have enough history. Both rules start 1/3 each in them; KX3 keeps MDY at about 40% until 2008.\n- **Path chaos.**\n  - Shifting rebalance dates 4-8 weeks: KX1 score +0.70 / +0.38; only 1 of 3 schedules passes for each rule.\n  - 15 instead of 5 bps cuts the full excess to +0.46 (KX3) / +0.91 (KX1).\n- **Multiple testing.** Deflated Sharpe 0.04-0.05; only 25-37% of neighbours pass criteria 1-3.\n- **Regime.**\n  - Pre-tax active return 2000-08 is +4.6 to +5.0/yr, mostly MDY.\n  - 2009-26 is +0.7 to +0.9/yr: growth/tech +2.0, everything else \u22121.2 to \u22121.3.\n  - 5-year windows starting 2019 or later average \u22122.7 to \u22122.8/yr.\n  - By 2026: 54-57% growth/tech and 81-87% unrealized gain.\n\n## Signal, structure or regime luck\n\nOn the incumbent menu (score):\n\n| rule | score |\n|---|---|\n| equal-weight buy-and-hold | +0.05 |\n| random picks, KX execution | +0.08 / +0.13 |\n| KX3 / KX1 | +0.99 / +0.93 |\n| all of these without QQQ and XLK | \u22120.40 to +0.12 |\n\n- **Signal:** real but narrow; it runs largely through picking QQQ/XLK.\n- **Structure:** necessary to survive the tax, worth about zero on its own.\n- **Regime luck:** the lead over SPY.",
+ "verdicts": [
+  {
+   "candidate": "KX3: 378-0 momentum, top 5, semiannual, 1% budget, keep-in-top-2N + no-trim + worst-ranked-first gain spending (WS, proportional buys)",
+   "verdict": "fail",
+   "reasons": [
+    "Criterion 6, hindsight (full protocol, CA). Without QQQ: score +0.30, ex10_beat 0.58, ex15_beat 0.62, boot_p 0.36. Without XLK: +0.39 (0.70 / 0.79 / 0.20). Without both: -0.26, with ex10_beat 0.46. FED is the same.",
+    "30 random menus from BROAD_EQUITY_POOL_2003 (full, CA): mean score +0.42, full +0.16 (positive on 60% of menus), ex10_beat 0.51, 1 in 30 passes criteria 1-3. Scored from starts in 2002 or later, the mean score is -0.04. Score by the number of tech funds in the menu: -0.91 with none, +0.19, +0.44, +1.21 with three.",
+    "Criterion 7, pre-2000 holdout on pre-ETF analog menus (VFINX benchmark, 1-day lag, CA). PRE20: ho5 +0.52, ho10 +0.09, boot_p 0.58. FSEL11: ho5 +0.63, ho10 -0.06. FSEL32: ho10 -1.91, beating VFINX in 6% of windows. On the sector menus, momentum does not beat equal-weight buy-and-hold.",
+    "Start-date artifact. At the 2000-01 start only SPY, MDY and DIA have 379 days of history, so the rule holds MDY/DIA/SPY and keeps MDY at 39-45% through 2008. Scored only from starts in 2002 or later: score +0.81, full +0.83, ex15_beat 0.82, boot_p 0.173, so it FAILS criteria 1-3.",
+    "Path chaos. Rebalance-boundary offsets of 56 and 112 days: score +0.74 / +0.95, boot_p 0.10 / 0.19; 1 of 3 schedules passes (round 1's month offsets: 3 of 6). At 15 instead of 5 bps per side the full excess drops from +1.84 to +0.46 and boot_p rises to 0.34, although the direct cost is only about 0.01pp.",
+    "Multiple testing. Deflated Sharpe 0.038 (CA) given 12,000 configs tried; round-1 PBO 0.60-0.68. Only 6 of 19 one-at-a-time neighbours and 6 of 24 random-box neighbours pass criteria 1-3, although nearly all have a positive score.",
+    "Regime. Pre-tax active return 2000-2008 is +4.56pp/yr, mostly the frozen MDY position. 2009-2026 is +0.87pp/yr: growth/tech +2.05, everything else -1.18. 5-year windows starting 2019 or later average -2.74pp/yr and beat SPY 18% of the time. In 2026 the portfolio is 54% growth/tech with 87% unrealized gain.",
+    "What holds: exact reproduction, no look-ahead or code bug; the score is robust to a 1-day lag (+1.09), 35 bps costs (+0.88) and annual distribution tax (real excess >= engine excess). The momentum signal beats random picks under the same execution (+0.80 score on random menus, t 5.8; +0.9 on the incumbent menu), but the lead over SPY is menu and regime luck."
+   ],
+   "bugs_found": [
+    "No code bug in tax_rotation.TRStrategy / Rank affecting KX3. verify_taxrot_robust.ws (offset 0 / lag 0) reproduces tax_rotation.ws exactly.",
+    "Evaluation artifact (not a code bug). The rule needs 379 bars of history, and on 2000-01-03 only SPY, MDY and DIA qualify. The first window, which supplies full_excess and the bootstrap series, is an unearned MDY/DIA/SPY portfolio held for years. The lab has no requires/min_start guard for rotation menus.",
+    "Single-path statistics (full_excess, boot_p) are chaotic for this frozen-portfolio rule: 5 to 15 bps of costs moves full_excess from +1.84 to +0.46.",
+    "Lab caching gap. registry.code_version hashes only a custom kind's own source file, not the source of signals or base classes imported from other family modules. Not triggered here."
+   ],
+   "key_numbers": {
+    "CA": {
+     "score": 0.0099,
+     "full_excess": 0.0184,
+     "ex10_beat": 0.8955,
+     "ex15_beat": 0.8511,
+     "ex20_beat": 0.963,
+     "boot_p": 0.011,
+     "max_dd": -0.5366,
+     "bench_max_dd": -0.5519,
+     "dsr": 0.038
+    },
+    "FED": {
+     "score": 0.011,
+     "full_excess": 0.0194,
+     "ex10_beat": 0.8955,
+     "ex15_beat": 0.8723,
+     "ex20_beat": 1,
+     "boot_p": 0.006,
+     "dsr": 0.048
+    },
+    "CA_starts_from_2002": {
+     "score": 0.0081,
+     "full_excess": 0.0083,
+     "ex10_beat": 0.8814,
+     "ex15_beat": 0.8205,
+     "ex20_beat": 0.9474,
+     "boot_p": 0.173,
+     "max_dd": -0.5818,
+     "bench_max_dd": -0.5519
+    },
+    "offsets_days_0_56_112": {
+     "score": [
+      0.0099,
+      0.0074,
+      0.0095
+     ],
+     "full_excess": [
+      0.0184,
+      0.011,
+      0.0087
+     ],
+     "boot_p": [
+      0.016,
+      0.104,
+      0.192
+     ],
+     "pass13": "1/3"
+    },
+    "lag1_CA": {
+     "score": 0.0109,
+     "full_excess": 0.0153,
+     "boot_p": 0.056
+    },
+    "costs_CA_score_0_15_35bps": [
+     0.0102,
+     0.0096,
+     0.0088
+    ],
+    "costs_CA_full_0_15_35bps": [
+     0.0182,
+     0.0046,
+     0.0097
+    ],
+    "realism_CA_real_excess_from_2000_2005_2010_2015": [
+     0.019,
+     0.0093,
+     0.01,
+     0.02
+    ],
+    "subperiods_CA": {
+     "2000-2010": 0.0293,
+     "2010-2020": 0.0089,
+     "2020-2026": -0.004
+    },
+    "removal_full_CA_score": {
+     "minus_QQQ": 0.003,
+     "minus_XLK": 0.0039,
+     "minus_both": -0.0026
+    },
+    "random_menus_full_CA": {
+     "score_mean": 0.0042,
+     "full_mean": 0.0016,
+     "pass13": "1/30",
+     "minus_random_rank_paired": 0.008,
+     "t": 5.76
+    },
+    "pre2000_long_CA_lag1": {
+     "PRE20": {
+      "score": 0.0112,
+      "full_excess": -0.0022,
+      "ho5_mean": 0.0052,
+      "ho10_mean": 0.0009,
+      "boot_p": 0.582
+     },
+     "FSEL11": {
+      "score": 0.0118,
+      "full_excess": 0.0002,
+      "ho5_mean": 0.0063,
+      "ho10_mean": -0.0006,
+      "boot_p": 0.448
+     },
+     "FSEL32": {
+      "score": 0.0127,
+      "full_excess": 0.0039,
+      "ho5_mean": 0.0032,
+      "ho10_mean": -0.0191,
+      "boot_p": 0.328
+     }
+    },
+    "neighbourhood_full_CA": {
+     "one_at_a_time_n": 19,
+     "score_mean": 0.0087,
+     "share_score_pos": 1,
+     "pass13": 6
+    },
+    "concentration": {
+     "top3_share_2009_2026": "0.62-0.71",
+     "growth_tech_2026": 0.537,
+     "unrealized_gain_share_2026": 0.867
+    }
+   },
+   "best_variant_cfg": {
+    "kind": "tax_rotation.ws",
+    "signal": "tax_rotation.rank",
+    "params": {
+     "menu": [
+      "SPY",
+      "QQQ",
+      "DIA",
+      "MDY",
+      "IWM",
+      "IJR",
+      "EFA",
+      "EEM",
+      "IWD",
+      "IWF",
+      "RSP",
+      "XLB",
+      "XLC",
+      "XLE",
+      "XLF",
+      "XLI",
+      "XLK",
+      "XLP",
+      "XLRE",
+      "XLU",
+      "XLV",
+      "XLY"
+     ],
+     "score": "ret",
+     "lookback": 252,
+     "skip": 21,
+     "top_n": 5,
+     "hold_buffer": 5
+    },
+    "rebalance": "Q",
+    "execution": "tax",
+    "gain_budget": 0.02,
+    "wash_days": 31,
+    "buy_order": "prop",
+    "st_gains": false,
+    "trim": false,
+    "gain_order": "rank"
+   },
+   "best_variant_numbers": {
+    "note": "No fixed variant was found. The more robust of the pair is KX1, unchanged; it is still a fail. CA numbers:",
+    "score": 0.0093,
+    "full_excess": 0.0182,
+    "ex10_beat": 0.9104,
+    "ex15_beat": 0.8936,
+    "ex20_beat": 0.963,
+    "boot_p": 0.011,
+    "max_dd": -0.5658,
+    "bench_max_dd": -0.5519
+   }
+  },
+  {
+   "candidate": "KX1: incumbent signal (252-21 momentum, top 5, quarterly) with keep-in-top-2N + no-trim + worst-ranked-first, long-term gains only, 2% budget (WS)",
+   "verdict": "fail",
+   "reasons": [
+    "Criterion 6, hindsight (full protocol, CA). Without QQQ: score +0.50, ex10_beat 0.61, ex15_beat 0.75, boot_p 0.08, so it fails. Without XLK: +0.60 (0.69 / 0.77 / 0.11). Without both: +0.12, ex10_beat 0.49, boot_p 0.48. FED is the same.",
+    "30 random menus (full, CA): mean score +0.34 (positive on 63% of menus), full +0.70 (positive on 87%), ex10_beat 0.48, ex15_beat 0.53, 1 in 30 passes. Scored from starts in 2002 or later, the mean score is -0.17.",
+    "Criterion 7, pre-2000 holdout (VFINX benchmark, 1-day lag, CA). PRE20: ho5 +0.01, ho10 -0.03, boot_p 0.42. FSEL11: ho5 +0.79, ho10 +0.24, boot_p 0.37. FSEL32: ho10 -0.39, ex15_beat 0.71. No analog menu passes criteria 1-3, and equal-weight buy-and-hold beats the rule on the sector menus.",
+    "Rebalance timing. Boundary offsets of 28 and 56 days: score +0.70 / +0.38, full excess +0.54 / +0.41, boot_p 0.29 / 0.32. Only 1 of 3 schedules passes (round 1's month offsets: 1 of 3).",
+    "Path chaos. At 15 instead of 5 bps per side the full excess drops from +1.82 to +0.91 and boot_p rises to 0.18.",
+    "Multiple testing. Deflated Sharpe 0.051 (CA) given 12,000 configs; round-1 PBO 0.60-0.68. 7 of 19 one-at-a-time neighbours pass criteria 1-3.",
+    "Regime. Pre-tax active return 2000-2008 is +5.02pp/yr: MDY, international, cyclicals. 2009-2026 is +0.74pp/yr: growth/tech +2.08, everything else -1.34. 5-year windows starting 2019 or later average -2.78pp/yr and beat SPY 9% of the time. From 2015-01 to 2026 the excess is -0.13pp. In 2026 the portfolio is 57% growth/tech.",
+    "Why KX1 is the more robust of the two: it still passes criteria 1-3 when scored from 2002 on (score +0.80, full +1.55, ex15_beat 0.87, boot_p 0.051); it is less damaged by removing QQQ/XLK; it has better random-menu full excess; and its lag and realism results are fine. But it fails the menu, holdout, timing and deflated-Sharpe tests, so it is not recommendable with good confidence."
+   ],
+   "bugs_found": [
+    "No code bug affecting KX1; identity check exact.",
+    "Same 2000-01 eligibility artifact as KX3: at 274 bars of history only SPY, MDY and DIA qualify on 2000-01-03, and MDY is about 41% through 2002. Removing those starts lowers the score from 0.93 to 0.80 and the full excess from 1.82 to 1.55.",
+    "Same single-path chaos and code_version caching gap as noted for KX3."
+   ],
+   "key_numbers": {
+    "CA": {
+     "score": 0.0093,
+     "full_excess": 0.0182,
+     "ex10_beat": 0.9104,
+     "ex15_beat": 0.8936,
+     "ex20_beat": 0.963,
+     "boot_p": 0.011,
+     "max_dd": -0.5658,
+     "bench_max_dd": -0.5519,
+     "dsr": 0.051
+    },
+    "FED": {
+     "score": 0.0105,
+     "full_excess": 0.0196,
+     "ex10_beat": 0.9254,
+     "ex15_beat": 0.9149,
+     "ex20_beat": 1,
+     "boot_p": 0.009,
+     "dsr": 0.065
+    },
+    "CA_starts_from_2002": {
+     "score": 0.008,
+     "full_excess": 0.0155,
+     "ex10_beat": 0.8983,
+     "ex15_beat": 0.8718,
+     "ex20_beat": 0.9474,
+     "boot_p": 0.051,
+     "max_dd": -0.5885,
+     "bench_max_dd": -0.5519
+    },
+    "offsets_days_0_28_56": {
+     "score": [
+      0.0093,
+      0.007,
+      0.0038
+     ],
+     "full_excess": [
+      0.0182,
+      0.0054,
+      0.0041
+     ],
+     "boot_p": [
+      0.014,
+      0.29,
+      0.322
+     ],
+     "pass13": "1/3"
+    },
+    "lag1_CA": {
+     "score": 0.0102,
+     "full_excess": 0.0183,
+     "boot_p": 0.036
+    },
+    "costs_CA_score_0_15_35bps": [
+     0.0097,
+     0.0086,
+     0.0074
+    ],
+    "costs_CA_full_0_15_35bps": [
+     0.0185,
+     0.0091,
+     0.0079
+    ],
+    "realism_CA_real_excess_from_2000_2005_2010_2015": [
+     0.0186,
+     0.0127,
+     0.0118,
+     -0.0012
+    ],
+    "subperiods_CA": {
+     "2000-2010": 0.0357,
+     "2010-2020": 0.0074,
+     "2020-2026": -0.0064
+    },
+    "removal_full_CA_score": {
+     "minus_QQQ": 0.005,
+     "minus_XLK": 0.006,
+     "minus_both": 0.0012
+    },
+    "random_menus_full_CA": {
+     "score_mean": 0.0034,
+     "full_mean": 0.007,
+     "pass13": "1/30",
+     "minus_random_rank_paired": 0.0073,
+     "t": 6.86
+    },
+    "pre2000_long_CA_lag1": {
+     "PRE20": {
+      "score": 0.0099,
+      "full_excess": 0.0017,
+      "ho5_mean": 0.0001,
+      "ho10_mean": -0.0003,
+      "boot_p": 0.424
+     },
+     "FSEL11": {
+      "score": 0.0098,
+      "full_excess": 0.002,
+      "ho5_mean": 0.0079,
+      "ho10_mean": 0.0024,
+      "boot_p": 0.37
+     },
+     "FSEL32": {
+      "score": 0.011,
+      "full_excess": -0.0002,
+      "ho5_mean": 0.008,
+      "ho10_mean": -0.0039,
+      "boot_p": 0.522
+     }
+    },
+    "neighbourhood_full_CA": {
+     "one_at_a_time_n": 19,
+     "score_mean": 0.0081,
+     "share_score_pos": 1,
+     "pass13": 7,
+     "random_box_n": 24,
+     "random_box_score_mean": 0.0068,
+     "random_box_pass13": 6
+    },
+    "concentration": {
+     "top3_share_2009_2026": "0.53-0.70",
+     "growth_tech_2026": 0.57,
+     "unrealized_gain_share_2026": 0.806
+    }
+   },
+   "best_variant_cfg": {
+    "kind": "tax_rotation.ws",
+    "signal": "tax_rotation.rank",
+    "params": {
+     "menu": [
+      "SPY",
+      "QQQ",
+      "DIA",
+      "MDY",
+      "IWM",
+      "IJR",
+      "EFA",
+      "EEM",
+      "IWD",
+      "IWF",
+      "RSP",
+      "XLB",
+      "XLC",
+      "XLE",
+      "XLF",
+      "XLI",
+      "XLK",
+      "XLP",
+      "XLRE",
+      "XLU",
+      "XLV",
+      "XLY"
+     ],
+     "score": "ret",
+     "lookback": 252,
+     "skip": 21,
+     "top_n": 5,
+     "hold_buffer": 5
+    },
+    "rebalance": "Q",
+    "execution": "tax",
+    "gain_budget": 0.02,
+    "wash_days": 31,
+    "buy_order": "prop",
+    "st_gains": false,
+    "trim": false,
+    "gain_order": "rank"
+   },
+   "best_variant_numbers": {
+    "note": "KX1 unchanged is the most robust design found; no neighbour or fix removes the menu and regime dependence. CA numbers:",
+    "score": 0.0093,
+    "full_excess": 0.0182,
+    "ex10_beat": 0.9104,
+    "ex15_beat": 0.8936,
+    "ex20_beat": 0.963,
+    "boot_p": 0.011,
+    "max_dd": -0.5658,
+    "bench_max_dd": -0.5519,
+    "from_2002_score": 0.008,
+    "from_2002_full_excess": 0.0155,
+    "from_2002_boot_p": 0.051
+   }
+  }
+ ],
+ "summary": "KX3 and KX1 both FAIL as \"beats SPY after tax with good confidence\", in CA and in FED.\n\nWhat holds:\n- The round-1 numbers reproduce exactly, and no look-ahead or code bug was found.\n- A 1-day lag, costs up to 35 bps and annual distribution tax barely move the score.\n- On the incumbent menu nearly every parameter neighbour has a positive score.\n- The momentum ranking really does beat random picks under the same tax-managed execution: +0.7 to +0.9pp of score on 30 random menus (t about 6), on the incumbent menu, and on the pre-ETF PRE20 menu.\n\nWhat breaks:\n- The lead over SPY depends on the menu and the era.\n  - Removing QQQ alone cuts the score 46-70%.\n  - Removing QQQ and XLK leaves -0.26 (KX3) / +0.12 (KX1), a coin flip against SPY.\n  - On random menus only 1 in 30 passes, with a mean score of +0.3 to +0.4, and zero or below for starts from 2002 on.\n  - Performance rises with the number of tech funds in the menu.\n- The pre-2000 holdout is flat against VFINX: PRE20 ho5 +0.5 / 0.0. On sector-only menus, momentum does not beat equal-weight buy-and-hold.\n- New artifact: on 2000-01-03 only SPY, MDY and DIA have the required history, so both rules start as MDY/DIA/SPY. KX3 keeps MDY at about 40% until 2008. Scored from 2002 on, KX3 fails criteria 1-3 (ex15_beat 0.82, boot_p 0.17); KX1 still passes (boot_p 0.051).\n- The single 2000 path is chaotic. 15 instead of 5 bps cuts the full-period excess from +1.84 to +0.46 (KX3) and from +1.82 to +0.91 (KX1). Shifting rebalance dates 4-8 weeks drops KX1's score to +0.38.\n- Deflated Sharpe is 0.04-0.05 given about 12,000 configs tried.\n- Attribution: 2000-08 excess came from the forced MDY position. 2009-26 excess came entirely from growth/tech holdings (+2.0pp/yr; everything else -1.2 to -1.3). Fresh 5-year windows starting 2019 or later lose about 2.7pp/yr.\n\nConclusion: the signal is real but modest; the tax-managed structure is necessary but worth about zero on its own; the lead over SPY is regime luck. KX1, unchanged, is the more robust of the two. Present it as a tax-efficient momentum tilt with a growth-regime bet, not as an S&P-beater.",
+ "open_questions": [
+  "Should the lab add a min_start or eligibility guard for rotation menus, so that the first start (which drives full_excess and boot_p) is not one where only 3 of 22 funds are eligible? This affects every momentum family on ETF menus that start in 2000.",
+  "For low-turnover, frozen-portfolio tax rules, should the confidence bar use full_excess and boot_p averaged over rebalance-boundary offsets or start dates, instead of the single 2000-01 path, which proved chaotic under immaterial perturbations?",
+  "registry.code_version for custom kinds ignores signals and base classes imported from other family modules. Should it also hash SIGNALS[cfg['signal']][2]?",
+  "The FSEL11/FSEL32 analog menus are survivor lists and ignore Fidelity Select front loads and redemption fees. If the pre-2000 sector holdout matters for other families, a survivorship-free Select fund list would be needed.",
+  "Random-menu tests here used the screen and full protocols in CA only. FED random menus and the long protocol on more pre-ETF menus were not run."
+ ]
+}

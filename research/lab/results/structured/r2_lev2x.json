@@ -1,0 +1,465 @@
+{
+ "key": "lev2x",
+ "results_md": "/Users/siddhartha/dev/StockTest/research/lab/results/r2_lev2x.md",
+ "headline": "No moderate-leverage trend design clears the good-confidence bar after California tax. The 96-design grid was pre-registered and the selection rule picks daily 2x S&P (SSO) while SPY's close is more than 3% above its 200-day SMA, else IEF, with short-term-gain exits deferred up to 60 days (S200|A2|IEF|D-h1). It is effectively tied with the SMA175 version. CA after-tax score is positive in every history: +3.4 (2000-26, p 0.097), +4.6 (1986-26, p 0.070), +3.3 (1930-85 holdout, p 0.164), +4.0 (1930-2026, p 0.068). Drawdowns are below SPY's everywhere: -49% vs -55%, and -73% vs -81% in the 1930s. But the holdout p fails the bar, start-averaged p is 0.15-0.35, DSR is about 0.005, the edge has been near zero since 2010 (2010s +0.6, 2020-26 -0.3), and a one-day execution lag means a -59% drawdown in 1987. Verdict: CONDITIONAL at best; none is acceptable at the user's good-confidence standard.",
+ "recommendation": {
+  "verdict": "NONE acceptable at 'good confidence' in CA. If the user deliberately wants this exposure as an expected-value bet (a satellite, not a replacement for SPY), this is the most robust form found. Status: CONDITIONAL.",
+  "label": "S200|A2|IEF|D-h1: daily 2x S&P (SSO) while the S&P 500 total-return close is more than 3% above its 200-day SMA (hysteresis: exit once more than 3% below), else IEF. Checked every close, traded at that close (market-on-close). Defer an exit whose net short-term gain turns long-term within 60 days.",
+  "cfg": {
+   "kind": "r2_lev2x.rule",
+   "world": "ETF",
+   "safe": "IEF",
+   "filters": [
+    [
+     200,
+     0.03
+    ]
+   ],
+   "check": "D",
+   "lag": 0,
+   "core": 0,
+   "on": {
+    "two": 1
+   },
+   "off": {
+    "safe": 1
+   },
+   "defer": 60
+  },
+  "cfg_notes": "Run with sweep.run([cfg], protocol='full', regimes=('CA',)). In world ETF, two=R2L_SSO (real SSO from 2006-06-21, lab SYN_SPY2XC before) and safe=R2L_IEF (real IEF from 2002-07-30, VFITX before); signal = SPY close. The same rule on 1986-26 uses \"world\": \"LONG\" with protocol 'long_r'; on 1930-2026, \"world\": \"SPLICE\" with protocol 'r2_splice'.",
+  "cfg_real_tickers_only": {
+   "kind": "r2_lev2x.rule",
+   "filters": [
+    [
+     200,
+     0.03
+    ]
+   ],
+   "check": "D",
+   "lag": 0,
+   "core": 0,
+   "on": {
+    "two": 1
+   },
+   "off": {
+    "safe": 1
+   },
+   "defer": 60,
+   "roles": {
+    "one": "SPY",
+    "two": "SSO",
+    "three": "UPRO",
+    "safe": "IEF"
+   },
+   "requires": [
+    "SSO"
+   ]
+  },
+  "regime_target": "CA taxable (48.1% ST / 28.1% LT); FED secondary",
+  "numbers": {
+   "CA": {
+    "history": "2000-2026 (protocol full, SPY benchmark, official engine sweep)",
+    "score": 0.0342,
+    "full_excess": 0.0379,
+    "ex10_beat": 0.791,
+    "ex15_beat": 0.872,
+    "ex20_beat": 1,
+    "ex10_min": -0.018,
+    "boot_p": 0.097,
+    "boot_p_avg_over_starts": 0.348,
+    "full_excess_avg_over_starts": 0.016,
+    "max_dd": -0.493,
+    "bench_max_dd": -0.552,
+    "sharpe": 0.56,
+    "bench_sharpe": 0.51,
+    "vol": 0.247,
+    "trades": 65,
+    "turnover_per_yr": 0.97,
+    "lag1": {
+     "score": 0.031,
+     "boot_p": 0.118,
+     "max_dd": -0.476
+    }
+   },
+   "FED": {
+    "history": "2000-2026",
+    "score": 0.0425,
+    "full_excess": 0.049,
+    "ex10_beat": 0.866,
+    "ex15_beat": 0.936,
+    "ex20_beat": 1,
+    "boot_p": 0.059,
+    "max_dd": -0.471,
+    "bench_max_dd": -0.552
+   },
+   "NONE": {
+    "history": "2000-2026",
+    "score": 0.0629,
+    "full_excess": 0.0624,
+    "boot_p": 0.032
+   },
+   "long_r": {
+    "history": "1986-2026, VFINXR benchmark",
+    "CA": {
+     "score": 0.0457,
+     "full_excess": 0.0315,
+     "ex10_beat": 0.886,
+     "ex15_beat": 0.942,
+     "ex20_beat": 1,
+     "boot_p": 0.07,
+     "boot_p_avg_over_starts": 0.247,
+     "full_excess_avg_over_starts": 0.0225,
+     "max_dd": -0.493,
+     "bench_max_dd": -0.553,
+     "ho10_mean_pre2000": 0.037,
+     "ho10_beat": 1,
+     "lag1": {
+      "score": 0.043,
+      "boot_p": 0.177,
+      "max_dd": -0.592
+     }
+    },
+    "FED": {
+     "score": 0.0549,
+     "full_excess": 0.0473,
+     "ex10_beat": 0.935,
+     "ex15_beat": 0.981,
+     "ex20_beat": 1,
+     "boot_p": 0.021,
+     "max_dd": -0.471,
+     "bench_max_dd": -0.553
+    }
+   },
+   "holdout_1930_1985": {
+    "history": "r2_splice starts 1930-1975, windows ending by 1985-10; ^GSPC + dividends, T-bills before 1962, synthetic intermediate Treasuries 1962+",
+    "CA": {
+     "score": 0.0329,
+     "full_excess": 0.025,
+     "ex10_beat": 0.826,
+     "ex10_min": -0.058,
+     "ex15_beat": 0.951,
+     "ex20_beat": 1,
+     "boot_p": 0.164,
+     "boot_p_avg_over_starts": 0.153,
+     "max_dd": -0.729,
+     "bench_max_dd": -0.808,
+     "lag1": {
+      "score": 0.024,
+      "boot_p": 0.274,
+      "max_dd": -0.776
+     }
+    },
+    "FED": {
+     "score": 0.0403,
+     "full_excess": 0.0369,
+     "ex10_beat": 0.87,
+     "ex15_beat": 0.951,
+     "ex20_beat": 1,
+     "boot_p": 0.074
+    }
+   },
+   "splice_1930_2026": {
+    "CA": {
+     "score": 0.0396,
+     "full_excess": 0.0251,
+     "ex10_beat": 0.885,
+     "ex15_beat": 0.963,
+     "ex20_beat": 1,
+     "boot_p": 0.068,
+     "max_dd": -0.729,
+     "bench_max_dd": -0.808
+    },
+    "FED": {
+     "score": 0.0485,
+     "full_excess": 0.0406,
+     "boot_p": 0.013
+    }
+   },
+   "real_tickers_2006_2026": {
+    "CA": {
+     "score": 0.0161,
+     "full_excess": 0.0257,
+     "ex10_beat": 0.659,
+     "boot_p": 0.21,
+     "max_dd": -0.493,
+     "bench_max_dd": -0.552
+    },
+    "FED": {
+     "score": 0.023,
+     "boot_p": 0.14
+    },
+    "NONE": {
+     "score": 0.0421,
+     "boot_p": 0.073
+    }
+   },
+   "decades_CA_10y_excess": {
+    "1930s": 0.045,
+    "1940s": 0.006,
+    "1950s": 0.099,
+    "1960s": -0.015,
+    "1970s": 0.04,
+    "1980s": 0.069,
+    "1990s": 0.033,
+    "2000s": 0.09,
+    "2010s": 0.006,
+    "2020-26": -0.003
+   },
+   "prob_trail_spy": {
+    "empirical_10y_windows": "11-21% across histories (1 - ex10_beat)",
+    "empirical_20y_windows": "0% in every history",
+    "strategy_bootstrap_12m_blocks_10y_20y": "32%/25% (1930-2026), 25%/16% (1986-2026), 23%/14% (2000-2026)",
+    "market_path_bootstrap_20y": "57-66% with 1-3-month persistence, 29-31% with 1-year blocks"
+   },
+   "tail": {
+    "1987": "lag 0 exits at the 10-16 close (DD -31% vs -33%); lag 1 rides Black Monday (DD -59%)",
+    "single_minus20pct_day_while_invested": "10y excess drops ~2.9 (permanent) to ~4.0 (1987 pattern) pp/yr; 10y beat 94% -> 72%/53% (1986-2016 starts), 89% -> 62%/46% (1930-2016)",
+    "1929_35_from_1929_start": "max DD -77% vs -84%; value by 1935: 1.31x vs 0.77x pre-tax, 1.17x vs 0.77x after-tax",
+    "strategy_bootstrap_P_DD_gt_80pct_20y_1930_2026": "1.4% vs SPY 4.0% (P(DD>60%) 27% vs 20%)"
+   },
+   "turnover_and_tax": {
+    "switches_per_yr": "~1 (2.5 orders/yr)",
+    "turnover": 0.97,
+    "net_ST_realized_share_of_net_gains": -0.15,
+    "defer_postponed_exits": "2 of 13 (2000-26), 3 of 51 (1930-2026)",
+    "wash_sale_adjustment_pp": -0.03,
+    "distribution_tax_realism_CA_pp": "-0.08 to +0.02"
+   }
+  },
+  "risks": [
+   "Holdout (1930-85) not significant in CA (p 0.164); start-averaged p 0.15-0.35; DSR 0.002-0.006 given ~12,100 trials.",
+   "Little edge since 2010 (2010s +0.6, 2020-26 -0.3 pp/yr; 29% of 2010-23 starts negative to the end). Trailed SPY in 13 of 26 calendar years, by 15-24 pp in 2011, 2015, 2016, 2020, 2022.",
+   "Execution-sensitive: a one-day lag or weekly check rode the 1987 crash (DD -59%).",
+   "Needs multi-month trend persistence: in market-path bootstraps with 1-3-month persistence it trails SPY over 20y in 57-66% of paths.",
+   "A -20% day while holding 2x costs ~40% of the account in one close and ~3-4 pp/yr of 10y excess.",
+   "IEF adds ~1.0-1.4 pp/yr after 1986 (bond bull market); with T-bills the p-values are 0.17/0.14/0.20. 2022 stock+bond losses: pick -41% vs SPY -24%.",
+   "Volatility 24.7% vs SPY 19.3%; CA equity-curve Sharpe 0.64 vs 0.68 on 1986-26: mostly paid-for leverage.",
+   "The parameter choice (SMA175 vs 200, band 2-4%) moves sub-samples by ~1.5 pp/yr. Real-ticker 2006-26: pick +1.6 (p 0.21) vs SMA175 +3.0 (p 0.14).",
+   "Daily-reset swap fund risk (SSO), and leveraged-fund distributions taxed as ordinary income."
+  ],
+  "conditions": [
+   "Evaluate the signal near the close (about 3:45pm) and trade with market-on-close orders the same day. Do not check weekly or act a day late.",
+   "Hold SSO and IEF in the taxable account. Apply the 60-day long-term deferral on short-term-gain exits, and cancel the deferral if the signal turns back on.",
+   "Size it as a satellite. Accept drawdowns of -50% (modern) to -75% (1930s), a 1-in-6 to 1-in-4 chance of trailing SPY after 20 years, and multi-year flat or negative stretches such as 2010-26.",
+   "Expect roughly +1.5 to +2.5 pp/yr after CA tax (start-averaged), not the +3-4 the first start shows.",
+   "If the user cannot meet these conditions, stay in SPY buy-and-hold."
+  ],
+  "confidence": "low"
+ },
+ "alternatives": [
+  {
+   "label": "S175|A2|IEF|D-h1 (runner-up, statistically tied: worst p 0.166 vs 0.164)",
+   "cfg": {
+    "kind": "r2_lev2x.rule",
+    "world": "ETF",
+    "safe": "IEF",
+    "filters": [
+     [
+      175,
+      0.03
+     ]
+    ],
+    "check": "D",
+    "lag": 0,
+    "core": 0,
+    "on": {
+     "two": 1
+    },
+    "off": {
+     "safe": 1
+    },
+    "defer": 60
+   },
+   "numbers_CA": {
+    "2000-26": "score +4.28, p 0.084, DD -47%",
+    "1986-26": "+4.67, p 0.054",
+    "1930-85": "+3.66, p 0.166, DD -66%",
+    "real_tickers_2006-26": "+3.04, p 0.142"
+   },
+   "why_not_pick": "Ranked second by the pre-registered tie-break by a meaningless 0.002 in p. SMA175 was itself chosen post hoc in round 1. It is equally defensible and has a smaller 1930s drawdown (-66% vs -73%)."
+  },
+  {
+   "label": "S175|A2|IEF|D-h0 (the verified round-1 baseline on real tickers, no defer)",
+   "cfg": {
+    "kind": "r2_lev2x.rule",
+    "world": "ETF",
+    "safe": "IEF",
+    "filters": [
+     [
+      175,
+      0.03
+     ]
+    ],
+    "check": "D",
+    "lag": 0,
+    "core": 0,
+    "on": {
+     "two": 1
+    },
+    "off": {
+     "safe": 1
+    },
+    "defer": 0
+   },
+   "numbers_CA": {
+    "2000-26": "+5.33, p 0.066, 10y beat 100%",
+    "1986-26": "+4.88, p 0.060",
+    "1930-85": "+3.38, p 0.195",
+    "2010-23 starts to end": "mean -0.47, 47% negative"
+   },
+   "why_not_pick": "Worse 1930-85 p (0.195) and more short-term gains realized. Ranked 4th."
+  },
+  {
+   "label": "S175|CU.5|IEF|D-h0 (never-sold 50% SPY core + 50% sleeve UPRO<->IEF: 2x on / 0.5x off)",
+   "cfg": {
+    "kind": "r2_lev2x.rule",
+    "world": "ETF",
+    "safe": "IEF",
+    "filters": [
+     [
+      175,
+      0.03
+     ]
+    ],
+    "check": "D",
+    "lag": 0,
+    "core": 0.5,
+    "on": {
+     "three": 1
+    },
+    "off": {
+     "safe": 1
+    },
+    "defer": 0
+   },
+   "numbers_CA": {
+    "2000-26": "+6.16, p 0.031, DD -57% vs SPY -55%",
+    "1986-26": "+5.41, p 0.011, DD -59% vs -55%",
+    "1930-85": "+4.90, p 0.085, DD -77% vs -81%",
+    "1930-2026": "+4.95, p 0.012",
+    "real_tickers_2009-26": "+5.31, p 0.049, DD -54% vs -34%"
+   },
+   "why_not_pick": "The only design passing items 1-3 in all three histories, but it fails the pre-registered drawdown filter (deeper than SPY after 1986). Worst 1929-35: -85% from a 1929 start, 0.68x by 1935 vs 0.77x. Bootstrap P(DD>70% in 20y) 18% vs SPY 11%. A 3x instrument is not moderate leverage."
+  },
+  {
+   "label": "S175|C.5|IEF|D-h0 (core-satellite: 50% SPY never sold + SSO<->IEF sleeve, 1.5x/0.5x)",
+   "cfg": {
+    "kind": "r2_lev2x.rule",
+    "world": "ETF",
+    "safe": "IEF",
+    "filters": [
+     [
+      175,
+      0.03
+     ]
+    ],
+    "check": "D",
+    "lag": 0,
+    "core": 0.5,
+    "on": {
+     "two": 1
+    },
+    "off": {
+     "safe": 1
+    },
+    "defer": 0
+   },
+   "numbers_CA": {
+    "2000-26": "+3.04, p 0.081, DD -42%",
+    "1986-26": "+2.76, p 0.075",
+    "1930-85": "+1.93, p 0.193, DD -68%"
+   },
+   "why_not_pick": "A scaled-down 2x/0x: about half the excess and the same p-values. A legitimate lower-risk version of the same bet (bootstrap P(DD>60% in 20y) 10% vs SPY 20%)."
+  },
+  {
+   "label": "S200|A2|BIL|D-h1 (same rule, T-bills instead of IEF: removes the bond-bull dependency)",
+   "cfg": {
+    "kind": "r2_lev2x.rule",
+    "world": "ETF",
+    "safe": "BIL",
+    "filters": [
+     [
+      200,
+      0.03
+     ]
+    ],
+    "check": "D",
+    "lag": 0,
+    "core": 0,
+    "on": {
+     "two": 1
+    },
+    "off": {
+     "safe": 1
+    },
+    "defer": 60
+   },
+   "numbers_CA": {
+    "2000-26": "+2.40, p 0.171",
+    "1986-26": "+3.35, p 0.144",
+    "1930-85": "+3.25, p 0.197"
+   },
+   "why_not_pick": "Weaker after 1986. Equal in 1930-85, where 'IEF' is mostly T-bills or a synthetic intermediate fund."
+  },
+  {
+   "label": "N200b4|A2|IEF|D-h1 (post hoc: band 4%; best modern statistics in the neighbourhood)",
+   "cfg": {
+    "kind": "r2_lev2x.rule",
+    "world": "ETF",
+    "safe": "IEF",
+    "filters": [
+     [
+      200,
+      0.04
+     ]
+    ],
+    "check": "D",
+    "lag": 0,
+    "core": 0,
+    "on": {
+     "two": 1
+    },
+    "off": {
+     "safe": 1
+    },
+    "defer": 60
+   },
+   "numbers_CA": {
+    "2000-26": "+4.9, p 0.049",
+    "1986-26": "+5.9, p 0.022",
+    "1930-85": "+2.4, p 0.26"
+   },
+   "why_not_pick": "Post hoc, and the holdout is weaker. Wide bands win after 1986 and narrow bands before: an era-dependent parameter."
+  }
+ ],
+ "findings": [
+  "The 96-design grid (structures a-h) and selection rule were pre-registered before any new result. The rule picks S200|A2|IEF|D-h1: daily 2x SSO when SPY is more than 3% above its 200-day SMA (hysteresis), else IEF, with a 60-day short-term-to-long-term exit deferral. It ties with the SMA175 version (worst-history p 0.164 vs 0.166).",
+  "The pick is positive in every history (CA score +3.3 to +4.6; every 20-year window beats SPY). Its drawdown is below SPY's in every history (-49% vs -55%; -73% vs -81% in 1930-85). It passes PROTOCOL items 1-3 on 2000-26 (p 0.097) and 1986-26 (p 0.070) but not on the 1930-85 holdout (p 0.164). Under FED rates it passes all three (p 0.059 / 0.021 / 0.074).",
+  "First-start p-values flatter the modern histories. Averaged over all start dates, p is 0.35 (2000-26) and 0.25 (1986-26). The to-the-end excess averaged over starts is +1.6 / +2.3 against +3.8 / +3.2 from the first start.",
+  "Little edge since 2010. Ten-year CA excess was +0.6 in the 2010s and -0.3 over 2020-26; 29% of 2010-23 quarterly starts are negative to the end (47% for the SMA175 baseline). Real tickers only (2006-26): score +1.6, p 0.21.",
+  "(a) 2x/0x is the best structure at acceptable risk. (e) Confidence rises with leverage up to 2x: 1930-85 p is 0.50 / 0.35 / 0.25 / 0.20 at 1.25x / 1.5x / 1.75x / 2x. Lower leverage lowers drawdown, not uncertainty.",
+  "(b) The 1x floor (SSO on, SPY off) fails on risk: drawdowns -61% to -62% (2000-26) and -85% to -86% (1930-85), worse than SPY's, with no better p.",
+  "(c) A never-sold SPY core makes the strategy a scaled-down 2x/0x with the same p-value (C.5: half the excess, drawdown -42%). The UPRO version (2x/0.5x) is the statistically strongest design (p 0.03 / 0.01 / 0.085), but its drawdowns are deeper than SPY's after 1986, its 1929-35 is the worst of the finalists, and the pre-registered filter rejects it.",
+  "(d) Graded ensembles did not remove parameter risk; they diluted the edge. ENS8 includes 1% bands, which bring about 2x the turnover, more tax and hundreds of wash sales. Its 2000-26 and 1986-26 scores are +0.5 to +1.9 (p 0.35-0.66), though it matches single filters in 1930-85. A post-hoc 3%-band ensemble lands in between (p 0.12-0.34).",
+  "(f) IEF beats SHY, which beats T-bills, in every history. After 1986 IEF adds about 1.0-1.4 pp/yr (the bond bull market); in 1930-85 the gap is only +0.1. In 2022 the pick lost 41% vs SPY's 24%.",
+  "(g) Daily same-close execution is essential. Weekly checks and a one-day lag hold 2x into Black Monday (1986-26 drawdown -59% to -62%). Lagged daily rules stay positive (+2.1 to +5.6) but 1986-26 p becomes 0.18-0.40.",
+  "(h) The tax-aware deferral is a small real gain for CA. It postponed 2 of 13 exits (2000-26) and 3 of 51 (1930-2026), turned net short-term realized results negative, cut turnover from 1.17-1.33 to 0.97-1.08, and lowered the SMA200 1986-26 p from 0.13 to 0.07.",
+  "Overfitting: DSR is 0.002-0.006 given ~12,100 trials. Within the 2x/0x structure, PBO on 1930-85 is 0.60 (27 designs) and 0.82 (9). Walk-forward over the grid is positive out of sample (+4.2 to +4.6), but within the structure it matches the average design pre-1986. In 1930-2026, the in-sample-best of the three signals is worst out of sample in 87% of cells.",
+  "Post-hoc neighbourhood (SMA 150-250 \u00d7 band 2-4% \u00d7 defer): all 34 rules are positive in all four histories, including lag-1. Only 5 of 34 pass on 2000-26, 13 on 1986-26, and 0 on 1930-85. Wide bands win after 1986, narrow bands before.",
+  "Tails: a single -20% day while invested cuts 10-year excess by about 3-4 pp/yr. Market-path bootstrap: P(trail SPY over 20y) is 57-66% with 1-3-month trend persistence and 29-31% with 1-year blocks. Strategy-level bootstrap: 14-25%.",
+  "Realism: wash sales enforced on both sides cost -0.02 to -0.04 pp/yr (single filter) and -0.12 (ensemble). Annual distribution tax on real SSO/IEF/SPY moves CA excess by -0.08 to +0.02. Costs of 15/35 bps per side: score +3.10 / +2.46.",
+  "Infrastructure: an event-driven replica of the engine matches it at most 1.8e-15 relative across 432 start-level checks and 67 full records, and at 0.0 for all 36 official finalist sweeps. 16 research files (R2L_*) are real tickers from inception plus synthetic history (1928+). Synthetic bond funds from 5/10y CMT yields track VFITX within 0.05 and VFISX within 0.2 pp/yr. Six ^GSPC bad prints (1935-38, 1961) were repaired."
+ ],
+ "n_configs_tested": 126,
+ "concerns": [
+  "1930-2026 history is synthetic before ETF inception: 2x/3x funds assume today's cost structure (0.9% expense + T-bill + 0.6% financing) back to 1928. ^GSPC before 1957 is the S&P 90. Dividends come from approximate annual yields. T-bill yields before 1960 come from an approximate annual table.",
+  "No daily bond data before 1962, so the 'IEF'/'SHY' safe assets are T-bills for 1928-61 and synthetic constant-maturity funds for 1962-91. The 1930-85 safe-asset comparison is therefore only informative for 1962-85.",
+  "I repaired six isolated ^GSPC bad prints in my own R2L files only. verify_lev_robust's 1930-85 numbers include them; the lab may want to repair the source.",
+  "The engine is FIFO-only, ignores wash sales (checked separately: small), taxes distributions at sale (checked with realism: small), and its FED regime omits the 3.8% NIIT.",
+  "boot_p is first-start only (the 2000-01 start is the luckiest for trend rules). The start-averaged p uses quarterly series with 4-quarter blocks, a different resolution from the lab's monthly bootstrap.",
+  "Grid numbers come from the exact replica (sim2.py) rather than lab sweeps, for compute reasons on the loaded shared machine. Equality was verified start by start and on 67 complete engine records plus all 36 finalist sweeps.",
+  "Two choices were made after seeing results: a 30-rule post-hoc neighbourhood and the 3%-band ensembles. They are labelled and added to the trial count; they did not change the selection.",
+  "The pre-registered tie-break separated the pick from the SMA175 runner-up by 0.002 in p. The two differ by about 1.5 pp/yr in sub-samples (real-ticker 2006-26: +1.6 vs +3.0), so 'SMA200' should not be read as better than 'SMA175'.",
+  "realism.adjusted cannot price R2L_/SYN_ tickers (no distribution files; treated as qualified). Realism was run on real SPY/SSO/IEF only, from 2007."
+ ]
+}

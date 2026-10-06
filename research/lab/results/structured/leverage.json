@@ -1,0 +1,1055 @@
+{
+ "family": "leverage",
+ "module_path": "/Users/siddhartha/dev/StockTest/research/lab/families/leverage.py",
+ "results_md": "/Users/siddhartha/dev/StockTest/research/lab/results/leverage.md",
+ "n_configs_tested": 930,
+ "headline": "No leveraged-ETF strategy clears every item of the PROTOCOL bar for the CA taxable account. The closest is a rule found after the fact: 3x S&P while SPY is not more than 3% below its 175-day SMA (3% hysteresis, checked daily, traded at the close), else intermediate Treasuries. CA score +9.65, full excess +7.10 pp/yr, every 10-year window beat SPY, bootstrap p 0.029. It also passes on real UPRO/IEF since 2009 (p 0.031) and on the 1986-2026 synthetic holdout (pre-2000 10-year windows +7.81 pp/yr, p 0.022), and its neighbourhood is a plateau. It still fails item 4 at the family level (PBO 0.67, deflated Sharpe 0.20 over 930 configs). It was singled out after the fact: the pre-registered 2%-band version has p 0.117. And it survived the 1987 crash only by selling at the close of 1987-10-16; the version that trades one day later lost 58 pp vs the index in 1987 and fell 79%. Static leverage (2x/3x buy-and-hold, HFEA, SSO/SPY mixes), vol targeting, monthly-check rules and QQQ-based rules fail clearly. Most leveraged excess is payment for 1.7x or more of SPY's volatility.",
+ "findings": [
+  "CA verdict: of 754 SYN configs screened from 2000, 19 pass PROTOCOL items 1-3 (14 daily/weekly 3x trend, 5 low-vol, all S&P-based); 124 pass in NONE. None clears items 4-7 cleanly.",
+  "Best rule (post hoc): 3x S&P / intermediate Treasuries, daily, SMA175 with 3% band. Full protocol: CA score +9.65, full +7.10, ex10_beat 1.00 (worst 10y +4.81), ex15 1.00, p 0.029; FED p 0.016; NONE p 0.007. Max DD -60.5% vs SPY -55.2%. Average equity leverage 2.17x, 28% in Treasuries, vol 24% vs 14%, Sharpe 0.58 vs 0.51, M2 +0.91 (modestly better risk-adjusted).",
+  "Plateau: daily SMA150-200 with 3-4% bands all pass items 1-3 in CA on 2000-2026 and on 1986-2026. 1-2% bands whipsaw and mostly fail item 3 on 2000-2026, including the pre-registered SMA200/2% finalist (CA score +6.07, p 0.117; FED p 0.091; NONE p 0.052).",
+  "Pre-2000 holdout (synthetic leveraged VFINX, 1986-2026): every daily SMA rule that survived did so by selling at the 1987-10-16 close (VFINX 4.5-7% below its 150-200-day SMAs that Friday). One-day-lag, weekly-check, monthly-check, lagged-^GSPC and SMA225/3% versions took Black Monday at 3x: -47 to -60 pp vs the index in 1987, about -80% drawdown, CA p 0.18-0.36. Over 2000-2026 the one-day lag is harmless (plateau rule CA +10.01, p 0.031).",
+  "The first run's top scorer, Monthly-100 3x/Treasuries (CA +6.52, p 0.100), is check-day luck. A common.trend emulation with month boundaries shifted 0/7/14/21 days gives CA +6.59/+1.11/+3.50/+1.47; offset 0 reproduces leverage.regime exactly (full +5.06). It has 0/8 neighbours passing, daily check +1.05, weekly -0.51, and on 1986-2026 -50 pp in 1987 with an -81% drawdown.",
+  "Low-vol 3x (3x while 60-day realised vol < 15%, else SPY) passes items 1-3 in CA on 2000-2026 (p 0.039). Only 1/10 neighbours pass, it has p 0.12 on 1986-2026, and it lost 19 pp vs the index in 1987.",
+  "Static leverage is a regime bet. 3x S&P bought in 2000: CA full -1.32 pp/yr, max DD -98.2%, worst after-tax wealth 0.03 of the start, 47% of starts down more than 50% after tax. Real UPRO bought 2009-07: CA +17.12 pp/yr, p 0.004, so it 'passes' items 1-3 on the bull-market-only real-ETF window.",
+  "Brief's classic mixes fail in CA: HFEA 55/45 UPRO/TMF quarterly (score +6.72, full +3.51, p 0.18, DD -75%, 2022 -61.6% vs SPY -16.8%, 0/17 neighbours pass); 50% SSO + 50% SPY (+1.90, p 0.27, DD -73%); 33% UPRO + 67% SPY (+2.13, p 0.35, DD -79%); 40% UPRO + 60% Treasuries (+1.07, p 0.28).",
+  "Vol targeting (79 configs) has a CA median of -1.3 pp and a negative lab-default walk-forward. Leveraged dip-buying is negative in all 6 configs. Overlay (never-sold core + 3x satellite) has 0 configs passing.",
+  "Risk vs reward: the pre-registered filtered 3x rules have M2 -0.2 to -0.9 in CA (more risk, not more skill). Only the 3-4% band daily rules (M2 about 0 to +0.9) and low-leverage Treasury mixes (2x/Treasuries monthly SMA100: M2 +1.14 but p 0.157 and 0/8 neighbours pass items 1-2) are at least level with SPY risk-adjusted.",
+  "Taxable-account realities: CA tax removes about 3 pp/yr of the leaders' excess vs NONE. Trend switches realise mostly short-term gains (about 4 trades/yr). Tax-aware execution that never realises short-term gains blocks the exits and turns the daily SMA200 rule negative (CA -1.19). Stricter annual distribution taxation changes leaders' excess by only -0.24 to +0.1 pp/yr.",
+  "Synthetic validation: calibrated series (0.6%/yr swap spread on borrowed notional) track SSO/UPRO/SPXL/TMF within 0.1 pp/yr, and strategy results on SYN vs real ETFs over 2006/2009-2026 agree within -0.31..+0.06 pp/yr. The brief's uncalibrated formula (RAW) flatters leaders by 0.7-1.0 pp/yr and would have moved Daily-200 under p 0.10.",
+  "QQQ hindsight: leveraged dual momentum SPY/QQQ (CA +5.52 screen) falls to a median +0.25 on 20 random 'SPY + X' menus from BROAD_EQUITY_POOL_2003 (1/20 as good). QQQ-removed menus: SPY/DIA +3.55, SPY/MDY +0.01, SPY/IWM -3.48. 3x QQQ trend (+4.70) falls to a median -4.07 on 20 random funds, with 13/20 drawdowns deeper than -80%.",
+  "Family diagnostics (745 SYN screen configs, CA): walk-forward selection positive in all 4 variants (+2.4 to +12.7 pp; average config also +1.6 to +1.7 pp), PBO 0.67 (0.83 on the coarse grid alone), DSR of best 0.20. Trend sub-family PBO 0.39 and low-vol 0.38, but only after neighbourhood refinements were added."
+ ],
+ "candidates": [
+  {
+   "label": "Daily trend 3x S&P / intermediate Treasuries, SMA175 with 3% band (POST HOC, best rule found)",
+   "cfg": {
+    "kind": "weights",
+    "params": {
+     "check": "D",
+     "conds": [
+      {
+       "band": 0.03,
+       "n": 175,
+       "ticker": "SPY",
+       "type": "sma"
+      }
+     ],
+     "confirm": 1,
+     "drift": 0,
+     "map": {
+      "0": {
+       "VFITX": 1
+      },
+      "1": {
+       "SYN_SPY3XC": 1
+      }
+     }
+    },
+    "rebalance": "M",
+    "requires": [
+     "VFITX"
+    ],
+    "signal": "leverage.regime"
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.0965,
+     "full_excess": 0.071,
+     "ex5_mean": 0.0902,
+     "ex10_mean": 0.0997,
+     "ex10_beat": 1,
+     "ex10_min": 0.0481,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.029,
+     "max_dd": -0.6046,
+     "bench_max_dd": -0.5519,
+     "trades": 107,
+     "turnover": 1.3624
+    },
+    "FED": {
+     "score": 0.1126,
+     "full_excess": 0.0857,
+     "ex5_mean": 0.1047,
+     "ex10_mean": 0.1162,
+     "ex10_beat": 1,
+     "ex10_min": 0.0606,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.016,
+     "max_dd": -0.5751,
+     "bench_max_dd": -0.5519,
+     "trades": 107,
+     "turnover": 1.3879
+    },
+    "NONE": {
+     "score": 0.1367,
+     "full_excess": 0.1071,
+     "ex5_mean": 0.1284,
+     "ex10_mean": 0.1407,
+     "ex10_beat": 1,
+     "ex10_min": 0.0797,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.007,
+     "max_dd": -0.542,
+     "bench_max_dd": -0.5519,
+     "trades": 75,
+     "turnover": 1.4138
+    }
+   },
+   "long_protocol": {
+    "protocol": "long (quarterly 1986-2023 starts, VFINX benchmark, LONG translation: SYN_VFINX3XC / FGOVX)",
+    "CA": {
+     "score": 0.0828,
+     "full_excess": 0.0574,
+     "ho5_mean": 0.0872,
+     "ho5_beat": 0.7838,
+     "ho10_mean": 0.0781,
+     "ho10_beat": 1,
+     "boot_p": 0.022,
+     "max_dd": -0.6058
+    },
+    "NONE": {
+     "score": 0.1146,
+     "full_excess": 0.1001,
+     "ho5_mean": 0.1144,
+     "ho5_beat": 0.8108,
+     "ho10_mean": 0.1083,
+     "ho10_beat": 1,
+     "boot_p": 0.003,
+     "max_dd": -0.5472
+    },
+    "lag1_CA": {
+     "score": 0.0683,
+     "full_excess": 0.032,
+     "ho5_mean": 0.039,
+     "ho5_beat": 0.7,
+     "ho10_mean": 0.0261,
+     "ho10_beat": 0.53,
+     "boot_p": 0.209,
+     "max_dd": -0.79,
+     "excess_1987": -0.58
+    },
+    "lag1_NONE": {
+     "score": 0.0977,
+     "full_excess": 0.0654,
+     "ho5_mean": 0.0558,
+     "ho10_mean": 0.0407,
+     "boot_p": 0.101
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": true,
+   "hindsight_risk": "medium",
+   "robustness_notes": "Selected POST HOC: it is the best of the neighbourhood scan around the pre-registered SMA200/2% finalist, picked after seeing about 750 screened configs; the 1986+ results of the 1-3% band grid had been seen before it was singled out. Items 1-3 pass in CA on 2000-2026 (p 0.029), on real UPRO/IEF 2009+ (CA +9.03, p 0.031) and on the 1986-2026 LONG history (p 0.022). Item 5: 8/8 neighbours (SMA150-200 x 2-4%) beat SPY in CA and 5/8 pass items 1-3; every 3-4% band member passes on both histories. Item 4 fails at the family level (PBO 0.67, DSR 0.20; trend sub-family PBO 0.39 after refinements). Item 7 is fragile: the only gap crash in the data (1987-10-19) was escaped by selling at the 1987-10-16 close. With a one-day lag, 1987 is -58 pp vs VFINX, drawdown -79%, p 0.21. On 2000-2026 the lag is harmless (CA +10.01, p 0.031). Risk: average equity leverage 2.17x (3x about 72% of days), after-tax vol 24.0% vs SPY 14.0%, Sharpe 0.58 vs 0.51, M2 +0.91, beta 0.94, worst 10y CAGR +6.24% vs SPY -1.81%, worst after-tax wealth 0.51 vs 0.54. Bad years (CA after-tax): 2000 -23.5% (SPY -8.9%), 2007 -18.4% (+3.8%), 2022 -43.1% (-16.8%). Sub-periods: 2000-10 +7.16, 2010-20 +9.61, 2020-26 +2.09 pp/yr. Stricter annual distribution tax: -0.24 pp. Synthetic SYN_SPY3XC tracks UPRO within +0.03 pp/yr. Not runnable on the website: leverage.* signals and the SYN/leveraged tickers are research-only."
+  },
+  {
+   "label": "Daily-200 3x S&P / intermediate Treasuries, 2% band (pre-registered finalist)",
+   "cfg": {
+    "kind": "weights",
+    "params": {
+     "check": "D",
+     "conds": [
+      {
+       "band": 0.02,
+       "n": 200,
+       "ticker": "SPY",
+       "type": "sma"
+      }
+     ],
+     "confirm": 1,
+     "drift": 0,
+     "map": {
+      "0": {
+       "VFITX": 1
+      },
+      "1": {
+       "SYN_SPY3XC": 1
+      }
+     }
+    },
+    "rebalance": "M",
+    "requires": [
+     "VFITX"
+    ],
+    "signal": "leverage.regime"
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.0607,
+     "full_excess": 0.0484,
+     "ex5_mean": 0.0574,
+     "ex10_mean": 0.0619,
+     "ex10_beat": 1,
+     "ex10_min": 0.0022,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.117,
+     "max_dd": -0.5883,
+     "bench_max_dd": -0.5519,
+     "trades": 108,
+     "turnover": 1.541
+    },
+    "FED": {
+     "score": 0.0727,
+     "full_excess": 0.061,
+     "ex5_mean": 0.0679,
+     "ex10_mean": 0.0742,
+     "ex10_beat": 1,
+     "ex10_min": 0.0076,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.091,
+     "max_dd": -0.5743,
+     "bench_max_dd": -0.5519,
+     "trades": 112,
+     "turnover": 1.5515
+    },
+    "NONE": {
+     "score": 0.0936,
+     "full_excess": 0.0815,
+     "ex5_mean": 0.0878,
+     "ex10_mean": 0.0954,
+     "ex10_beat": 1,
+     "ex10_min": 0.0142,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.052,
+     "max_dd": -0.5743,
+     "bench_max_dd": -0.5519,
+     "trades": 96,
+     "turnover": 1.5606
+    }
+   },
+   "long_protocol": {
+    "protocol": "long (quarterly, LONG translation)",
+    "CA": {
+     "score": 0.0668,
+     "full_excess": 0.0433,
+     "ho5_mean": 0.0907,
+     "ho5_beat": 0.7027,
+     "ho10_mean": 0.0801,
+     "ho10_beat": 1,
+     "boot_p": 0.092,
+     "max_dd": -0.596
+    },
+    "NONE": {
+     "score": 0.094,
+     "full_excess": 0.0823,
+     "ho5_mean": 0.1175,
+     "ho5_beat": 0.7297,
+     "ho10_mean": 0.1082,
+     "ho10_beat": 1,
+     "boot_p": 0.016,
+     "max_dd": -0.5833
+    },
+    "lag1_CA": {
+     "score": 0.0592,
+     "full_excess": 0.0233,
+     "ho5_mean": 0.0414,
+     "ho10_mean": 0.0262,
+     "ho10_beat": 0.53,
+     "boot_p": 0.27,
+     "max_dd": -0.8,
+     "excess_1987": -0.577
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": true,
+   "hindsight_risk": "medium",
+   "robustness_notes": "Fails item 3 in CA on 2000-2026 (p 0.117), passes it in FED (0.091) and NONE (0.052) and on CA 1986-2026 (0.092). Neighbourhood (SMA175-225 x 1-3%): 3/8 pass items 1-3 in CA and 8/8 pass items 1-2 (median score +6.43, median p 0.115); 4/8 pass on 1986-2026. 1987: exited at the 10-16 close (+7.9 pp vs index). Lag-1, weekly check, monthly check or the lagged ^GSPC signal take Black Monday (-47 to -60 pp, DD -79% to -80%). Lag-1 on 2000-26 is harmless (CA +7.38, p 0.071). T-bill off-state CA +5.12, p 0.18. Never-realise-ST-gains tax execution turns it negative (CA -1.19). Risk: M2 -0.60, vol 25.3% vs 14.0%, avg leverage 2.21x. 2022 -39.5% vs SPY -16.8%. REAL UPRO/IEF 2009+: CA +4.50, p 0.157; from a 2018 start -1.6 pp/yr."
+  },
+  {
+   "label": "Low-vol 3x: 3x S&P while SPY 60-day realised vol < 15% (exit >16.5%, re-enter <13.5%), else 1x SPY",
+   "cfg": {
+    "kind": "weights",
+    "params": {
+     "check": "D",
+     "conds": [
+      {
+       "band": 0.1,
+       "max": 0.15,
+       "n": 60,
+       "ticker": "SPY",
+       "type": "vol"
+      }
+     ],
+     "confirm": 1,
+     "drift": 0,
+     "map": {
+      "0": {
+       "SPY": 1
+      },
+      "1": {
+       "SYN_SPY3XC": 1
+      }
+     }
+    },
+    "rebalance": "M",
+    "signal": "leverage.regime"
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.0514,
+     "full_excess": 0.0468,
+     "ex5_mean": 0.0511,
+     "ex10_mean": 0.0515,
+     "ex10_beat": 1,
+     "ex10_min": 0.0089,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.039,
+     "max_dd": -0.6515,
+     "bench_max_dd": -0.5519,
+     "trades": 68,
+     "turnover": 1.0287
+    },
+    "FED": {
+     "score": 0.0631,
+     "full_excess": 0.0597,
+     "ex5_mean": 0.0624,
+     "ex10_mean": 0.0629,
+     "ex10_beat": 1,
+     "ex10_min": 0.0134,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.014,
+     "max_dd": -0.6317,
+     "bench_max_dd": -0.5519,
+     "trades": 68,
+     "turnover": 1.0037
+    },
+    "NONE": {
+     "score": 0.0824,
+     "full_excess": 0.0804,
+     "ex5_mean": 0.0828,
+     "ex10_mean": 0.0817,
+     "ex10_beat": 1,
+     "ex10_min": 0.0184,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.003,
+     "max_dd": -0.6091,
+     "bench_max_dd": -0.5519,
+     "trades": 53,
+     "turnover": 0.9575
+    }
+   },
+   "long_protocol": {
+    "protocol": "long (quarterly, LONG translation)",
+    "CA": {
+     "score": 0.0452,
+     "full_excess": 0.0277,
+     "ho5_mean": 0.0612,
+     "ho5_beat": 0.6757,
+     "ho10_mean": 0.053,
+     "ho10_beat": 1,
+     "boot_p": 0.116,
+     "max_dd": -0.6561
+    },
+    "NONE": {
+     "score": 0.0692,
+     "full_excess": 0.061,
+     "ho5_mean": 0.0805,
+     "ho5_beat": 0.6757,
+     "ho10_mean": 0.0726,
+     "ho10_beat": 1,
+     "boot_p": 0.022,
+     "max_dd": -0.6114
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": true,
+   "hindsight_risk": "medium",
+   "robustness_notes": "Items 1-3 pass in CA on 2000-2026 (p 0.039), but only 1/10 neighbours pass in CA (all have positive scores +2.6 to +5.5, median p 0.209). On 1986-2026 the CA p is 0.116 (item 3 fails) and it lost 19 pp vs the index in 1987: 60-day vol crossed the exit level only at the 10-14 close. Lag-1 is harmless (2000-26 CA +5.37, p 0.023; 1986+ p 0.100). The Treasuries-off variant looks better on 2000-26 (CA +5.37, DD -45.9%) but fails on 1986+ (ho10 +1.42). Sub-family PBO 0.38; family PBO 0.67. Risk: beta 1.45, M2 -0.18, vol 23.4% vs 14.0%, avg leverage 2.12x. REAL UPRO/SPY 2009+: CA +6.43, p 0.087."
+  },
+  {
+   "label": "Monthly-100 3x S&P / intermediate Treasuries, 2% band, monthly check (first run's top scorer; rejected)",
+   "cfg": {
+    "kind": "weights",
+    "params": {
+     "check": "M",
+     "conds": [
+      {
+       "band": 0.02,
+       "n": 100,
+       "ticker": "SPY",
+       "type": "sma"
+      }
+     ],
+     "confirm": 1,
+     "drift": 0,
+     "map": {
+      "0": {
+       "VFITX": 1
+      },
+      "1": {
+       "SYN_SPY3XC": 1
+      }
+     }
+    },
+    "rebalance": "M",
+    "requires": [
+     "VFITX"
+    ],
+    "signal": "leverage.regime"
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.0652,
+     "full_excess": 0.0506,
+     "ex5_mean": 0.0697,
+     "ex10_mean": 0.0647,
+     "ex10_beat": 1,
+     "ex10_min": 0.0116,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.1,
+     "max_dd": -0.609,
+     "bench_max_dd": -0.5519,
+     "trades": 102,
+     "turnover": 1.3661
+    },
+    "FED": {
+     "score": 0.0785,
+     "full_excess": 0.0638,
+     "ex5_mean": 0.0824,
+     "ex10_mean": 0.0779,
+     "ex10_beat": 1,
+     "ex10_min": 0.02,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.068,
+     "max_dd": -0.5658,
+     "bench_max_dd": -0.5519,
+     "trades": 102,
+     "turnover": 1.3796
+    },
+    "NONE": {
+     "score": 0.0994,
+     "full_excess": 0.0837,
+     "ex5_mean": 0.104,
+     "ex10_mean": 0.0985,
+     "ex10_beat": 1,
+     "ex10_min": 0.0382,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.039,
+     "max_dd": -0.5264,
+     "bench_max_dd": -0.5519,
+     "trades": 78,
+     "turnover": 1.392
+    }
+   },
+   "long_protocol": {
+    "protocol": "long_screen (yearly, LONG translation)",
+    "CA": {
+     "score": 0.0572,
+     "full_excess": 0.0194,
+     "ho5_mean": 0.0442,
+     "ho5_beat": 0.7,
+     "ho10_mean": 0.0327,
+     "ho10_beat": 0.6,
+     "boot_p": 0.295,
+     "max_dd": -0.8129,
+     "excess_1987": -0.5
+    },
+    "FED": {
+     "score": 0.0672,
+     "full_excess": 0.0324,
+     "ho5_mean": 0.0506,
+     "ho5_beat": 0.7,
+     "ho10_mean": 0.0388
+    },
+    "NONE": {
+     "score": 0.0839,
+     "full_excess": 0.0525,
+     "ho5_mean": 0.0655,
+     "ho5_beat": 0.7,
+     "ho10_mean": 0.0525
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": true,
+   "hindsight_risk": "high",
+   "robustness_notes": "Check-day luck. Run as a common.trend emulation with the month boundary shifted 0/7/14/21 days (weights_x offset_days does not move leverage.regime's own check), it scores CA +6.59/+1.11/+3.50/+1.47; offset 0 reproduces leverage.regime (full +5.06). Daily check +1.05, weekly -0.51. 0/8 neighbours pass items 1-3 in CA (median p 0.384). 1986-2026: held 3x through Black Monday, -50 pp vs VFINX in 1987, max DD -81%, CA p 0.295. RAW (uncalibrated) synthetic would show p 0.079."
+  },
+  {
+   "label": "2x S&P / intermediate Treasuries, monthly SMA100 2% band (lower-leverage, best risk-adjusted pre-registered rule)",
+   "cfg": {
+    "kind": "weights",
+    "params": {
+     "check": "M",
+     "conds": [
+      {
+       "band": 0.02,
+       "n": 100,
+       "ticker": "SPY",
+       "type": "sma"
+      }
+     ],
+     "confirm": 1,
+     "drift": 0,
+     "map": {
+      "0": {
+       "VFITX": 1
+      },
+      "1": {
+       "SYN_SPY2XC": 1
+      }
+     }
+    },
+    "rebalance": "M",
+    "requires": [
+     "VFITX"
+    ],
+    "signal": "leverage.regime"
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.031,
+     "full_excess": 0.026,
+     "ex5_mean": 0.0352,
+     "ex10_mean": 0.0307,
+     "ex10_beat": 0.8209,
+     "ex10_min": -0.0181,
+     "ex15_beat": 0.8298,
+     "ex20_beat": 1,
+     "boot_p": 0.157,
+     "max_dd": -0.4656,
+     "bench_max_dd": -0.5519,
+     "trades": 100,
+     "turnover": 1.3729
+    },
+    "FED": {
+     "score": 0.0397,
+     "full_excess": 0.0362,
+     "ex5_mean": 0.0429,
+     "ex10_mean": 0.0394,
+     "ex10_beat": 0.8955,
+     "ex10_min": -0.0142,
+     "ex15_beat": 0.9787,
+     "ex20_beat": 1,
+     "boot_p": 0.106,
+     "max_dd": -0.4231,
+     "bench_max_dd": -0.5519,
+     "trades": 102,
+     "turnover": 1.3846
+    },
+    "NONE": {
+     "score": 0.055,
+     "full_excess": 0.0526,
+     "ex5_mean": 0.0579,
+     "ex10_mean": 0.0548,
+     "ex10_beat": 0.9552,
+     "ex10_min": -0.0015,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.049,
+     "max_dd": -0.3745,
+     "bench_max_dd": -0.5519,
+     "trades": 76,
+     "turnover": 1.3961
+    }
+   },
+   "long_protocol": {
+    "protocol": "long_screen (yearly, LONG translation)",
+    "CA": {
+     "score": 0.0292,
+     "full_excess": 0.0007,
+     "ho5_mean": 0.0094,
+     "ho5_beat": 0.7,
+     "ho10_mean": 0.0019,
+     "ho10_beat": 0.6,
+     "boot_p": 0.465,
+     "excess_1987": -0.25
+    },
+    "FED": {
+     "score": 0.0363,
+     "full_excess": 0.012,
+     "ho5_mean": 0.0125,
+     "ho5_beat": 0.7,
+     "ho10_mean": 0.0072
+    },
+    "NONE": {
+     "score": 0.0496,
+     "full_excess": 0.03,
+     "ho5_mean": 0.0235,
+     "ho5_beat": 0.7,
+     "ho10_mean": 0.0196
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": true,
+   "hindsight_risk": "medium",
+   "robustness_notes": "The one pre-registered rule that is clearly better risk-adjusted: beta 0.64, alpha +4.87, M2 +1.14, vol 16.2% vs 14.0%, max DD -46.6% vs -55.2%, worst after-tax wealth 0.65 vs 0.54. But CA p 0.157, ex15_beat 0.83 (item 2 fails), and 0/8 neighbours pass even items 1-2 in CA (median score +1.61). 1986-2026: pre-2000 10y windows +0.19 pp, -25 pp in 1987. It is a monthly-check rule exposed to the same check-day luck as Monthly-100."
+  },
+  {
+   "label": "HFEA 55% 3x S&P / 45% 3x long Treasuries, quarterly rebalance (brief's classic)",
+   "cfg": {
+    "kind": "weights",
+    "params": {
+     "abs_band": null,
+     "mode": "calendar",
+     "rel_band": null,
+     "weights": {
+      "SYN_LTB3XC": 0.45,
+      "SYN_SPY3XC": 0.55
+     }
+    },
+    "rebalance": "Q",
+    "requires": [
+     "SYN_LTB3XC"
+    ],
+    "signal": "leverage.bandmix"
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.0672,
+     "full_excess": 0.0351,
+     "ex5_mean": 0.0526,
+     "ex10_mean": 0.072,
+     "ex10_beat": 0.8657,
+     "ex10_min": -0.0235,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.183,
+     "max_dd": -0.7508,
+     "bench_max_dd": -0.5519,
+     "trades": 214,
+     "turnover": 0.2987
+    },
+    "FED": {
+     "score": 0.0788,
+     "full_excess": 0.0426,
+     "ex5_mean": 0.0633,
+     "ex10_mean": 0.0837,
+     "ex10_beat": 0.8955,
+     "ex10_min": -0.0208,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.152,
+     "max_dd": -0.7317,
+     "bench_max_dd": -0.5519,
+     "trades": 214,
+     "turnover": 0.2857
+    },
+    "NONE": {
+     "score": 0.0945,
+     "full_excess": 0.0524,
+     "ex5_mean": 0.0797,
+     "ex10_mean": 0.0992,
+     "ex10_beat": 0.9254,
+     "ex10_min": -0.0148,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.125,
+     "max_dd": -0.7079,
+     "bench_max_dd": -0.5519,
+     "trades": 214,
+     "turnover": 0.2713
+    }
+   },
+   "long_protocol": {
+    "protocol": "long_screen (yearly, LONG translation, first start 1987)",
+    "CA": {
+     "score": 0.0627,
+     "full_excess": 0.036,
+     "ho5_mean": 0.088,
+     "ho5_beat": 1,
+     "ho10_mean": 0.0818,
+     "ho10_beat": 1,
+     "boot_p": 0.13,
+     "max_dd": -0.7514
+    },
+    "FED": {
+     "score": 0.0721,
+     "full_excess": 0.0469,
+     "ho5_mean": 0.0981,
+     "ho5_beat": 1,
+     "ho10_mean": 0.0903
+    },
+    "NONE": {
+     "score": 0.0847,
+     "full_excess": 0.0604,
+     "ho5_mean": 0.112,
+     "ho5_beat": 1,
+     "ho10_mean": 0.102
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": true,
+   "hindsight_risk": "high",
+   "robustness_notes": "Its success depends on the 2010-2020 negative stock/bond correlation and falling rates: 2000-10 -0.40 pp/yr, 2010-20 +14.70, 2020-26 -6.28 (2022 -61.6% vs SPY -16.8%). CA p 0.183, max DD -75.1%, worst after-tax wealth 0.35, 17% of starts down more than 50% after tax at some point, M2 -1.98. 0/17 neighbours pass items 1-3 in CA. Quarterly rebalancing realises gains (214 trades). REAL UPRO/TMF 2009+: CA +6.28, p 0.148. RAW synthetic would show p 0.112."
+  },
+  {
+   "label": "Real-ETF version of the post-hoc rule: UPRO / IEF, daily SMA175 3% band (2009-07 onward only)",
+   "cfg": {
+    "kind": "weights",
+    "params": {
+     "check": "D",
+     "conds": [
+      {
+       "band": 0.03,
+       "n": 175,
+       "ticker": "SPY",
+       "type": "sma"
+      }
+     ],
+     "confirm": 1,
+     "drift": 0,
+     "map": {
+      "0": {
+       "IEF": 1
+      },
+      "1": {
+       "UPRO": 1
+      }
+     }
+    },
+    "rebalance": "M",
+    "requires": [
+     "IEF",
+     "UPRO"
+    ],
+    "signal": "leverage.regime"
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.0902,
+     "full_excess": 0.077,
+     "ex5_mean": 0.0988,
+     "ex10_mean": 0.0924,
+     "ex10_beat": 1,
+     "ex10_min": 0.049,
+     "ex15_beat": 1,
+     "ex20_beat": null,
+     "boot_p": 0.031,
+     "max_dd": -0.6139,
+     "bench_max_dd": -0.5519,
+     "trades": 74,
+     "turnover": 1.3782
+    },
+    "FED": {
+     "score": 0.108,
+     "full_excess": 0.0989,
+     "ex5_mean": 0.1148,
+     "ex10_mean": 0.1107,
+     "ex10_beat": 1,
+     "ex10_min": 0.0618,
+     "ex15_beat": 1,
+     "ex20_beat": null,
+     "boot_p": 0.018,
+     "max_dd": -0.5845,
+     "bench_max_dd": -0.5519,
+     "trades": 78,
+     "turnover": 1.4006
+    },
+    "NONE": {
+     "score": 0.1361,
+     "full_excess": 0.1362,
+     "ex5_mean": 0.1411,
+     "ex10_mean": 0.1391,
+     "ex10_beat": 1,
+     "ex10_min": 0.0816,
+     "ex15_beat": 1,
+     "ex20_beat": null,
+     "boot_p": 0.005,
+     "max_dd": -0.5513,
+     "bench_max_dd": -0.5519,
+     "trades": 55,
+     "turnover": 1.4234
+    }
+   },
+   "long_protocol": {
+    "note": "no long history for real ETFs; see the SYN/LONG version (candidate 1)"
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": true,
+   "hindsight_risk": "high",
+   "robustness_notes": "Investable form of candidate 1, but the window is 2009-07..2026-07 only: a bull market with no 2000-02 or 2008 bear. bench_max_dd -0.5519 is the lab's 2000-start SPY value; SPY's same-period max DD was -0.3372. Passes items 1-3 in all regimes on this window. M2 -3.07 here because SPY's own 2009-2026 Sharpe was high. The SYN version of the same rule reproduces REAL results within -0.3..+0.1 pp/yr over the overlap. With real distributions charged yearly the CA excess moves +0.08 pp. CA excess from a 2015 start +4.09 pp/yr, from 2018 +2.17."
+  },
+  {
+   "label": "Static 3x S&P buy-and-hold (synthetic from 2000; reference failure)",
+   "cfg": {
+    "kind": "buyhold",
+    "weights": {
+     "SYN_SPY3XC": 1
+    }
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.0309,
+     "full_excess": -0.0132,
+     "ex5_mean": 0.0261,
+     "ex10_mean": 0.0321,
+     "ex10_beat": 0.5224,
+     "ex10_min": -0.219,
+     "ex15_beat": 0.7234,
+     "ex20_beat": 0.8148,
+     "boot_p": 0.527,
+     "max_dd": -0.9819,
+     "bench_max_dd": -0.5519,
+     "trades": 1,
+     "turnover": 0
+    },
+    "FED": {
+     "score": 0.034,
+     "full_excess": -0.0137,
+     "ex5_mean": 0.033,
+     "ex10_mean": 0.0337,
+     "ex10_beat": 0.5224,
+     "ex10_min": -0.219,
+     "ex15_beat": 0.7234,
+     "ex20_beat": 0.8148,
+     "boot_p": 0.53,
+     "max_dd": -0.9819,
+     "bench_max_dd": -0.5519,
+     "trades": 1,
+     "turnover": 0
+    },
+    "NONE": {
+     "score": 0.0368,
+     "full_excess": -0.0141,
+     "ex5_mean": 0.0397,
+     "ex10_mean": 0.0352,
+     "ex10_beat": 0.5224,
+     "ex10_min": -0.219,
+     "ex15_beat": 0.7234,
+     "ex20_beat": 0.8148,
+     "boot_p": 0.532,
+     "max_dd": -0.9819,
+     "bench_max_dd": -0.5519,
+     "trades": 1,
+     "turnover": 0
+    }
+   },
+   "long_protocol": {
+    "protocol": "long_screen (yearly, LONG translation)",
+    "CA": {
+     "score": 0.0247,
+     "full_excess": 0.0269,
+     "ho5_mean": 0.1361,
+     "ho5_beat": 0.7,
+     "ho10_mean": 0.13,
+     "ho10_beat": 1,
+     "boot_p": 0.321,
+     "max_dd": -0.9816,
+     "excess_1987": -0.413
+    },
+    "FED": {
+     "score": 0.0273,
+     "full_excess": 0.0271,
+     "ho5_mean": 0.1455,
+     "ho5_beat": 0.7,
+     "ho10_mean": 0.1349
+    },
+    "NONE": {
+     "score": 0.0298,
+     "full_excess": 0.0273,
+     "ho5_mean": 0.1546,
+     "ho5_beat": 0.7,
+     "ho10_mean": 0.1396
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": true,
+   "hindsight_risk": "low",
+   "robustness_notes": "Risk-of-ruin reference. From 2000: max DD -98.2%, worst after-tax wealth 0.03 of the start, 47% of starts down more than 50% after tax at some point and 35% down more than 75%. Worst 5y CAGR -31.9% vs SPY -4.7%. M2 -5.16, beta 3.28. The same exposure via real UPRO bought 2009-07 shows CA +17.12 pp/yr, p 0.004, so it 'passes' items 1-3 on the bull-market real-ETF window, a pure start-date/regime effect. Static 2x (SSO-like) from 2000: CA +0.82 pp/yr full, DD -88.4%."
+  }
+ ],
+ "diagnostics": {
+  "note": "report.diagnostics on SYN configs screened with aligned 2000-01-01 starts (hindsight random menus excluded), plus metrics.walk_forward with step_quarters=1 ('yearly') because the lab default steps 4 starts (= 4 years) on the yearly-start screen protocol. Coarse-grid-only values from the interrupted run: CA PBO 0.828 (ALL, 530 configs), trend 0.700, lowvol 0.371, DSR 0.055.",
+  "CA": {
+   "ALL": {
+    "n_configs": 745,
+    "wf_10_5": {
+     "oos_mean": 0.0778,
+     "oos_beat": 1,
+     "avg_config_oos_mean": 0.0169
+    },
+    "wf_5_3": {
+     "oos_mean": 0.0241,
+     "oos_beat": 0.5
+    },
+    "wf_10_5_yearly": {
+     "oos_mean": 0.0645,
+     "oos_beat": 0.75,
+     "n": 12
+    },
+    "wf_5_3_yearly": {
+     "oos_mean": 0.1271,
+     "oos_beat": 0.6842,
+     "n": 19
+    },
+    "pbo": 0.6672,
+    "pbo_oos_of_is_best_mean": -0.0772,
+    "dsr_best": 0.1985,
+    "best_by_monthly_mean": "SYN|trend|on=x3|off=mid|sma200|b0.02|M|lag1"
+   },
+   "trend": {
+    "n_configs": 304,
+    "wf_10_5": {
+     "oos_mean": 0.0579,
+     "oos_beat": 1
+    },
+    "wf_5_3": {
+     "oos_mean": 0.1529,
+     "oos_beat": 1
+    },
+    "wf_10_5_yearly": {
+     "oos_mean": 0.0378,
+     "oos_beat": 0.6667,
+     "n": 12
+    },
+    "wf_5_3_yearly": {
+     "oos_mean": 0.0818,
+     "oos_beat": 0.7895,
+     "n": 19
+    },
+    "pbo": 0.3854,
+    "dsr_best": 0.5476
+   },
+   "lowvol": {
+    "n_configs": 104,
+    "wf_10_5": {
+     "oos_mean": 0.0476,
+     "oos_beat": 1
+    },
+    "wf_5_3": {
+     "oos_mean": 0.0087,
+     "oos_beat": 0.75
+    },
+    "pbo": 0.3766,
+    "dsr_best": 0.2069
+   },
+   "mix": {
+    "n_configs": 144,
+    "wf_10_5": {
+     "oos_mean": 0.0328,
+     "oos_beat": 0.6667
+    },
+    "wf_5_3": {
+     "oos_mean": -0.0092,
+     "oos_beat": 0.5
+    },
+    "pbo": 0.6794,
+    "dsr_best": 0.0384
+   },
+   "vt": {
+    "n_configs": 79,
+    "wf_10_5": {
+     "oos_mean": -0.0083,
+     "oos_beat": 0
+    },
+    "wf_5_3": {
+     "oos_mean": -0.0074,
+     "oos_beat": 0.5
+    },
+    "pbo": 0.3512,
+    "dsr_best": 0.1143
+   }
+  },
+  "NONE": {
+   "ALL": {
+    "n_configs": 746,
+    "wf_10_5": {
+     "oos_mean": 0.1117,
+     "oos_beat": 1,
+     "avg_config_oos_mean": 0.0414
+    },
+    "wf_5_3": {
+     "oos_mean": 0.0437,
+     "oos_beat": 0.5
+    },
+    "wf_10_5_yearly": {
+     "oos_mean": 0.1016,
+     "oos_beat": 0.75,
+     "n": 12
+    },
+    "wf_5_3_yearly": {
+     "oos_mean": 0.1635,
+     "oos_beat": 0.7895,
+     "n": 19
+    },
+    "pbo": 0.527,
+    "pbo_oos_of_is_best_mean": -0.0293,
+    "dsr_best": 0.2273,
+    "best_by_monthly_mean": "SYN|trend|on=x3|off=mid|sma200|b0.02|M|lag1"
+   },
+   "trend": {
+    "n_configs": 304,
+    "wf_10_5": {
+     "oos_mean": 0.029,
+     "oos_beat": 0.6667
+    },
+    "wf_5_3": {
+     "oos_mean": 0.1711,
+     "oos_beat": 1
+    },
+    "pbo": 0.2692,
+    "dsr_best": 0.6109
+   },
+   "lowvol": {
+    "n_configs": 105,
+    "wf_10_5": {
+     "oos_mean": 0.0794,
+     "oos_beat": 1
+    },
+    "wf_5_3": {
+     "oos_mean": 0.0173,
+     "oos_beat": 0.75
+    },
+    "pbo": 0.2522,
+    "dsr_best": 0.5765
+   },
+   "mix": {
+    "n_configs": 144,
+    "pbo": 0.5522,
+    "dsr_best": 0.0037
+   },
+   "vt": {
+    "n_configs": 79,
+    "pbo": 0.292,
+    "dsr_best": 0.2171
+   }
+  }
+ },
+ "hindsight_checks": "SPY-based rules use no star instrument. The S&P is the benchmark itself. The Treasury off-asset benefited from 1986-2020 falling rates and failed in 2022; the T-bill and 1x-SPY off-state versions are reported. Daily SMA200 2% band: T-bills CA +5.12, p 0.18; SPY off +5.97. Leverage itself was not chosen with hindsight: static 3x from 2000 is a clear failure. The real-ETF window (2009+) is a bull-market-only sample, and every leveraged config looks good there; real UPRO buy-and-hold passes items 1-3. QQQ-dependent rules were checked per PROTOCOL 5.3. (b) Star removed: leveraged dual momentum SPY/QQQ (CA screen +5.52) becomes SPY/DIA +3.55 (p 0.22), SPY+MDY+DIA +1.91, SPY/MDY +0.01, SPY/IWM -3.48, SPY/EFA -0.42. (a) 20 random 'SPY + X' menus, X drawn with fixed seeds from common.BROAD_EQUITY_POOL_2003 (QQQ and SPY near-duplicates excluded), each X held through a cost-calibrated synthetic 2x series: CA median +0.25, mean +0.74, 1/20 at least as good as QQQ (XLY), 1/20 passes items 1-3 (SPYG). 3x trend on 20 random X: CA median -4.07 vs QQQ +4.70, 13/20 drawdowns deeper than -80%. Parameter hindsight: the best rule (SMA175, 3% band, daily) was selected after the neighbourhood scan. It sits on a plateau: all 3-4% band members pass on 2000-26 and 1986-2026. The 1986+ results of the 1-3% band grid had been seen before it was singled out, so the holdout is not perfectly clean for it.",
+ "concerns": [
+  "Synthetic data: 2000-2009 (SYN) and 1986-2026 (LONG) results use research-only synthetic daily-reset leveraged series. They are calibrated and validated against the real funds (strategy-level agreement -0.31..+0.06 pp/yr), but they cannot be reproduced on the website. The real leveraged ETFs and the leverage.* signals are research-only too (not site tickers or site strategies).",
+  "Execution convention: the lab and site decide and fill at the same close. The daily trend rules' only gap-crash escape (1987-10-16) depends on it; a one-day lag turns the best rule's 1986-2026 drawdown into -79%. A real market-on-close order computed shortly before the close may or may not have exited that day.",
+  "Single-event dependence: 1987 is the only one-day gap crash in 40 years of data. A future gap crash not preceded by a sell signal would hit a 3x position at full size (a one-day S&P drop of more than 33% would wipe out a 3x fund).",
+  "Post-hoc selection: the strongest rule (3% band) was found in the neighbourhood scan of the pre-registered 2%-band finalist. The family-level PBO (0.67) and DSR (0.20) discount it, and they fail item 4.",
+  "Not modelled: leveraged-ETF closures or terminations, swap counterparty risk, intraday rebalancing slippage in extreme moves, financing-spread changes. Bond interest and dividends are taxed as deferred capital gains in the engine; the realism check shows under 0.3 pp/yr impact.",
+  "Compute was throttled (battery-aware slot sharing with ~13 families). The first run's screen-2 refinement grids (~1,600 configs defined in grids.py) were pruned; 930 of 2,553 defined configs have results. The multiple-testing count is the 930 run, not the 2,553 defined.",
+  "This run added 37 synthetic SYN_<X>2XC/3XC CSVs to research/lab/data/ for the hindsight random menus, following the previous researcher's hindsight.py convention. No lab core, site data/ or other families' files were edited, and leverage.py is unchanged since the first run, so its cache stayed valid."
+ ],
+ "untested_ideas": [
+  "Model near-close execution: decide on a price shortly before the close or apply an intraday stop. This would settle whether the 1987-10-16 exit was achievable; the daily-bar engine cannot do it.",
+  "Run the full quarterly long protocol for every 3-4% band plateau member, and their lag-1 versions, with T-bills instead of Treasuries as the off-asset on 1986-2026 (no duration bet).",
+  "A lower-leverage plateau rule (2x or 50% SPY + 50% 3x with the 3-4% band, daily) to see whether the 1986+ lag-1 tail shrinks enough to pass item 7 robustly.",
+  "An ensemble of daily SMA lengths and bands (exposure = share of rules on, 1x to 3x) to reduce single-parameter and single-day dependence.",
+  "The full refine_trend / refine_other dense grids from grids.py (about 1,600 configs), to measure the multiple-testing penalty exactly as originally planned.",
+  "Wide-band daily trend leverage on other underlyings (international, small cap) using the random-menu pool, to test whether the effect is S&P-specific.",
+  "Realism with actual leveraged-fund distribution histories before 2006/2009 (not available); currently mapped to the real funds where they exist."
+ ],
+ "lab_bugs": [
+  "metrics.summary: bench_max_dd always comes from the benchmark's run from the protocol's first start, not the config's first valid start. Late-start configs (REAL, 2009-07 onward) are compared with SPY's 2000-2026 drawdown (-55.2%) instead of the same-period value (-33.7%). My scratch analyze.risk_stats computes the same-period value.",
+  "variants.py kind weights_x: offset_days shifts only WeightStrategy's rebalance periods. Signals with daily=True and their own check calendar (e.g. leverage.regime with check='M') keep evaluating on the first trading day of each month, so verify.battery's rebalance-timing-luck test would report nearly identical results for them (false robustness). Workaround used: the common.trend emulation (daily=False).",
+  "metrics.walk_forward / report.diagnostics: step_quarters=4 is applied regardless of start spacing. On the yearly-start 'screen' protocol it steps 4 years, giving only 3-4 walk-forward decisions. I reported step_quarters=1 alongside.",
+  "sweep cache keying: _key computes registry.code_version(cfg) from the files on disk at write time, while forked pool workers run the code imported when the pool started. Editing a family module during a running sweep would store old-code results under the new code hash. Not observed here; a potential silent cache contamination.",
+  "Performance only: core.run_starts iterates the whole market calendar from the earliest instrument's first date for every start (e.g. from 1985 when SYN_TBILL is in the menu), so 2000+ screens spend much of their time on pre-start days.",
+  "realism.py: synthetic tickers (SYN_*) have no distribution records, so no distribution tax is charged on synthetic leveraged sleeves. I mapped them to UPRO/SSO/BIL/TMF where those existed."
+ ]
+}

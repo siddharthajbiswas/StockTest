@@ -1,0 +1,822 @@
+{
+ "family": "tax_rotation",
+ "module_path": "/Users/siddhartha/dev/StockTest/research/lab/families/tax_rotation.py",
+ "results_md": "# Tax-managed rotation: refining the \"Beat the S&P (CA)\" preset\n\nFull report on disk: /Users/siddhartha/dev/StockTest/research/lab/results/tax_rotation.md\nTable: /Users/siddhartha/dev/StockTest/research/lab/results/tax_rotation_table.csv (2,238 records; columns include protocol, stage and the exact cfg).\n\nExcess means after-tax CAGR minus SPY buy-and-hold in the same regime (0.01 = 1 pp/yr). CA is the primary regime, FED secondary, NONE diagnostic only.\n\n## Verdict\nNo tax-managed rotation clears the full PROTOCOL section 3 bar in CA or in FED.\n\nThe best refinement found is KX3:\n- 378-day momentum, no skip, top 5, semiannual, 1%/yr gain budget, proportional buys.\n- Frozen-winner execution: keep a held fund while it ranks in the top 2N; never trim a fund the signal still wants; spend the gain budget on the worst-ranked holdings first.\n\nKX3 vs the incumbent, full protocol, CA:\n\n| metric | KX3 | incumbent |\n|---|---|---|\n| score | +0.0099 | +0.0066 |\n| full_excess | +0.0184 | +0.0154 |\n| ex10_beat | 0.90 | 0.70 |\n| ex15_beat | 0.85 | 0.83 |\n| boot_p | 0.011 | 0.025 |\n| max_dd | \u22120.537 | \u22120.566 (SPY \u22120.552) |\n\nKX3 passes criteria 1-3 in CA and FED. So does KX1 (12-1, top 5, quarterly, same execution, long-term gains only, 2% budget).\n\nBoth fail the rest of the bar:\n- Criterion 4: family PBO 0.60 over 997 configs; walk-forward OOS +0.0004 (10y/5y) and \u22120.0116 (5y/3y).\n- Criterion 6: they fail once QQQ or XLK is removed, and pass on only 1 of 30 random menus.\n- Criterion 7: the pre-2000 holdout is flat to negative (KX3 ho5 \u22120.0012, ho10 \u22120.0023).\n- Criterion 5 is only partial: 25/25 neighbours have a positive score, but only 27-29% pass criteria 1-3, and the default rebalance months are among the best.\n\nWhat is real and what is not:\n- Momentum beats random ranking under the same tax rule on menus nobody chose: +0.008 score, t \u2248 7.\n- The lead over SPY needs QQQ/XLK in the menu (or a US equal-weight tilt from 2000).\n- The lead comes mostly from 2000-2010: KX3 +2.9 pp, +0.9 pp, \u22120.4 pp in 2000-10, 2010-20, 2020-26.\n- Every rule lost 2.8-3.9 pp/yr in 5-year windows starting 2020-2023.\n- The frozen-winner problem is not cured: KX1/KX3 hold 56-60% growth/tech and 80-87% unrealized gains by 2026.\n\n## What was tested\n- 1,794 distinct configs; 2,238 backtests (screen CA 1,422, screen NONE 674, full 86, long_screen 44, long 12).\n- About 1,100 configs were searched for performance; the rest are controls and hindsight menus.\n- Stages:\n  - A: 480 site combos.\n  - B: 375 WS signals, plus 286 shadow-NONE runs.\n  - K: 28 frozen-winner variants; C: 26 budgets; J: 4 buy orders; D: 46 features; E: 52 named menus.\n  - KG: 40-config local grid; neighbourhoods and offsets: 48 full runs.\n  - Controls: 20+20+18+25+40+20+24 random-rank seeds.\n  - Hindsight: 30 random menus \u00d7 4 rules, 60 paired random-rank menus, 90 US-only menus (sensitivity), removal of QQQ/XLK.\n  - Long: 56 runs.\n\n## Key results\n- **Grid (screen, CA):**\n  - Long lookbacks (378-504, skip 0) and top_n 5-8 are best; 63-day loses; Q/S cadence beats M.\n  - Only 5/336 combos and 13/375 WS configs pass criteria 1-3; no broad plateau.\n- **Execution:** proportional buys beat the site's alphabetical buys on 84% of 144 pairs (+0.0011 score). WS with alpha buys reproduces the site combo exactly.\n- **Budget:** the plateau is 0.5-2%; 5% hurts. st_gains=False helps the score but hurts full_excess on INC.\n- **Frozen-winner variants:** the K-execution lifts INC from 0.0073 to 0.012-0.013 (screen); all 40 local-grid configs are positive. Random rank with the same execution scores +0.0006 to +0.0012, so z = 3.5-5.2 on the incumbent menu.\n- **Features:**\n  - TLH hurts (B378: 0.0106 \u2192 0.0048-0.0078).\n  - Inverse-vol weights are slightly worse.\n  - A SPY core dilutes the excess about proportionally.\n  - An absolute filter to SHY/IEF is strongly negative.\n  - Strict wash guard and a 2% band are neutral.\n- **Menus:**\n  - The incumbent 22 is the best of 15 named menus.\n  - SPDR sectors \u2248 0; iShares sectors, countries, factors and +bonds are negative.\n  - The 84/90-fund pools have negative full_excess.\n- **Hindsight:**\n  - QQQ removed: combo INC 0.0004, B378 0.0044, KX1 0.0075 (ex10_beat 0.59), KX3 0.0044.\n  - Random menus: score +0.004-0.005 but beat rates around 0.5; 0-1/30 pass.\n- **US-only random menus (sensitivity):** B378 has score +0.0087 and 6/30 pass, but random ranking also scores +0.0040 with full_excess +0.0103. That is an equal-weight/size tilt that paid from 2000.\n- **Random-rank controls:** score \u2248 0 but full_excess +0.4 to +1.0 pp on the incumbent menu (a menu effect).\n- **Long 1986-2026 (CA):** nothing passes. Holdout ho5 ranges from \u22121.2 to +0.3 pp.\n- **Diagnostics:** CA PBO 0.605, DSR of best 0.157. NONE PBO 0.516, walk-forward \u22120.0056 / \u22120.0439.\n\n## Conclusion\n- The incumbent can be improved inside its own frame. KX3 lifts the CA score from 0.0066 to 0.0099, ex10_beat from 0.70 to 0.90, and turnover falls from 0.105 to 0.047.\n- It is still the same growth/tech regime bet, not a strategy that beats SPY with good confidence.\n- For a CA taxable account this family's honest answer is to hold SPY, unless the user knowingly takes that bet. If they do, KX3 is the most robust variant.",
+ "n_configs_tested": 1794,
+ "headline": "No tax-managed rotation clears the full good-confidence bar in CA or FED. The best refinement, KX3, has a full-protocol CA score of +0.0099 vs the incumbent's +0.0066 (full_excess +0.0184, ex10_beat 0.90, ex15_beat 0.85, boot_p 0.011). KX3 is 378-0 momentum, top 5, semiannual, with keep-in-top-2N + no-trim + worst-ranked-first gain spending; it and its sibling KX1 pass criteria 1-3 in CA and FED and beat the incumbent on every one of those metrics. Both fail the hindsight test (QQQ or XLK removed, 1/30 random menus pass), the family overfitting checks (PBO 0.60, walk-forward OOS ~0) and the pre-2000 holdout (flat to negative). Momentum ranking genuinely beats random ranking under the same tax rule on menus nobody chose (+0.008/yr score, t \u2248 7), but the lead over SPY depends on QQQ/XLK being in the menu and on the 2000-2010 decade, and every rule lost 2.8-3.9 pp/yr in 5-year windows starting 2020-2023.",
+ "findings": [
+  "No config in the family passes all 7 PROTOCOL section 3 criteria in CA or FED. Best: KX3 and KX1 pass criteria 1-3 on full in CA and FED, but fail 4 (PBO 0.60), 6 (hindsight) and 7 (pre-2000 holdout flat/negative); criterion 5 is partial.",
+  "Full protocol CA: KX3 score +0.0099, full +0.0184, ex10_beat 0.90, ex15_beat 0.85, boot_p 0.011, max_dd -0.537 (SPY -0.552). KX1: +0.0093 / +0.0182 / 0.91 / 0.89 / 0.011. WS B378: +0.0091 / +0.0115 / 0.82 / 0.89 / 0.054. Site combo B378: +0.0079 / +0.0105 / 0.82 / 0.91 / 0.073. Incumbent preset: +0.0066 / +0.0154 / 0.70 / 0.83 / 0.025 (fails ex10/ex15; reproduces the lead's numbers exactly).",
+  "Execution (item j): proportional buys (WS) beat the site's alphabetical TaxManagedCombo buys on 84% of 144 identical-knob pairs (+0.0011 score, +0.0019 full_excess, score correlation 0.955). WS with buy_order=alpha reproduces the site combo exactly. Rank-order fills add nothing.",
+  "Signals / top_n / cadence (screen CA): long lookbacks 378-504 (skip 0) and riskadj126 v63 are best; 63-day loses (-0.004 to -0.005). n=2 loses; n 5-8 is the plateau. Q/S beat M. Only 5/336 combos and 13/375 WS configs pass 1-3, clustered at 378-504 skip 0, n5-6, S/Q.",
+  "Gain budget (item d): the plateau is 0.5-2%/yr. 5% hurts (B378 WS 0.0029, INC 0.0034). Budget 0 is about as good as 1% for the combo. st_gains=False raises the INC window score but lowers full_excess and worsens boot_p; neutral on B378.",
+  "Frozen winners (item k): the incumbent is 74.5% growth/tech by 2026 with 88% of value in unrealized gains. The new knobs (hold_buffer=N to keep names in the top 2N, trim=False, gain_order=rank, optional LT-only) lift the INC rule from 0.0073 to 0.0121-0.0133 on screen. All 40 configs in a local grid are positive (mean 0.0085; 23% pass 1-3). The variants do NOT unfreeze holdings: KX1/KX3 are 56-60% growth/tech in 2026.",
+  "Features: TLH (5-15%, monthly/weekly, with different-index substitutes or cash) hurts on both bases (B378 0.0106 -> 0.0048-0.0078). Inverse-vol weights are slightly worse. A SPY core of 25/50/75% dilutes excess about proportionally (B378 + 25-50% core still passes 1-3 on screen). An absolute-momentum filter to SHY/IEF is strongly negative. Strict wash guard, 2% band and max_weight caps are neutral.",
+  "Menus (item f): the incumbent 22-ETF menu is the best of 15 named menus for every rule. SPDR sectors-only ~0; iShares sectors -0.006 to -0.010; +bonds negative; +gold neutral; 20 countries + SPY -0.022 to -0.026; factor ETFs negative; the 84/90-fund pools have positive window scores but negative full_excess and ~-0.66 drawdowns.",
+  "Hindsight (item g, 5.3): with QQQ removed the site preset falls to 0.0004 (XLK removed 0.0017, both -0.0030). Every finalist fails the bar with either star removed (KX1 -QQQ: 0.0075, ex10_beat 0.59; KX3 -QQQ: 0.0044). On 30 random menus from BROAD_EQUITY_POOL_2003: combo INC mean score -0.0013 (40% >0), WS B378 +0.0048 (full -0.0018), KX1 +0.0042 (full +0.0070), KX3 +0.0039; 0-1 of 30 pass 1-3.",
+  "Momentum is real relative to chance: paired on the same 30 random menus with the same execution, momentum beats random ranking by +0.0079 score (B378, t=6.96, 90% of menus) and +0.0080 (KX1, t=7.22; full_excess +0.0089, t=5.10). But random ranking on those menus trails SPY by ~0.0035, so momentum lifts them only to ~+0.004 vs SPY.",
+  "Random-rank controls (mandatory) on the incumbent menu: combo RandomPicker 20 seeds score -0.0022; WS random 20 seeds +0.0006; B378-eligibility 25 seeds +0.0004 (sd 0.0026); K-execution 20+20 seeds +0.0012 / +0.0006. Every momentum rule beats all seeds on score, but random selection already earns +0.4 to +1.0 pp of full-period excess on this menu: a menu effect inside every headline full_excess.",
+  "US-only random menus (sensitivity, not pre-registered): B378 score +0.0087 (97% >0, 6/30 pass) and KX1 +0.0062 (6/30). But random ranking with the same execution also beats SPY there (score +0.0040, full +0.0103). This is an equal-weight/size tilt that paid from the 2000 peak of mega-cap concentration, not selection skill.",
+  "Long history (1986-2026, VFINX, pre-registered LONG_MENU of mutual-fund proxies): nothing passes 1-3 in CA (ex10_beat 0.56-0.66, boot_p 0.48-0.68). Pre-2000 holdout is flat to negative: KX3 ho5 -0.0012/ho10 -0.0023, KX1 -0.0030/-0.0028, plain 378-day rules ho5 -0.010 to -0.012. Momentum beats same-execution random rank there by only 0.001-0.004.",
+  "Overfitting diagnostics (screen grid, CA, 997 configs): PBO 0.605; walk-forward OOS +0.0004 (10/5, 3 dates) and -0.0116 (5/3); DSR of best 0.157. A supplementary walk-forward with a decision every year gives OOS -0.0134 / -0.0057 / +0.0038 with OOS rank ~0.5. In the K-execution sub-family (68 configs): PBO 0.68.",
+  "Robustness on full (CA): every neighbour of KX1/KX3/B378 has a positive score, but only 22-29% pass 1-3. Rebalance-month offsets: KX3 6/6 schedules positive (score 0.0068-0.0109, full 0.0075-0.0184, 3/6 pass); WS B378 full ranges -0.0017 to +0.0144. Default schedules are among the best (timing luck).",
+  "Sub-periods (CA, fresh starts): incumbent +1.20 / -0.55 / +0.19 pp for 2000-10 / 2010-20 / 2020-26 (matches the lead). KX3 +2.93 / +0.89 / -0.40; KX1 +3.57 / +0.74 / -0.64; WS B378 +1.88 / +0.53 / -1.01. All rules lose 2.8-3.9 pp/yr in 5-year windows starting 2020-2023.",
+  "NONE diagnostic (plain untaxed rotations, since the tax rule is inert without lots): nothing passes on full. The untaxed 378-0 n5 S rotation does pass 1-3 on the long protocol (score +0.0225, holdout ho5/ho10 +0.011/+0.010) but not in the ETF era (ex10_beat 0.57). This is worth a look by the IRA-focused families."
+ ],
+ "candidates": [
+  {
+   "label": "KX3: 378-0 momentum, top 5, semiannual, 1% budget, keep-in-top-2N + no-trim + worst-ranked-first gain spending (WS, proportional buys)",
+   "cfg": {
+    "kind": "tax_rotation.ws",
+    "signal": "tax_rotation.rank",
+    "params": {
+     "menu": [
+      "SPY",
+      "QQQ",
+      "DIA",
+      "MDY",
+      "IWM",
+      "IJR",
+      "EFA",
+      "EEM",
+      "IWD",
+      "IWF",
+      "RSP",
+      "XLB",
+      "XLC",
+      "XLE",
+      "XLF",
+      "XLI",
+      "XLK",
+      "XLP",
+      "XLRE",
+      "XLU",
+      "XLV",
+      "XLY"
+     ],
+     "score": "ret",
+     "lookback": 378,
+     "skip": 0,
+     "top_n": 5,
+     "hold_buffer": 5
+    },
+    "rebalance": "S",
+    "execution": "tax",
+    "gain_budget": 0.01,
+    "wash_days": 31,
+    "buy_order": "prop",
+    "trim": false,
+    "gain_order": "rank"
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.0099,
+     "full_excess": 0.0184,
+     "ex5_mean": 0.0078,
+     "ex10_mean": 0.0117,
+     "ex10_beat": 0.8955,
+     "ex10_min": -0.0038,
+     "ex15_beat": 0.8511,
+     "ex20_beat": 0.963,
+     "boot_p": 0.011,
+     "max_dd": -0.5366,
+     "bench_max_dd": -0.5519,
+     "trades": 224,
+     "turnover": 0.0469
+    },
+    "FED": {
+     "score": 0.011,
+     "full_excess": 0.0194,
+     "ex5_mean": 0.0088,
+     "ex10_mean": 0.013,
+     "ex10_beat": 0.8955,
+     "ex10_min": -0.0038,
+     "ex15_beat": 0.8723,
+     "ex20_beat": 1,
+     "boot_p": 0.006,
+     "max_dd": -0.5366,
+     "bench_max_dd": -0.5519,
+     "trades": 224,
+     "turnover": 0.0471
+    },
+    "NONE": {
+     "score": 0.0091,
+     "full_excess": 0.0148,
+     "ex5_mean": 0.0102,
+     "ex10_mean": 0.0085,
+     "ex10_beat": 0.6567,
+     "ex10_min": -0.02,
+     "ex15_beat": 0.7021,
+     "ex20_beat": 0.8519,
+     "boot_p": 0.135,
+     "max_dd": -0.54,
+     "bench_max_dd": -0.5519,
+     "trades": 188,
+     "turnover": 0.4499
+    }
+   },
+   "long_protocol": {
+    "note": "same rule on LONG_MENU mutual-fund proxies, protocol long, benchmark VFINX",
+    "CA": {
+     "score": 0.0096,
+     "full_excess": -0.0034,
+     "ho5_mean": -0.0012,
+     "ho5_beat": 0.5676,
+     "ho10_mean": -0.0023
+    },
+    "NONE": {
+     "score": 0.0083,
+     "full_excess": 0.0059,
+     "ho5_mean": 0.0183,
+     "ho5_beat": 0.7027,
+     "ho10_mean": 0.0178
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "high",
+   "robustness_notes": "Passes criteria 1-3 on full in CA and FED. Fails 4: family PBO 0.605; K-execution sub-family PBO 0.68; walk-forward OOS ~0. Fails 6: -QQQ score 0.0044 (ex10_beat 0.59, ex15 0.58, boot 0.33); -XLK 0.0056; -both -0.0010; 30 random menus mean score +0.0039, full +0.0016, 1/30 pass. 7 contradicted mildly: long CA full -0.0034, ho5 -0.0012, ho10 -0.0023 (beat 0.24). 5 partial: 14/14 full-protocol neighbours have score >0 (median 0.0092) but 4/14 pass 1-3. The 6 rebalance-month schedules all have positive score (0.0068-0.0109) and full (0.0075-0.0184), mean boot_p 0.093, 3/6 pass; the default schedule has the best full_excess. Same-execution random-rank control (20 seeds) mean score +0.0006 (z 3.5). 2026 holdings: QQQ 33%, XLK 23%, MDY 18%; growth/tech 56%; unrealized gains 87% of value. Sub-periods CA: 2000-10 +2.93pp, 2010-20 +0.89, 2020-26 -0.40. Turnover 0.047/yr. Needs the trim/gain_order knobs added to research/lab/families/tax_rotation.py (not site-expressible today)."
+  },
+  {
+   "label": "KX1: incumbent signal (252-21 momentum, top 5, quarterly) with keep-in-top-2N + no-trim + worst-ranked-first, long-term gains only, 2% budget (WS)",
+   "cfg": {
+    "kind": "tax_rotation.ws",
+    "signal": "tax_rotation.rank",
+    "params": {
+     "menu": [
+      "SPY",
+      "QQQ",
+      "DIA",
+      "MDY",
+      "IWM",
+      "IJR",
+      "EFA",
+      "EEM",
+      "IWD",
+      "IWF",
+      "RSP",
+      "XLB",
+      "XLC",
+      "XLE",
+      "XLF",
+      "XLI",
+      "XLK",
+      "XLP",
+      "XLRE",
+      "XLU",
+      "XLV",
+      "XLY"
+     ],
+     "score": "ret",
+     "lookback": 252,
+     "skip": 21,
+     "top_n": 5,
+     "hold_buffer": 5
+    },
+    "rebalance": "Q",
+    "execution": "tax",
+    "gain_budget": 0.02,
+    "wash_days": 31,
+    "buy_order": "prop",
+    "st_gains": false,
+    "trim": false,
+    "gain_order": "rank"
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.0093,
+     "full_excess": 0.0182,
+     "ex5_mean": 0.0072,
+     "ex10_mean": 0.0107,
+     "ex10_beat": 0.9104,
+     "ex10_min": -0.0047,
+     "ex15_beat": 0.8936,
+     "ex20_beat": 0.963,
+     "boot_p": 0.011,
+     "max_dd": -0.5658,
+     "bench_max_dd": -0.5519,
+     "trades": 279,
+     "turnover": 0.071
+    },
+    "FED": {
+     "score": 0.0105,
+     "full_excess": 0.0196,
+     "ex5_mean": 0.0082,
+     "ex10_mean": 0.012,
+     "ex10_beat": 0.9254,
+     "ex10_min": -0.0046,
+     "ex15_beat": 0.9149,
+     "ex20_beat": 1,
+     "boot_p": 0.009,
+     "max_dd": -0.5631,
+     "bench_max_dd": -0.5519,
+     "trades": 281,
+     "turnover": 0.0714
+    },
+    "NONE": {
+     "score": 0.0071,
+     "full_excess": 0.0162,
+     "ex5_mean": 0.0101,
+     "ex10_mean": 0.006,
+     "ex10_beat": 0.4776,
+     "ex10_min": -0.0191,
+     "ex15_beat": 0.5957,
+     "ex20_beat": 0.8519,
+     "boot_p": 0.124,
+     "max_dd": -0.5466,
+     "bench_max_dd": -0.5519,
+     "trades": 288,
+     "turnover": 0.7473
+    }
+   },
+   "long_protocol": {
+    "note": "same rule on LONG_MENU mutual-fund proxies, protocol long, benchmark VFINX",
+    "CA": {
+     "score": 0.0068,
+     "full_excess": -0.0054,
+     "ho5_mean": -0.003,
+     "ho5_beat": 0.5946,
+     "ho10_mean": -0.0028
+    },
+    "NONE": {
+     "score": 0.006,
+     "full_excess": 0.0037,
+     "ho5_mean": 0.0122,
+     "ho5_beat": 0.7027,
+     "ho10_mean": 0.0107
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "high",
+   "robustness_notes": "Passes 1-3 on full in CA and FED. Fails 4 (PBO 0.605 family-wide; K sub-family 0.68). Fails 6: -QQQ score 0.0075 (ex10_beat 0.59, ex15 0.75, boot 0.071); -XLK 0.0095 (0.65/0.83/0.095); -both 0.0042; 30 random menus score +0.0042, full +0.0070 (87% >0) but ex10_beat mean 0.48, 1/30 pass. 7 mildly contradicted: long CA full -0.0054, ho5 -0.0030, ho10 -0.0028. 5 partial: 11/11 neighbours have positive score and full (median score 0.0076), 3/11 pass. Q-offset schedules: 0.0061 / 0.0057 (both fail); the default is best. Same-execution random-rank control mean +0.0012 (z 5.2). Paired vs random rank on 30 random menus: +0.0080 score (t 7.2). 2026: XLK 32%, QQQ 25%, growth/tech 60%. Sub-periods CA: +3.57 / +0.74 / -0.64 pp. On screen, budget 1-5% (LT-only) all pass 1-3."
+  },
+  {
+   "label": "B378 WS: 378-0 momentum, top 5, semiannual, 1% budget, tax execution with proportional buys",
+   "cfg": {
+    "kind": "tax_rotation.ws",
+    "signal": "tax_rotation.rank",
+    "params": {
+     "menu": [
+      "SPY",
+      "QQQ",
+      "DIA",
+      "MDY",
+      "IWM",
+      "IJR",
+      "EFA",
+      "EEM",
+      "IWD",
+      "IWF",
+      "RSP",
+      "XLB",
+      "XLC",
+      "XLE",
+      "XLF",
+      "XLI",
+      "XLK",
+      "XLP",
+      "XLRE",
+      "XLU",
+      "XLV",
+      "XLY"
+     ],
+     "score": "ret",
+     "lookback": 378,
+     "skip": 0,
+     "top_n": 5
+    },
+    "rebalance": "S",
+    "execution": "tax",
+    "gain_budget": 0.01,
+    "wash_days": 31,
+    "buy_order": "prop"
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.0091,
+     "full_excess": 0.0115,
+     "ex5_mean": 0.0059,
+     "ex10_mean": 0.0097,
+     "ex10_beat": 0.8209,
+     "ex10_min": -0.0114,
+     "ex15_beat": 0.8936,
+     "ex20_beat": 1,
+     "boot_p": 0.054,
+     "max_dd": -0.5493,
+     "bench_max_dd": -0.5519,
+     "trades": 331,
+     "turnover": 0.0696
+    },
+    "FED": {
+     "score": 0.0102,
+     "full_excess": 0.0123,
+     "ex5_mean": 0.0068,
+     "ex10_mean": 0.011,
+     "ex10_beat": 0.8209,
+     "ex10_min": -0.0121,
+     "ex15_beat": 0.8936,
+     "ex20_beat": 1,
+     "boot_p": 0.046,
+     "max_dd": -0.5493,
+     "bench_max_dd": -0.5519,
+     "trades": 331,
+     "turnover": 0.07
+    },
+    "NONE": {
+     "score": 0.01,
+     "full_excess": 0.0147,
+     "ex5_mean": 0.0148,
+     "ex10_mean": 0.0079,
+     "ex10_beat": 0.5672,
+     "ex10_min": -0.0304,
+     "ex15_beat": 0.7021,
+     "ex20_beat": 0.963,
+     "boot_p": 0.131,
+     "max_dd": -0.5392,
+     "bench_max_dd": -0.5519,
+     "trades": 364,
+     "turnover": 0.7881
+    }
+   },
+   "long_protocol": {
+    "note": "same rule on LONG_MENU mutual-fund proxies, protocol long, benchmark VFINX",
+    "CA": {
+     "score": 0.0087,
+     "full_excess": -0.0046,
+     "ho5_mean": -0.0101,
+     "ho5_beat": 0.6486,
+     "ho10_mean": -0.001
+    },
+    "NONE": {
+     "score": 0.0225,
+     "full_excess": 0.0207,
+     "ho5_mean": 0.011,
+     "ho5_beat": 0.6757,
+     "ho10_mean": 0.0101
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "high",
+   "robustness_notes": "Passes 1-3 on full in CA (boot_p 0.054) and FED. Fails 4 (PBO 0.605). Fails 6: -QQQ 0.0044 (ex10 0.76, ex15 0.67, boot 0.44); -XLK 0.0075 (boot 0.103); 30 random menus score +0.0048 (73% >0) but full -0.0018, 0/30 pass. 7 contradicted: long CA ho5 -0.0101, full -0.0046. 5 partial: 14/14 neighbours positive score (median 0.0072), 4/14 pass. Rebalance offsets: full_excess ranges -0.0017 to +0.0144, 2/6 schedules pass. Random-rank control with the same execution (25 seeds): score +0.0004 (sd 0.0026) but full +0.0064, so its full_excess is only at the 72nd percentile of random. 2026 holdings ~50% growth/tech, unrealized gains 86%. Sub-periods CA: +1.88 / +0.53 / -1.01 pp."
+  },
+  {
+   "label": "B378 site combo: momentum 378-0 (TaxManagedCombo), top 5, semiannual, 1% budget, incumbent 22-ETF menu (site-expressible)",
+   "cfg": {
+    "kind": "combo",
+    "picker": "momentum",
+    "picker_params": {
+     "lookback": 378,
+     "skip": 0
+    },
+    "timer": "buy_hold",
+    "timer_params": {},
+    "top_n": 5,
+    "rebalance": "S",
+    "menu": [
+     "SPY",
+     "QQQ",
+     "DIA",
+     "MDY",
+     "IWM",
+     "IJR",
+     "EFA",
+     "EEM",
+     "IWD",
+     "IWF",
+     "RSP",
+     "XLB",
+     "XLC",
+     "XLE",
+     "XLF",
+     "XLI",
+     "XLK",
+     "XLP",
+     "XLRE",
+     "XLU",
+     "XLV",
+     "XLY"
+    ],
+    "trade_rule": "tax_managed",
+    "gain_budget": 0.01,
+    "wash_days": 31
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.0079,
+     "full_excess": 0.0105,
+     "ex5_mean": 0.0057,
+     "ex10_mean": 0.0076,
+     "ex10_beat": 0.8209,
+     "ex10_min": -0.0112,
+     "ex15_beat": 0.9149,
+     "ex20_beat": 1,
+     "boot_p": 0.073,
+     "max_dd": -0.5668,
+     "bench_max_dd": -0.5519,
+     "trades": 184,
+     "turnover": 0.0771
+    },
+    "FED": {
+     "score": 0.0088,
+     "full_excess": 0.0109,
+     "ex5_mean": 0.0066,
+     "ex10_mean": 0.0086,
+     "ex10_beat": 0.8209,
+     "ex10_min": -0.0114,
+     "ex15_beat": 0.9362,
+     "ex20_beat": 1,
+     "boot_p": 0.075,
+     "max_dd": -0.5668,
+     "bench_max_dd": -0.5519,
+     "trades": 185,
+     "turnover": 0.0779
+    },
+    "NONE": {
+     "score": 0.01,
+     "full_excess": 0.0147,
+     "ex5_mean": 0.0148,
+     "ex10_mean": 0.008,
+     "ex10_beat": 0.5672,
+     "ex10_min": -0.0304,
+     "ex15_beat": 0.7021,
+     "ex20_beat": 0.963,
+     "boot_p": 0.131,
+     "max_dd": -0.5392,
+     "bench_max_dd": -0.5519,
+     "trades": 362,
+     "turnover": 0.788
+    }
+   },
+   "long_protocol": {
+    "note": "same rule on LONG_MENU mutual-fund proxies, protocol long, benchmark VFINX",
+    "CA": {
+     "score": 0.0075,
+     "full_excess": -0.002,
+     "ho5_mean": -0.0117,
+     "ho5_beat": 0.6486,
+     "ho10_mean": -0.0045
+    },
+    "NONE": {
+     "score": 0.0225,
+     "full_excess": 0.0207,
+     "ho5_mean": 0.011,
+     "ho5_beat": 0.6757,
+     "ho10_mean": 0.0101
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "high",
+   "robustness_notes": "The only finalist the website can run today (a change of lookback, skip and cadence from the preset). Passes 1-3 on full in CA (boot_p 0.073) and FED. Fails 4 (PBO 0.605). Fails 6 (same menu dependence as B378 WS; QQQ/XLK removal and random menus fail). 7 contradicted: long CA ho5 -0.0117, ho10 -0.0045. 5 partial: 9/9 neighbours have positive score and full (median 0.0068), 2/9 pass (n6 S and n5 Q pass). The site cannot shift rebalance months, so offsets cannot be tested for the combo; the WS twin's offsets vary widely."
+  },
+  {
+   "label": "INC WS: the incumbent's knobs (252-21, top 5, quarterly, 1% budget) with proportional buys instead of the site's alphabetical fills",
+   "cfg": {
+    "kind": "tax_rotation.ws",
+    "signal": "tax_rotation.rank",
+    "params": {
+     "menu": [
+      "SPY",
+      "QQQ",
+      "DIA",
+      "MDY",
+      "IWM",
+      "IJR",
+      "EFA",
+      "EEM",
+      "IWD",
+      "IWF",
+      "RSP",
+      "XLB",
+      "XLC",
+      "XLE",
+      "XLF",
+      "XLI",
+      "XLK",
+      "XLP",
+      "XLRE",
+      "XLU",
+      "XLV",
+      "XLY"
+     ],
+     "score": "ret",
+     "lookback": 252,
+     "skip": 21,
+     "top_n": 5
+    },
+    "rebalance": "Q",
+    "execution": "tax",
+    "gain_budget": 0.01,
+    "wash_days": 31,
+    "buy_order": "prop"
+   },
+   "regime_target": "FED",
+   "stats": {
+    "CA": {
+     "score": 0.0072,
+     "full_excess": 0.0129,
+     "ex5_mean": 0.0051,
+     "ex10_mean": 0.0075,
+     "ex10_beat": 0.8358,
+     "ex10_min": -0.0154,
+     "ex15_beat": 0.8298,
+     "ex20_beat": 1,
+     "boot_p": 0.044,
+     "max_dd": -0.5511,
+     "bench_max_dd": -0.5519,
+     "trades": 581,
+     "turnover": 0.1061
+    },
+    "FED": {
+     "score": 0.0081,
+     "full_excess": 0.0134,
+     "ex5_mean": 0.006,
+     "ex10_mean": 0.0085,
+     "ex10_beat": 0.8507,
+     "ex10_min": -0.0159,
+     "ex15_beat": 0.8511,
+     "ex20_beat": 1,
+     "boot_p": 0.044,
+     "max_dd": -0.5511,
+     "bench_max_dd": -0.5519,
+     "trades": 587,
+     "turnover": 0.1072
+    },
+    "NONE": {
+     "score": 0.0014,
+     "full_excess": 0.0055,
+     "ex5_mean": 0.0065,
+     "ex10_mean": -0.0003,
+     "ex10_beat": 0.403,
+     "ex10_min": -0.0274,
+     "ex15_beat": 0.4255,
+     "ex20_beat": 0.7778,
+     "boot_p": 0.341,
+     "max_dd": -0.5175,
+     "bench_max_dd": -0.5519,
+     "trades": 714,
+     "turnover": 1.4514
+    }
+   },
+   "long_protocol": {
+    "note": "same rule on LONG_MENU mutual-fund proxies, protocol long, benchmark VFINX",
+    "CA": {
+     "score": 0.0075,
+     "full_excess": -0.0052,
+     "ho5_mean": 0.003,
+     "ho5_beat": 0.6216,
+     "ho10_mean": 0.0019
+    },
+    "NONE": {
+     "score": 0.0049,
+     "full_excess": 0.0051,
+     "ho5_mean": 0.0201,
+     "ho5_beat": 0.7027,
+     "ho10_mean": 0.0179
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "high",
+   "robustness_notes": "Fails 1-3 in CA (ex15_beat 0.83) and passes them in FED, just on the line (ex10_beat 0.85, ex15_beat 0.85). Fails 4 and 6: -QQQ 0.0020 and -XLK 0.0034 on screen; the site-combo version on random menus has mean score -0.0013. Long-history holdout is about flat (ho5 +0.0030, ho10 +0.0019) with full -0.0052. Its value is diagnostic: it isolates the execution improvement (+0.0006 score vs the site combo on full CA; +0.0011 on average over 144 screen pairs)."
+  },
+  {
+   "label": "Reference: incumbent site preset 'Beat the S&P (CA)' (TaxManagedCombo 12-1 momentum, top 5, quarterly, 1% budget, 22 ETFs)",
+   "cfg": {
+    "kind": "combo",
+    "picker": "momentum",
+    "picker_params": {
+     "lookback": 252,
+     "skip": 21
+    },
+    "timer": "buy_hold",
+    "timer_params": {},
+    "top_n": 5,
+    "rebalance": "Q",
+    "menu": [
+     "SPY",
+     "QQQ",
+     "DIA",
+     "MDY",
+     "IWM",
+     "IJR",
+     "EFA",
+     "EEM",
+     "IWD",
+     "IWF",
+     "RSP",
+     "XLB",
+     "XLC",
+     "XLE",
+     "XLF",
+     "XLI",
+     "XLK",
+     "XLP",
+     "XLRE",
+     "XLU",
+     "XLV",
+     "XLY"
+    ],
+    "trade_rule": "tax_managed",
+    "gain_budget": 0.01,
+    "wash_days": 31
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.0066,
+     "full_excess": 0.0154,
+     "ex5_mean": 0.0056,
+     "ex10_mean": 0.0055,
+     "ex10_beat": 0.7015,
+     "ex10_min": -0.0148,
+     "ex15_beat": 0.8298,
+     "ex20_beat": 1,
+     "boot_p": 0.025,
+     "max_dd": -0.5662,
+     "bench_max_dd": -0.5519,
+     "trades": 295,
+     "turnover": 0.1055
+    },
+    "FED": {
+     "score": 0.0074,
+     "full_excess": 0.016,
+     "ex5_mean": 0.0065,
+     "ex10_mean": 0.0063,
+     "ex10_beat": 0.6866,
+     "ex10_min": -0.0133,
+     "ex15_beat": 0.8511,
+     "ex20_beat": 1,
+     "boot_p": 0.025,
+     "max_dd": -0.5662,
+     "bench_max_dd": -0.5519,
+     "trades": 297,
+     "turnover": 0.1062
+    },
+    "NONE": {
+     "score": 0.0014,
+     "full_excess": 0.0055,
+     "ex5_mean": 0.0065,
+     "ex10_mean": -0.0003,
+     "ex10_beat": 0.403,
+     "ex10_min": -0.0274,
+     "ex15_beat": 0.4255,
+     "ex20_beat": 0.7778,
+     "boot_p": 0.341,
+     "max_dd": -0.5176,
+     "bench_max_dd": -0.5519,
+     "trades": 713,
+     "turnover": 1.4515
+    }
+   },
+   "long_protocol": {
+    "note": "same rule on LONG_MENU mutual-fund proxies, protocol long, benchmark VFINX",
+    "CA": {
+     "score": 0.0065,
+     "full_excess": -0.0002,
+     "ho5_mean": 0.0002,
+     "ho5_beat": 0.5135,
+     "ho10_mean": 0.0008
+    },
+    "NONE": {
+     "score": 0.0049,
+     "full_excess": 0.0051,
+     "ho5_mean": 0.0201,
+     "ho5_beat": 0.7027,
+     "ho10_mean": 0.0179
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "high",
+   "robustness_notes": "Reproduces the lead's reference numbers exactly (CA full: score +0.0066, full +0.0154, ex10_beat 0.70, ex15_beat 0.83, boot_p 0.025; sub-periods +1.20 / -0.55 / +0.19 pp). Fails 1-3 in CA and FED on ex10_beat. Hindsight: -QQQ score 0.0004, -XLK 0.0017, -both -0.0030; 30 random menus mean -0.0013 (40% >0, 0/30 pass). Random-pick control with the same rule (20 seeds) scores -0.0022. Long history is about neutral (ho5 +0.0002, ho10 +0.0008). By 2026 it is 74.5% growth/tech with 88% unrealized gains. Included as the baseline every other candidate is compared against."
+  }
+ ],
+ "diagnostics": {
+  "CA": {
+   "n_configs": 997,
+   "walk_forward": {
+    "oos_mean": 0.0004,
+    "oos_beat": 0.3333,
+    "is_mean": 0.0378,
+    "avg_config_oos_mean": -0.0076,
+    "mean_oos_rank_pct": 0.4768
+   },
+   "walk_forward_5_3": {
+    "oos_mean": -0.0116,
+    "oos_beat": 0.5,
+    "is_mean": 0.0483,
+    "avg_config_oos_mean": -0.0098,
+    "mean_oos_rank_pct": 0.5441
+   },
+   "pbo": {
+    "pbo": 0.6046,
+    "n_configs": 997,
+    "n_splits": 5000,
+    "is_best_mean": 0.0433,
+    "oos_of_is_best_mean": 0.0022,
+    "oos_of_is_best_p_pos": 0.5826
+   },
+   "dsr_best": {
+    "sr_monthly": 0.1175,
+    "sr_annual": 0.4071,
+    "sr0_monthly": 0.1731,
+    "dsr": 0.1568,
+    "psr": 0.9834
+   },
+   "best_by_monthly_mean": "a70f80b1a1cf82 (C|inc22|mom126-0|n2|Q: screen CA score -0.0016, full_excess +0.0352: a full-period fluke)",
+   "set": "screen protocol: stage A combos (480) + stage B WS (375) + s2 K/C/J/D + s3 KG",
+   "supplementary_yearly_walk_forward_A+B": {
+    "is10_oos5": {
+     "dates": 12,
+     "oos_mean": -0.0134,
+     "rank_pct": 0.5
+    },
+    "is5_oos3": {
+     "dates": 19,
+     "oos_mean": -0.0057,
+     "rank_pct": 0.53
+    },
+    "is5_oos5": {
+     "dates": 17,
+     "oos_mean": 0.0038,
+     "rank_pct": 0.63
+    }
+   },
+   "k_execution_subfamily_68": {
+    "pbo": 0.684,
+    "wf_10_5_oos": 0.0002,
+    "wf_5_3_oos": -0.0152,
+    "dsr_best": 0.754
+   }
+  },
+  "NONE": {
+   "n_configs": 622,
+   "walk_forward": {
+    "oos_mean": -0.0056,
+    "oos_beat": 0.3333,
+    "is_mean": 0.0439,
+    "avg_config_oos_mean": -0.0125,
+    "mean_oos_rank_pct": 0.433
+   },
+   "walk_forward_5_3": {
+    "oos_mean": -0.0439,
+    "oos_beat": 0.25,
+    "is_mean": 0.0706,
+    "avg_config_oos_mean": -0.0093,
+    "mean_oos_rank_pct": 0.1977
+   },
+   "pbo": {
+    "pbo": 0.5162,
+    "n_configs": 622,
+    "n_splits": 5000,
+    "is_best_mean": 0.0499,
+    "oos_of_is_best_mean": 0.0016,
+    "oos_of_is_best_p_pos": 0.5488
+   },
+   "dsr_best": {
+    "sr_monthly": 0.1027,
+    "sr_annual": 0.3558,
+    "sr0_monthly": 0.1418,
+    "dsr": 0.2415,
+    "psr": 0.9675
+   },
+   "best_by_monthly_mean": "54005d457ca4ae (C|inc22|mom252-21|n2|A)",
+   "set": "screen protocol: stage A combos grid1 in NONE (plain rotations, 336) + stage B WS shadow-lot runs (286)"
+  }
+ },
+ "hindsight_checks": "PROTOCOL 5.3 was applied to every finalist.\n\n(a) Removing the stars (screen, CA):\n- Site preset: 0.0064 with QQQ and XLK; 0.0004 without QQQ; 0.0017 without XLK; -0.0030 without both.\n- WS B378: 0.0106 -> 0.0044 / 0.0075 / 0.0006.\n- KX1: 0.0133 -> 0.0075 / 0.0095 / 0.0042.\n- KX3: 0.0117 -> 0.0044 / 0.0056 / -0.0010.\n- Every finalist fails criteria 1-3 once either star is gone.\n\n(b) 30 random menus of 15-25 funds from common.BROAD_EQUITY_POOL_2003 (seeds 1-30):\n\n| rule | score mean (share > 0) | full_excess mean | pass 1-3 |\n|---|---|---|---|\n| combo INC | -0.0013 (40%) | -0.0028 | 0/30 |\n| WS B378 | +0.0048 (73%) | -0.0018 | 0/30 |\n| KX1 | +0.0042 (70%) | +0.0070 | 1/30 |\n| KX3 | +0.0039 (77%) | +0.0016 | 1/30 |\n\nRandom-menu drawdowns are about -0.64 vs SPY's -0.55.\n\n(c) Paired control: random ranking with the same execution on the same 30 menus. Momentum adds +0.0079 / +0.0080 of score (t \u2248 7, better on 90% of menus). The signal is real; the lead over SPY is not robust.\n\n(d) Sensitivity, not pre-registered: 30 US-only random menus.\n- B378 scores +0.0087 (6/30 pass).\n- Random ranking with the same execution scores +0.0040 with full_excess +0.0103.\n- So US-menu results reflect an equal-weight/size tilt from 2000.\n\n(e) 15 named menus: the incumbent 22 is the best for every rule. SPDR sectors \u2248 0; the near-duplicate iShares sector menu is clearly negative; countries, factors and +bonds are negative.\n\n(f) Holdings: every finalist ends 2026 at 50-75% growth/tech (QQQ/XLK), with 80-88% of value in unrealized gains.\n\nConclusion: the family's lead over SPY depends on QQQ/XLK being in the menu, which is a hindsight choice.",
+ "concerns": [
+  "Hindsight: all positive results depend on the incumbent menu containing QQQ and XLK (or on a US equal-weight tilt from the year-2000 mega-cap peak). On the pre-registered random menus the rules beat random selection but not SPY.",
+  "Era dependence: most of the excess comes from 2000-2010 (+1.2 to +3.6 pp/yr). 2020-2026 is negative, and 5-year windows starting 2020-2023 lose 2.8-3.9 pp/yr for every rule.",
+  "Frozen portfolios: tax management converts the rotation into buy-and-hold of past winners (50-75% growth/tech, 80-88% unrealized gains by 2026). The strategy is a regime bet, and switching out would trigger large realized gains.",
+  "Rebalance-timing luck: the default rebalance months are among the best schedules for KX1, KX3 and B378. B378 WS full_excess ranges -0.0017 to +0.0144 across offsets.",
+  "The terminal-liquidation after-tax metric taxes the large embedded gains at window end. Investors who never sell (step-up at death, charitable gifts) would see these strategies differently; the engine does not model that, nor the $3k/yr ordinary-income loss offset that would favour TLH.",
+  "TLH with substitutes is handicapped before 2003-2007 because VEA, VWO and ONEQ did not exist. The family's _harvest leaves the proceeds in cash until the next rebalance, so the TLH results are partly a design limitation.",
+  "NONE results for tax-managed configs are plain untaxed rotations: the engine tracks no lots without a tax policy, so the tax rule, TLH and sell-losers are inert. The 'shadow' option (same tax-managed trades untaxed) was used only as a screen diagnostic.",
+  "Cache reuse across a module edit: ~700 WS screen results computed before my additive edit (trim/gain_order) were read via the old code hash (tr.cached_v1). verify_v1.py confirmed bit-for-bit equality on 6 representative configs, but not on every config.",
+  "The previous researcher edited tax_rotation.py at 09:34 while stage B was running. Results finished after the edit were stored under the new file hash but computed by the in-memory (older) code. The 6-config verification (3 from stage B) matched exactly, so the edit appears additive, but not every stage-B record was individually re-verified.",
+  "The criterion-4 walk-forward on the annual-start screen protocol has only 3 decision dates at the default step, so the supplementary yearly walk-forward (12-19 dates) carries more weight in my judgement. Both are negative or about zero."
+ ],
+ "untested_ideas": [
+  "Benchmark-anchored rotation: hold SPY by default and switch a slot only when a fund's momentum beats SPY's by a margin. This might cut tracking error and lift beat rates. It needs a small Rank-signal change; not run, to avoid another code-hash invalidation late in the run.",
+  "K-execution plus a 25-50% SPY core on the full protocol. On screen, B378 + 25-50% core still passed 1-3 with lower tracking error; it was not promoted to full or to the hindsight tests.",
+  "Specific-lot (HIFO) sale selection instead of the engine's FIFO lots. This could cut realized gains in trims and exits; it needs engine support.",
+  "TLH that falls back to a broad substitute (e.g. VTI or SPY-group-safe IWB) when the mapped substitute has no data yet, plus the $3k/yr ordinary-loss deduction. Neither is modelled now.",
+  "A pre-registered US-only menu-construction rule (all US size/style/sector funds that existed in 2000) as a formal hindsight test. My US-only random menus were a sensitivity check only.",
+  "Random-rank controls for the K-execution on the long protocol, and shadow-NONE runs for the 89 remaining stage-B configs and the D/K groups (diagnostics only).",
+  "Long-history neighbourhoods and rebalance offsets for KX3 (only the base rules were run on long/long_screen).",
+  "Periodic 'reset' variants: realise gains up to X% every k years to force re-ranking. These were judged tax-expensive given that 3-5% budgets already hurt, and were not run."
+ ],
+ "lab_bugs": [
+  "Cache poisoning when a family file changes mid-sweep. sweep.run_one recomputes registry.code_version(cfg) from the file on disk for each task. Forked workers, though, execute the module that was imported when the sweep started. Results computed by the old in-memory code are therefore stored under the NEW file's hash. This happened in this family: the module was edited at 09:34 while stage B ran. Suggested fix: hash the source captured at import time (inspect.getsource of the loaded module, or a hash taken in load_families), or refuse to write when the on-disk hash differs from the import-time hash.",
+  "report.diagnostics' walk-forward uses step_quarters=4. On the 'screen' protocol (annual starts) that keeps only every 4th start, so the 10y/5y walk-forward has 3 decision dates and is nearly powerless. Suggest step_quarters=1 when protocol starts are annual, or scaling the step by the start spacing.",
+  "Not a bug, but worth documenting for every family: with regime NONE, Context.lots() is empty and realized_this_year() is zero. TaxManagedCombo and WeightStrategy(execution='tax') therefore silently become plain full rotations, and TLH/sell-losers logic does nothing. Comparisons of 'the same strategy' across CA and NONE are comparisons of different trading rules."
+ ]
+}

@@ -1,0 +1,220 @@
+{
+ "key": "tilts",
+ "results_md": "/Users/siddhartha/dev/StockTest/research/lab/results/verify_tilts.md",
+ "verdicts": [
+  {
+   "candidate": "N5_vgh|VG_R|lb252|sk21|M|h0.06|tax1 (value/growth 12-1 switch, 6% hysteresis, monthly, tax-managed 1% budget)",
+   "verdict": "fail",
+   "reasons": [
+    "It is a frozen growth tilt. The holdings replay from 2000-07 shows switches only at losses (2000-03 and 2008-12), then 100% IWF from 2009 to 2026: 13 trades in 26 years and no tax paid during the run. Starts in value years stay frozen in value: 2013 start -3.04 pp/yr to the end, 2016 -1.21, 2020-23 starts -0.3 to -1.8.",
+    "Static IWF on the same windows scores higher (+1.21 vs +1.16 in CA). Rule minus IWF: 5y -0.19 (rule ahead in 28% of windows), 10y -0.25 (34%), to-end -0.80 (23%). All of the rule's edge over static growth comes from 2000-05 starts escaping the 2000-02 crash; every start year from 2006 on trails static IWF. With later first starts (2004-2014), static IWF scores +1.80 to +2.66, against +1.01 to +1.16 for the rule.",
+    "Long protocol (VIVAX/VIGRX vs VFINX, 119 starts 1994-2023) fails in CA: score +0.61, full +0.79, 10y beat 60%, boot_p 0.224. 10-year windows starting 1994-96 beat VFINX 0 of 12, because the rule was frozen in 1990s growth through 2000-02. Static VIGRX does better (+0.67/+0.92). On the long protocol 0 of 15 neighbours pass, and 5 have negative full excess (-0.96 to -1.18).",
+    "Other style pairs, exact rule, CA: only 3 of 11 clear bar 1-3, all S&P 500/900 large-cap (SPYV/SPYG +1.04, IUSV/IUSG +0.45, IVE/IVW +0.53). 6 of 11 are negative: IJS/IJT -0.37, IWS/IWP -0.54, RPV/RPG -0.83, VBR/VBK -1.65, IWN/IWO -1.72, RZV/RZG -3.41. In every large-cap pair the static growth leg scores higher than the rule.",
+    "Placebo: 40 random date-determined IWD/IWF switching paths through the same tax-managed execution. 4 of 40 clear bar 1-3 in CA; the candidate's score ranks about 93rd percentile and its full excess about 72nd. The tax freeze alone produces passes.",
+    "Neighbourhood on full CA: 20 of 38 pass, but the failures are structured. All no-hysteresis versions fail (-0.31 to +0.31). Lookbacks 189 and 315 at sk21/h0.06 fail the 10y and 15y beat rates. Lookback 126 scores -0.15. Quarterly, every-2-months and standard execution all fail.",
+    "boot_p depends on the first-start path: 0.026 from 2000-07, 0.113 with the first start in 2012, 0.998 from 2014. Deflated Sharpe given ~12,000 trials is 0.012 in CA.",
+    "Pre-tax signal information is weak: next-month chosen-minus-other +2.97%/yr, t=1.45 (2000-26), and negative over 2009-16. Own-history signals in small and pure-style pairs show none (IJS/IJT t=-1.36). The CA rule cannot harvest it anyway, because it is frozen.",
+    "Mechanical tests hold: offsets (CA score +0.86 to +1.16), 1-day lag (+1.22), 35 bps costs (+1.10), distribution-tax realism (+1.93 to +1.96), and start dates shifted by 1 and 2 months (+1.24 / +1.15). They hold because it barely trades, so they do not rescue it."
+   ],
+   "bugs_found": [
+    "metrics.summary computes boot_p and max_dd from the first start's path only. For tax-frozen strategies that is the luckiest path (it escaped 2000-02 at a loss). Moving the first start moves boot_p from 0.026 to 0.113 (2012) and 0.998 (2014).",
+    "verify.battery silently drops the 2000-2010 sub-period when the first start is after 2000-01-01, because it looks for an exact window start of 2000-01-01. N5_vgh's first start is 2000-07, so the one sub-period where its timing paid is hidden.",
+    "No look-ahead and no execution bug found: proxy signals are lagged by 1 day; the 1-day execution lag improves it; wash-sale guard OK. StyleRotation's hysteresis state (_held) tracks the target rather than the actual frozen holdings. That is by design, not a bug, but it means the signal and the book diverge."
+   ],
+   "key_numbers": {
+    "CA": {
+     "score": 0.0116,
+     "full_excess": 0.0183,
+     "ex10_beat": 0.877,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "ex10_min": -0.0313,
+     "boot_p": 0.026,
+     "boot_p_round1_1000boots": 0.04,
+     "max_dd": -0.531,
+     "bench_max_dd": -0.552,
+     "offsets_score_mean": 0.0103,
+     "offsets_score_min": 0.0086,
+     "offsets_full_mean": 0.0154,
+     "offsets_full_min": 0.0112,
+     "lag1_score": 0.0122,
+     "lag1_full": 0.0203,
+     "cost35bps_score": 0.011,
+     "realism_from2000_engine_to_real": [
+      0.0193,
+      0.0196
+     ],
+     "dsr": 0.012,
+     "shifted_start_m1_score": 0.0124,
+     "shifted_start_m2_score": 0.0115,
+     "static_IWF_score": 0.0121,
+     "static_IWF_full": -0.0033,
+     "static_IWF_boot_p": 0.53,
+     "rule_minus_IWF_10y_mean": -0.0025,
+     "rule_ahead_of_IWF_10y_share": 0.34,
+     "long_VIVAX_VIGRX_score": 0.0061,
+     "long_full": 0.0079,
+     "long_ex10_beat": 0.6,
+     "long_boot_p": 0.224,
+     "long_ho5_mean": 0.0237,
+     "long_static_VIGRX_score": 0.0067,
+     "placebo_pass_rate": 0.1,
+     "neighbourhood_pass": "20/38",
+     "pairs_pass": "3/11"
+    },
+    "FED": {
+     "score": 0.0126,
+     "full_excess": 0.0188,
+     "ex10_beat": 0.877,
+     "ex15_beat": 1,
+     "boot_p": 0.022,
+     "dsr": 0.013,
+     "long_score": 0.0067,
+     "long_boot_p": 0.231
+    },
+    "NONE": {
+     "score": 0.0123,
+     "full_excess": 0.013,
+     "boot_p": 0.092,
+     "long_score": 0.0137,
+     "long_boot_p": 0.059
+    }
+   }
+  },
+  {
+   "candidate": "Tax-managed cyclical season, Oct 1-May 1 boundary (G19 cyclicals Oct1-May1 / SPY TAX gb=0.01)",
+   "verdict": "fail",
+   "reasons": [
+    "It is a ratchet into a static, XLK-heavy cyclical tilt. Holdings by start: 2000-01 ends about 80% cyclicals (XLK 31%); 2003-07 ends 97% SPY; 2009-07 100% SPY; 2013-01 82% cyclicals; 2013-07 54% SPY. To-end excess for 2009-2023 starts averages about +0.03 pp/yr (range -0.68 to +0.74). Sub-periods in CA: 2000-10 +2.43, 2010-20 +0.32, 2020-26 -1.29.",
+    "The never-rebalanced four SPDRs score higher (+1.21 vs +0.85 in CA). Rule minus static: 10y -0.33 (rule ahead in 30%), to-end -0.70 (16%), and for starts from 2003 on the rule is ahead in only 7% of to-end windows. The same basket held all year with the same tax-managed execution and no season gets +0.99 / full +0.97 / 10y 100% / boot_p 0.077. With first starts in 2002-2014 the static basket beats the rule every time, and the rule's boot_p rises to 0.459 (2004) and 0.979 (2014).",
+    "Long protocol (Fidelity Select twin, Oct 1-May 1, 1986-2026; not run in round 1) fails in CA: +1.89, full +0.75, 10y beat 78%, boot_p 0.146. Static buy-and-hold of the same four funds does better (+2.44, boot_p 0.048), and the seasonal rule beats it in only 16% of 10-year windows. With the alternative Fidelity maps, the season beats static only for alt2 in CA. Fidelity Selects are survivors, so even the static excess is inflated.",
+    "Same rule on other sector sets, CA: iShares IYC/IYJ/IYM/IYW (same sectors, different index) fails on 10y beat (73%); Vanguard VCR/VIS/VAW/VGT fails (boot_p 0.243); no-tech +0.40 fails; IGV for XLK fails (boot_p 0.20); cyclicals ex-tech with XLF/XLE -0.08. Only the XLK and SMH baskets pass.",
+    "Placebos: 14 of 16 random season windows with the same basket and execution are positive in CA (median +0.42), and 5 of 16 clear bar 1-3. Non-Halloween windows such as 6/15-2/15 and 7/15-3/15 are positive too. The season is mostly irrelevant after tax; the reversed season scores -0.17.",
+    "Neighbourhood: all 12 boundary pairs are positive (+0.45 to +0.85), and the candidate is the post-hoc best of them. Gain budget 0 does better (+1.00, boot_p 0.013): never realizing a gain is buy-and-hold plus loss-switching, not seasonality.",
+    "The pre-tax seasonal effect has vanished: in-season vs out-of-season basket-minus-SPY was t=2.32 over 2000-26, but +0.80 vs +0.86 %/yr (t=-0.02) over 2017-26. Deflated Sharpe 0.015 in CA.",
+    "Mechanical tests hold: offsets (+0.83 to +0.91), 1-day lag (+0.82), 35 bps costs (+0.44), realism (+0.02), cover_tax (identical), and start dates shifted by 1 and 2 months (+0.84, boot_p 0.017 / +0.90, 0.012). So the quarterly start grid is not the source of the result."
+   ],
+   "bugs_found": [
+    "First-start-path dependence of boot_p (metrics.summary): 0.030 from 2000-01, but 0.459 from 2004, 0.177 from 2010 and 0.979 from 2014.",
+    "The quarterly-start grid interacts with season boundaries: with Oct 1-May 1, 3 of 4 quarterly starts buy cyclicals first. I added the full_m1/full_m2 shifted protocols (registered in verify_tilts.py with setdefault) to test this. For this candidate it made no material difference.",
+    "The engine's 0%-interest January tax loan is not material here: cover_tax=True gives identical results (+0.85)."
+   ],
+   "key_numbers": {
+    "CA": {
+     "score": 0.0085,
+     "full_excess": 0.0144,
+     "ex10_beat": 0.91,
+     "ex15_beat": 0.936,
+     "ex20_beat": 0.963,
+     "ex10_min": -0.0085,
+     "boot_p": 0.03,
+     "max_dd": -0.567,
+     "bench_max_dd": -0.552,
+     "offsets_score_mean": 0.0087,
+     "offsets_score_min": 0.0083,
+     "offsets_full_mean": 0.0142,
+     "offsets_full_min": 0.0135,
+     "lag1_score": 0.0082,
+     "lag1_full": 0.0154,
+     "cost35bps_score": 0.0044,
+     "realism_from2000_engine_to_real": [
+      0.0144,
+      0.0146
+     ],
+     "dsr": 0.015,
+     "subperiods": {
+      "2000-2010": 0.0243,
+      "2010-2020": 0.0032,
+      "2020-2026": -0.0129
+     },
+     "shifted_start_m1_score": 0.0084,
+     "shifted_start_m2_score": 0.009,
+     "static_bh_cyclicals_score": 0.0121,
+     "static_bh_cyclicals_full": 0.0046,
+     "static_bh_boot_p": 0.287,
+     "static_taxmanaged_allyear_score": 0.0099,
+     "static_taxmanaged_allyear_boot_p": 0.077,
+     "rule_minus_static_10y_mean": -0.0033,
+     "rule_ahead_of_static_end_share": 0.16,
+     "long_fidelity_twin_score": 0.0189,
+     "long_full": 0.0075,
+     "long_ex10_beat": 0.78,
+     "long_boot_p": 0.146,
+     "long_ho5_mean": 0.013,
+     "long_static_fid_basket_score": 0.0244,
+     "random_season_positive_share": 0.875,
+     "neighbourhood_pass": "15/19",
+     "sector_sets_pass": "3/20 (only XLK/SMH baskets)"
+    },
+    "FED": {
+     "score": 0.0096,
+     "full_excess": 0.0149,
+     "ex10_beat": 0.925,
+     "ex15_beat": 0.979,
+     "boot_p": 0.024,
+     "dsr": 0.016,
+     "long_score": 0.021,
+     "long_boot_p": 0.115
+    },
+    "NONE": {
+     "score": 0.0122,
+     "full_excess": 0.0131,
+     "boot_p": 0.038
+    }
+   },
+   "best_variant_cfg": {
+    "kind": "weights",
+    "signal": "seasonal.cal",
+    "params": {
+     "layers": [
+      {
+       "rule": {
+        "type": "window",
+        "start": [
+         10,
+         1
+        ],
+        "end": [
+         5,
+         1
+        ]
+       },
+       "w": {
+        "XLY": 0.25,
+        "XLI": 0.25,
+        "XLB": 0.25,
+        "XLK": 0.25
+       }
+      }
+     ],
+     "default": {
+      "SPY": 1
+     },
+     "rebalance_states": true
+    },
+    "rebalance": "M",
+    "execution": "tax",
+    "gain_budget": 0
+   },
+   "best_variant_numbers": {
+    "note": "Best-scoring neighbour (gain budget 0), NOT a fix: it is the same frozen static tilt, even more so (92 trades). It was run only on full CA and inherits every failure above.",
+    "CA_score": 0.01,
+    "CA_full_excess": 0.0183,
+    "CA_ex10_beat": 0.88,
+    "CA_ex15_beat": 0.96,
+    "CA_ex20_beat": 1,
+    "CA_boot_p": 0.013,
+    "CA_max_dd": -0.569,
+    "bench_max_dd": -0.552
+   }
+  }
+ ],
+ "summary": "Both candidates fail. In a taxable CA account each is a static tilt that the tax-managed execution freezes: growth for N5_vgh, an XLK-heavy cyclical basket for the Oct 1-May 1 season rule. Each beats its own static tilt only through one episode, the 2000-02 bear market, when holdings were at a loss and could be switched without tax. The mechanical checks all hold: rebalance offsets, 1-day lag, costs up to 35 bps, distribution-tax realism, cover_tax, and start dates shifted by 1 and 2 months. That is because the rules barely trade. The hindsight and regime tests break both.\n\nN5_vgh (CA +1.16, full +1.83, boot_p 0.026, DSR 0.012):\n- Static IWF scores higher (+1.21). The rule trails IWF in 66% of 10-year and 77% of to-end windows; every start from 2006 on trails static growth.\n- Its 1994-2026 VIVAX/VIGRX twin fails (10y beat 60%, boot_p 0.224; 10-year windows starting 1994-96 win 0 of 12) and also loses to static VIGRX.\n- On other style pairs it works only in S&P 500/900 large-cap V/G (3 of 11), where static growth scores higher; small, mid and pure-style pairs are negative.\n- 4 of 40 random switching paths through the same execution also clear bar 1-3.\n\nCyclical season (CA +0.85, full +1.44, boot_p 0.030, DSR 0.015):\n- The never-rebalanced basket scores higher (+1.21) and beats it in 84% of to-end windows (93% for starts from 2003 on).\n- Its Fidelity twin with the Oct 1-May 1 boundary (1986-2026, not run in round 1) fails (boot_p 0.146) and loses to the static Fidelity basket.\n- It fails with the same sectors from iShares or Vanguard, and without XLK.\n- 14 of 16 random season windows are also positive after tax.\n- The pre-tax seasonal effect is zero over 2017-26.\n\nNew code: research/lab/families/verify_tilts.py (random-path placebo signal; full_m1/full_m2 shifted-start protocols). Scripts and logs: research/lab/scratch/verify_tilts/. Write-up: research/lab/results/verify_tilts.md. 239 configs, 355 runs, plus two batteries.",
+ "open_questions": [
+  "Should metrics.summary or the bar report boot_p across several first starts (e.g. the median over 2000-2014 first starts) instead of the single first path? For tax-frozen strategies the 2000 start is systematically the luckiest path, and that inflates confidence.",
+  "Static growth (IWF from 2004+) and static cyclicals (from 2002+) clear bar 1-3 when scored after the 2000-02 crash. That is the same launch-window and post-bubble hindsight that round 1 flagged for VUG and similar funds. Any recommendation of a static tilt needs the same pre-2000 and regime scrutiny.",
+  "The Fidelity Select long-history proxies are survivors with historical loads and redemption fees. Should long-history sector results be discounted, or checked against a non-survivor sector index (e.g. Ken French industry portfolios) before they count as pre-2000 evidence?",
+  "In NONE the pre-tax style momentum (VIVAX/VIGRX 1994-2026: +1.37, boot_p 0.059) and sector seasonality (Fidelity maps beat their static baskets) look weakly real. Is that worth pursuing for the user's tax-deferred accounts, or is it out of scope?",
+  "The trimmed grids (88-config vgh neighbourhood, 33/30-config cyc neighbourhood/placebo) were not run. They are unlikely to change the verdicts, given the static-dominance and long-history results."
+ ]
+}

@@ -1,0 +1,296 @@
+{
+ "key": "curve",
+ "results_md": "Full write-up: /Users/siddhartha/dev/StockTest/research/lab/results/verify_curve.md\n\n# Verification: yield-curve un-inversion candidates (verify_curve)\n\n**Verdict: both candidates FAIL as \"beats SPY after California tax with good confidence\".**\nThere is no code bug or look-ahead: round-1 engine numbers reproduce exactly and the signal is causal. The problem is that this is a two-event backtest.\n- Since 2000 the 10y-3m curve un-inverted 4 times: 2001, 2007, 2019, 2024.\n- All of the after-tax excess comes from holding Treasuries through the 2001-02 and 2008 bear markets: 120% (M) and 146% (G) of the CA log excess.\n- All other years combined: -0.70 / -1.20 pp/yr.\n- 2022 contributed about zero, because neither rule was out of SPY in 2022.\n\nBoth candidates fail CA bar items 2a and 2b (10y beat 0.57 / 0.64, 15y beat 0.81 / 0.77) everywhere in their neighbourhoods. For every `after` from 90 to 930 days, the CA 10y beat rate is at most 0.58 / 0.66. Deflated Sharpe in CA, given about 12,000 configs: 0.022 / 0.004.\n\n## Fragilities round 1 missed\n1. **Curve-definition artifact (affects M).** The lab spread ^TNX-^IRX uses the T-bill *discount* yield, which reads 0.10-0.12 pp too high against FRED T10Y3M.\n   - A bond-equivalent conversion (BEY) matches FRED to within 1 bp.\n   - On the standard curve, 2019 was one 141-day inversion (the lab shows 51 + 71 days), so `min_len 90` would NOT have skipped it.\n   - 1989 becomes a 93-day event, which makes the pre-2000 holdout informative.\n   - Corrected M in CA: score +2.67 (was +3.87), full +2.24, 10y beat 0.57, 15y beat 0.77, boot p 0.23.\n2. **Check-day luck (affects G).** G checks once a month on the 1st trading day, which is the best of the 28 possible check days.\n   - CA score over the 28 check days: +0.88..+3.12, median +1.63. NONE: median +2.39 vs +4.27.\n   - Reading the signal 8 days late gives CA +1.86; 31 days late gives +1.17.\n   - Cause: on 2 Mar 2020 it read SPY's 28 Feb close, just below the SMA200. SPY closed back above it on 2 Mar, so a check one day later would have stayed in.\n3. **verify.battery limitation.** The battery's offset variants shift only the WeightStrategy rebalance key. MacroSwitch's own `check` key stays on the calendar month, so \"offsets\" really mean \"check on the 1st AND the shifted day\". The battery therefore showed G's offsets as +2.64..+3.12 when the true range is +0.88..+3.12.\n\n## Key numbers (CA; engine, or an exact replica that matches the engine to 0.0 on every window)\n\n| test | M uninv540 minlen90 | G GATED uninv540 & spy200 |\n|---|---|---|\n| headline score / full / 10y / 15y / 20y beat | +3.87 / +3.76 / 0.57 / 0.81 / 1.00 | +3.12 / +2.80 / 0.64 / 0.77 / 1.00 |\n| boot p / maxDD (SPY) / DSR | 0.062-0.064 / -34% (-55%) / 0.022 | 0.101-0.134 / -35% (-55%) / 0.004 |\n| FED score / 10y / 15y / boot p | +4.40 / 0.57 / 0.81 / 0.044-0.048 | +3.59 / 0.82 / 0.77 / 0.066-0.072 |\n| 1-day execution lag | +3.72 | +2.81 |\n| indicator lag 8 d / 31 d | +3.79 / +3.24 | +1.86 / +1.17 |\n| 28 check days: min / median / max | +3.14 / +3.44 / +4.24 | +0.88 / +1.63 / +3.12 (actual = best) |\n| weekly / daily check | +3.58 / +3.52 | +2.66 / +2.15 |\n| realism (annual tax on distributions, from 2000) | +3.76 -> +3.60 | +2.80 -> +2.70 |\n| safe asset VFISX / VUSTX / cash at 0% | +3.55 / +3.99 / +2.93 | +2.93 / +3.24 / +2.61 |\n| hold SPY all of 2008 | +0.98 | +0.35 |\n| drop both the 2001 and 2007 spells (score / full) | -0.06 / -0.80 | -0.10 / -0.95 |\n| hold SPY all of 2022 | unchanged | unchanged |\n| long 1986-2026 (lab curve): score / full / 10y / boot p | +3.71 / +1.84 / 0.59 / 0.166 | +3.03 / +1.19 / 0.63 / 0.248 |\n| long, corrected curve: holdout ho5 / ho10 | -0.11 / -0.43 | -0.75 (beat 0.03) / -1.05 |\n| permutation p, CA (1,000 random placements, score) | 0.001 | 0.004 |\n| permutation p, pre-tax 1962-1999 only (off-engine) | 0.42 | 0.042 |\n\n## Events\n**ETF era.** Engine switch dates and SPY return over each spell:\n- M: 2001-02 -> 2002-08: SPY -34%, VFITX +14%.\n- M: 2007-06 -> 2008-12: SPY -45%, VFITX +21%.\n- M: 2024-12 -> 2026-06: SPY +28%, VFITX +6%.\n- G: 6 spells, 4 helped (2001, 2002, 2008, 2020 slightly); 2025 and 2026 hurt.\n\n**1962-2026** (lab curve): 8 independent inversion cycles and 14 un-inversions. The S&P was lower 18 months later after only 4 of the 14; only 2001 and 2007 were bear markets that a 540-day exit fully captures.\n\n**M's long-hold rule since 1962** (off-engine, pre-tax): 7 spells, 2 helped. 1962-85: -1.03 pp/yr.\n\n**G since 1962:** 13 spells, 9 helped. 1962-85: +1.79 pp/yr, close to plain SMA200 trend timing (+1.71).\n\n## Neighbourhood\n- 540 days is the left edge of a 520-720-day plateau: CA 510 / 540 / 630 / 720 = +2.61 / +3.87 / +4.67 / +3.18.\n- Below that there is a cliff: 450 days = +1.15. The 2007 window must stay open through the Sept-Oct 2008 crash.\n- Pre-tax 1962-85, 99% of variants with `after` of 420 days or more lose.\n- With an inversion threshold of -0.25, M's 2000 and 2006 inversions vanish and the score is -0.11.\n\n## Most robust versions (still FAIL)\n- **M corrected** (curve_bey): CA +2.67 / full +2.24 / 10y 0.57 / 15y 0.77 / 20y 1.00 / boot p 0.23 / maxDD -30%. Long protocol CA +2.99 / full +0.59, ho10 -0.43.\n- **G corrected** (curve_bey + weekly check): CA +2.83 / full +2.61 / 10y 0.66 / 15y 0.77 / boot p 0.106 / maxDD -31%. FED +3.28 / 10y 0.82 / 15y 0.79 / boot p 0.07. Long protocol CA +2.63 / full +0.68, ho10 -0.94.",
+ "verdicts": [
+  {
+   "candidate": "uninv540 minlen90 | chkM",
+   "verdict": "fail",
+   "reasons": [
+    "Two-event backtest: 3 risk-off spells since 2000 (2001-02-01..2002-08-01 SPY -34%, 2007-06-01..2008-12-01 SPY -45%, 2024-12-02..2026-06-01 SPY +28%). 2001-02 plus 2008 = 120% of the CA log excess; all other years combined -0.70 pp/yr. Holding SPY through 2008 cuts the CA score from +3.87 to +0.98; dropping both the 2001 and 2007 spells gives -0.06 (full -0.80). 2022 contributes 0 (the rule held SPY all of 2022).",
+    "Fails protocol conditions 2a/2b in CA (10y beat 0.57, 15y beat 0.81). No point of the neighbourhood (after 90-930, any min_len 0-180, confirm 1-20, thr -0.25..+0.25) reaches 10y beat > 0.58 or 15y beat > 0.83.",
+    "min_len 90 rests on a data artifact. The lab curve ^TNX-^IRX uses the T-bill discount yield, biased +0.10-0.12 pp vs FRED T10Y3M. On the standard curve the 2019 inversion lasted 141 days, so min_len 90 would not skip it. Corrected (curve_bey): CA score +2.67, full +2.24, boot p 0.23.",
+    "Pre-2000 evidence contradicts it. Off-engine 1962-85, 0 of 4 spells helped (-1.03 pp/yr pre-tax); pre-2000 permutation p = 0.42. With the corrected curve the engine holdout gets the 1989 event and is negative after tax (ho5 -0.11, ho10 -0.43 pp/yr CA). 99% of after >= 420-day variants lose in 1962-85.",
+    "540 sits on a plateau (520-720 days) that exists only because the 2007 window must stay open through the Sept-Oct 2008 crash; 450 days gives CA +1.15. An inversion threshold of -0.25 removes the 2000 and 2006 inversions and the score drops to -0.11.",
+    "Deflated Sharpe CA 0.022 given ~12,000 configs. Long protocol CA full excess only +1.84 (lab curve) / +0.59 (corrected), 10y beat 0.59-0.61, boot p 0.17-0.41.",
+    "Timing/realism are fine. 1-day execution lag CA +3.72; check-day spread across 28 monthly days +3.14..+4.24 (median +3.44); annual distribution tax from 2000 +3.76 -> +3.60; costs at 35 bps per side +3.73. CA permutation p = 0.001: the timing was informative in-sample, but on the two events the parameters were tuned to."
+   ],
+   "bugs_found": [
+    "Data-definition artifact in macro_regime's curve indicator: ^TNX - ^IRX uses the 13-week bill DISCOUNT yield, so the spread reads ~0.10-0.12 pp too high vs FRED T10Y3M (constant-maturity, bond-equivalent). Lab episodes vs FRED: no 1989 inversion (FRED: 93 days) and 2019 split into 51+71 days (FRED: 141 days). A BEY conversion of ^IRX (365d/(360-91d)) matches FRED within 1 bp and reproduces FRED's un-inversion dates within 0-3 days. Implemented as indicator type curve_bey in research/lab/families/verify_curve.py. Impact on M: CA score +3.87 -> +2.67, boot p 0.06 -> 0.23.",
+    "Round-1 note 'holdout windows contain no un-inversion event' is an artifact of the same definition. With the FRED-consistent curve the 1986-99 holdout contains the 1989 event and is negative after tax for both rules.",
+    "verify.battery limitation for macro_regime.switch with check='M': the offset variants (weights_x offset_days) shift only WeightStrategy's rebalance key; MacroSwitch computes its check key from the unshifted date, so offsets become 'check on the 1st AND the shifted day'. The rebalance-timing-luck test is optimistic for every monthly-check macro_regime finalist. Fixed in my module: verify_curve.switch takes check_offset, used together with weights_x offset_days; validated vs the engine at offsets 3/7/10/14.",
+    "No look-ahead found: indicator read strictly before the trade day, episodes built causally, min_len known at un-inversion. Engine numbers reproduce exactly."
+   ],
+   "key_numbers": {
+    "CA": {
+     "score": 0.0387,
+     "full_excess": 0.0376,
+     "ex10_mean": 0.0399,
+     "ex10_beat": 0.567,
+     "ex15_beat": 0.809,
+     "ex20_beat": 1,
+     "boot_p": "0.062 (500 draws) / 0.064 (1000)",
+     "max_dd": -0.337,
+     "bench_max_dd": -0.552,
+     "trades": 27,
+     "dsr": 0.022,
+     "battery_offsets_mean_min": "mean +3.71 / min +3.49 (optimistic battery test)",
+     "true_checkday_28_offsets_min_median_max": "+3.14 / +3.44 / +4.24 (actual ranks 3rd)",
+     "lag1_exec": 0.0372,
+     "signal_lag_8d_31d": "+3.79 / +3.24",
+     "costs_35bps": 0.0373,
+     "realism_from_2000": "+3.76 -> +3.60",
+     "realism_from_2010": "-1.36 -> -1.35",
+     "subperiods": "2000-10 +10.98, 2010-20 -0.00, 2020-26 -2.99",
+     "hold_spy_2008": 0.0098,
+     "drop_2001_and_2007_spells_score_full": "-0.06 / -0.80",
+     "hold_spy_2022": "unchanged",
+     "perm_p_CA_score_1000_random": 0.001,
+     "perm_p_pretax_2000_random": 0.0015,
+     "perm_p_offengine_1962_1999": 0.42,
+     "corrected_curve_bey_score_full_boot_p": "+2.67 / +2.24 / 0.23",
+     "long_protocol_CA_lab_curve": "score +3.71, full +1.84, ex10 0.59, ex15 0.90, boot p 0.166, holdout empty",
+     "long_protocol_CA_corrected": "score +2.99, full +0.59, ex10 0.61, ex15 0.88, boot p 0.41, ho5 -0.11 (beat 0.32), ho10 -0.43",
+     "offengine_1962_85_pretax": "-1.03 pp/yr, 0 of 4 spells helped"
+    },
+    "FED": {
+     "score": 0.044,
+     "full_excess": 0.0425,
+     "ex10_beat": 0.567,
+     "ex15_beat": 0.809,
+     "ex20_beat": 1,
+     "boot_p": "0.044-0.048",
+     "dsr": 0.035,
+     "max_dd": -0.337,
+     "long_protocol": "score +4.23, full +2.50, boot p 0.098"
+    },
+    "NONE": {
+     "score": 0.0503,
+     "full_excess": 0.0477,
+     "boot_p": "0.034-0.036",
+     "dsr": 0.053
+    }
+   },
+   "best_variant_cfg": {
+    "execution": "standard",
+    "kind": "weights",
+    "label": "uninv540 minlen90 BEY(FRED-consistent curve) | chkM",
+    "params": {
+     "check": "M",
+     "combine": "all",
+     "ind": [
+      {
+       "after": 540,
+       "anchor": "end",
+       "confirm": 5,
+       "delay": 0,
+       "long": "^TNX",
+       "min_len": 90,
+       "short": "^IRX",
+       "thr": 0,
+       "type": "curve_bey"
+      }
+     ],
+     "risk": {
+      "SPY": 1
+     },
+     "safe": {
+      "VFITX": 1
+     }
+    },
+    "rebalance": "M",
+    "signal": "verify_curve.switch"
+   },
+   "best_variant_numbers": {
+    "note": "Corrected (de-artifacted) version, not better; still FAIL. Engine-confirmed.",
+    "CA": {
+     "score": 0.0267,
+     "full_excess": 0.0224,
+     "ex10_mean": 0.029,
+     "ex10_beat": 0.567,
+     "ex15_beat": 0.766,
+     "ex20_beat": 1,
+     "boot_p": 0.23,
+     "max_dd": -0.295,
+     "bench_max_dd": -0.552,
+     "trades": 36
+    },
+    "FED": {
+     "score": 0.0315,
+     "full_excess": 0.0283,
+     "ex10_beat": 0.567,
+     "ex15_beat": 0.766,
+     "boot_p": 0.192
+    },
+    "NONE": {
+     "score": 0.0376,
+     "full_excess": 0.0348,
+     "boot_p": 0.145
+    },
+    "long_CA": {
+     "score": 0.0299,
+     "full_excess": 0.0059,
+     "ex10_beat": 0.61,
+     "ex15_beat": 0.884,
+     "boot_p": 0.414,
+     "ho5_mean": -0.0011,
+     "ho10_mean": -0.0043
+    }
+   }
+  },
+  {
+   "candidate": "GATED uninv540 & spy200 | chkM",
+   "verdict": "fail",
+   "reasons": [
+    "Two-event backtest: 2001-02 plus 2008 = 146% of the CA log excess; all other years combined -1.20 pp/yr. Holding SPY through 2008 cuts the CA score from +3.12 to +0.35; dropping both the 2001 and 2007 curve windows gives -0.10 (full -0.95). 2022 contributes ~0 (no curve window open).",
+    "Fails CA conditions 2a (10y beat 0.64), 2b (15y beat 0.77) and 3 (boot p 0.10-0.13). Neighbourhood never exceeds 10y beat 0.66 / 15y beat 0.79 for any after 90-930, SMA 100-250, confirm or threshold. 450 days gives +0.41: the 540-720 plateau again depends on staying out through Oct-Nov 2008.",
+    "Calendar luck: the monthly check on the 1st trading day is the BEST of 28 possible check days. CA range +0.88..+3.12, median +1.63; ex10 beat median 0.55. Reading the indicator 8 days late gives +1.86, 31 days late +1.17. The COVID exit on 2020-03-02 read the 28 Feb close below SMA200, and SPY was back above it on 2 Mar.",
+    "With a calendar-neutral weekly/daily check: CA +2.66 / +2.15. Corrected curve + weekly check: +2.83, 10y beat 0.66, 15y 0.77, boot p 0.106.",
+    "The pre-2000 engine holdout, made informative by the FRED-consistent curve (1989 event), is negative: corrected CA ho5 -0.75 (beat 0.03), ho10 -1.05 pp/yr. Gate whipsaws in Feb-Mar and May 1990.",
+    "Supportive but not sufficient: off-engine 1962-85 pre-tax +1.79 pp/yr (13 spells, 9 helped) is about the same as plain SMA200 timing (+1.71). Pre-2000 permutation p 0.042; CA ETF-era permutation p 0.004. Real crash insurance (maxDD -35% vs -55%), but DSR in CA is 0.004 given ~12,000 configs.",
+    "Long protocol CA full excess +1.19 (lab curve) / +0.77 (corrected), 10y beat 0.63-0.65, boot p 0.25-0.36."
+   ],
+   "bugs_found": [
+    "Same curve-definition artifact (^IRX discount yield vs FRED T10Y3M). It does not change G's 2000-2026 result at 540 days (min_len 30 keeps 2019 on either curve), but it hid the 1989 event from the pre-2000 holdout; with it the holdout is negative.",
+    "verify.battery's offset test is optimistic for this signal: it showed +2.64..+3.12 (100% positive) because MacroSwitch's monthly check key ignores offset_days. True check-day spread +0.88..+3.12, median +1.63.",
+    "No look-ahead found; engine numbers reproduce exactly."
+   ],
+   "key_numbers": {
+    "CA": {
+     "score": 0.0312,
+     "full_excess": 0.028,
+     "ex10_mean": 0.0325,
+     "ex10_beat": 0.642,
+     "ex15_beat": 0.766,
+     "ex20_beat": 1,
+     "boot_p": "0.101 (1000 draws) / 0.134 (500)",
+     "max_dd": -0.355,
+     "bench_max_dd": -0.552,
+     "trades": 47,
+     "dsr": 0.004,
+     "battery_offsets_mean_min": "mean +2.95 / min +2.64 (optimistic battery test)",
+     "true_checkday_28_offsets_min_median_max": "+0.88 / +1.63 / +3.12 (actual = best of 28)",
+     "lag1_exec": 0.0281,
+     "signal_lag_8d_31d": "+1.86 / +1.17",
+     "weekly_daily_check": "+2.66 / +2.15",
+     "costs_35bps": 0.0287,
+     "realism_from_2000": "+2.80 -> +2.70",
+     "realism_from_2010": "-1.62 -> -1.58",
+     "subperiods": "2000-10 +9.02, 2010-20 -0.00, 2020-26 -2.37",
+     "hold_spy_2008": 0.0035,
+     "drop_2001_and_2007_spells_score_full": "-0.10 / -0.95",
+     "hold_spy_2022": "unchanged",
+     "perm_p_CA_score_1000_random": 0.004,
+     "perm_p_pretax_2000_random": 0.004,
+     "perm_p_offengine_1962_1999": 0.042,
+     "long_protocol_CA_lab_curve": "score +3.03, full +1.19, ex10 0.63, ex15 0.88, boot p 0.248, holdout empty",
+     "long_protocol_CA_corrected_monthly": "score +2.87, full +0.77, ho5 -0.75 (beat 0.03), ho10 -1.05",
+     "offengine_1962_85_pretax": "+1.79 pp/yr (trend-only +1.71)"
+    },
+    "FED": {
+     "score": 0.0359,
+     "full_excess": 0.0334,
+     "ex10_beat": 0.821,
+     "ex15_beat": 0.766,
+     "ex20_beat": 1,
+     "boot_p": "0.066-0.072",
+     "dsr": 0.008,
+     "max_dd": -0.312,
+     "checkday_28_median": 0.0194,
+     "long_protocol": "score +3.47, full +1.88, boot p 0.146"
+    },
+    "NONE": {
+     "score": 0.0427,
+     "full_excess": 0.0411,
+     "ex10_beat": 0.851,
+     "ex15_beat": 0.894,
+     "boot_p": "0.036-0.040",
+     "dsr": 0.017,
+     "checkday_28_median": 0.0239
+    }
+   },
+   "best_variant_cfg": {
+    "execution": "standard",
+    "kind": "weights",
+    "label": "GATED uninv540 BEY(FRED-consistent curve) & spy200 | chkW",
+    "params": {
+     "check": "W",
+     "combine": "any",
+     "ind": [
+      {
+       "after": 540,
+       "anchor": "end",
+       "confirm": 5,
+       "delay": 0,
+       "long": "^TNX",
+       "min_len": 30,
+       "short": "^IRX",
+       "thr": 0,
+       "type": "curve_bey"
+      },
+      {
+       "n": 200,
+       "series": "SPY",
+       "type": "sma"
+      }
+     ],
+     "risk": {
+      "SPY": 1
+     },
+     "safe": {
+      "VFITX": 1
+     }
+    },
+    "rebalance": "M",
+    "signal": "verify_curve.switch"
+   },
+   "best_variant_numbers": {
+    "note": "Most robust (calendar-neutral weekly check + FRED-consistent curve); still FAIL. Engine-confirmed.",
+    "CA": {
+     "score": 0.0283,
+     "full_excess": 0.0261,
+     "ex10_mean": 0.0294,
+     "ex10_beat": 0.657,
+     "ex15_beat": 0.766,
+     "ex20_beat": 1,
+     "boot_p": 0.106,
+     "max_dd": -0.311,
+     "bench_max_dd": -0.552,
+     "trades": 66
+    },
+    "FED": {
+     "score": 0.0328,
+     "full_excess": 0.0317,
+     "ex10_beat": 0.821,
+     "ex15_beat": 0.787,
+     "boot_p": 0.07,
+     "max_dd": -0.271
+    },
+    "NONE": {
+     "score": 0.0392,
+     "full_excess": 0.04,
+     "ex10_beat": 0.851,
+     "ex15_beat": 0.894,
+     "boot_p": 0.033
+    },
+    "long_CA": {
+     "score": 0.0263,
+     "full_excess": 0.0068,
+     "ex10_beat": 0.65,
+     "ex15_beat": 0.874,
+     "boot_p": 0.359,
+     "ho5_mean": -0.0063,
+     "ho5_beat": 0.027,
+     "ho10_mean": -0.0094
+    }
+   }
+  }
+ ],
+ "summary": "Both candidates fail. \"uninv540 minlen90 | chkM\" scores CA +3.87 and \"GATED uninv540 & spy200 | chkM\" scores CA +3.12, but neither beats SPY after California tax with good confidence.\n\n**Two events carry everything.** All of the after-tax excess comes from holding Treasuries through 2001-02 and 2008: 120% (M) and 146% (G) of the CA log excess. Every other year combined is -0.70 / -1.20 pp/yr. 2022 contributed nothing because neither rule was out of SPY then. Dropping both crash spells makes both rules negative.\n\n**Protocol bar.** Both fail the CA beat-rate bar everywhere in a dense neighbourhood (after 90-930 days, min_len, confirm, threshold, SMA length): 10y beat at most 0.58 / 0.66. The deflated Sharpe in CA is 0.022 / 0.004. The 540-day value sits on a 520-720-day plateau, but that plateau only means \"stay out through the Sept-Oct 2008 crash\"; 450 days gives +1.15 / +0.41.\n\n**New fragilities.**\n- **Data artifact (affects M).** The lab curve ^TNX-^IRX uses the T-bill discount yield, biased about +0.1 pp versus FRED T10Y3M. On the standard curve the 2019 inversion lasted 141 days, so `min_len 90` would not have skipped it. Corrected, M's CA score is +2.67 with boot p 0.23. The correction also exposes a 1989 event in the pre-2000 holdout, which is negative after tax for both rules (corrected G: ho10 -1.05).\n- **Check-day luck (affects G).** Checking on the 1st trading day of the month is the best of 28 possible check days (CA median +1.63). An 8-day signal lag gives +1.86.\n- **Battery gap.** The standard battery's offset test cannot detect this check-day luck for monthly-check macro_regime signals.\n\n**What holds up.** The timing is not random in sample: permutation p is 0.001-0.004 in CA, but 0.42 for M before 2000. G does cut drawdowns: -35% vs SPY's -55%.\n\nAll numbers come from the engine, or from an exact replica validated at 0.0 difference on every window in CA, FED and NONE, including the long protocol.",
+ "open_questions": [
+  "The ^IRX discount-yield bias affects every curve config in macro_regime and any other family that uses ^TNX-^IRX. Should round-1 curve results be re-run with curve_bey (FRED-consistent)? Short-hold rules such as uninv150/180 may shift too, since their un-inversion dates move by days to weeks (2007: 05-21 -> 06-04; 2024: 11-18 -> 12-19).",
+  "verify.battery's rebalance-offset test is optimistic for signals that keep their own check calendar (MacroSwitch check='M'). Should verify.py pass the offset through to the signal (e.g. a check_offset like verify_curve.switch has), and should other monthly-check finalists be re-tested for check-day luck?",
+  "G is a plausible drawdown-reduction overlay (maxDD -31% to -35% vs -55%; pre-1986 off-engine +1.8 pp/yr pre-tax), but it does not beat SPY with good confidence. Does the user value drawdown reduction at roughly zero expected after-tax excess? If so, the weekly-check corrected variant is the honest version.",
+  "The off-engine 1962-85 results use a proxy (S&P price + 3.8% dividends; synthetic 5-year Treasury par bond from ^FVX, monthly correlation 0.97 with VFITX but 0.7 pp/yr below it). Should a proper pre-1986 total-return series be added to the lab data?",
+  "FRED T10Y3M was downloaded once and saved only in scratch/verify_curve/FRED_T10Y3M.csv, for validation. Should the lab add it as a research instrument?"
+ ]
+}

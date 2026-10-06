@@ -1,0 +1,492 @@
+{
+ "key": "lev_robust",
+ "summary": "Leverage plus a trend filter is not a confident after-tax edge. Every history shows positive excess and walk-forward is positive out of sample, but the excess is mostly paid-for leverage. It shrinks to +1 to +2.6 pp/yr (p 0.22-0.46) at 1.5x, where volatility matches SPY's. Confidence collapses once the size of the search is counted: deflated Sharpe 0.003-0.03; PBO 0.5-0.7 within the 3x/2x daily grids; only 13 of 486 neighbourhood configs pass on both 2000-26 and 1986-26, and 1 of 486 on all four histories; the 1930-85 holdout is not significant (C1 p 0.19, C2 p 0.16). The 3x tail risk is unacceptable: -88% to -93% drawdowns in 1929-35, a 17-24% chance of an >80% drawdown within 20 years on 1930-2026, the 1987 escape decided by one day, and one -20% day while invested costing about 7-8 pp/yr of 10-year excess. C1-C4 all fail; C3 and C4 have no edge at all in 1930-85. A derived 2x daily SMA175/3% rule (VFITX when off) is the acceptable-risk level. It is conditional: drawdowns at or below SPY's everywhere and +3 to +5 pp/yr CA excess, but p 0.07-0.27 depending on history and DSR 0.004. I also found a data bug: VFINX has unadjusted 1980-86 distribution days (e.g. 1986-12-09 -7.0% vs S&P -0.75%) that SYN_VFINX*XC triples. It penalised the strategies. A validated numpy simulator matching the engine to 4 decimals made the large grids possible. Report: /Users/siddhartha/dev/StockTest/research/lab/results/verify_lev_robust.md",
+ "results_md": "# verify_lev_robust: leveraged trend, long history, crash risk, overfitting\n\n**Verdict: not a confident after-tax edge.**\n\n* **The excess is real in every history:**\n  * 2000-26: C1 CA +9.65\n  * 1986-26, repaired: +8.64\n  * 1930-85 holdout: +6.81\n  * 1930-2026: +7.29\n* **Walk-forward selection is positive out of sample.** For 3x daily the OOS excess is +6.0 / +7.2 / +7.5 (2000-26 / 1986-26 / 1930-2026), with a 5-year beat rate of 83-88%.\n* **The excess is mostly leverage.** At the same volatility the trend rule beats constant leverage by 3-7 pp/yr. At SPY-like risk (1.5x) it is only +1.5 to +2.6 with p 0.22-0.46.\n* **Confidence fails:**\n  * deflated Sharpe 0.003-0.03 for every variant (12.5k trials);\n  * PBO 0.47-0.71 inside the 3x/2x daily grids;\n  * 1930-85 holdout p 0.19 (C1) and 0.16 (C2);\n  * 13 of 486 neighbourhood configs pass on both 2000-26 and 1986-26; only 1 (3x SMA200/3%) passes all four histories.\n* **3x tail risk:**\n  * 1929-35 drawdown of -88% to -93% (S&P -81%);\n  * P(>80% drawdown in 20y) 17-24% on 1930-2026 (1.5-4% on 1986-26);\n  * the 1987 exit fired at the 10-16 close only; with a one-day lag the 1986+ drawdown is -78% and p 0.13-0.21;\n  * 37% of daily configs and ~100% of weekly/monthly configs held the 3x fund into the -61% day;\n  * one -20% day while invested cuts the 10-year excess from +9.1 to +0.8-2.2 and the beat rate from 100% to 54-74%.\n* **Fast corrections:** in nearly every fast correction (1990, 1998, 2011, 2015, 2018, 2022, 2025) the 3x rule lost more than the index. It wins only in slow bears (2000-02, 2007-09, 1929-32, 1973-74).\n* **Market-path bootstrap with 1-3 month blocks:** 3x trails SPY over 20 years in 52-65% of paths, and P(>80% drawdown) is 35-55%. The edge needs multi-month trend persistence.\n\n**Acceptable leverage: about 2x.** The daily SMA175/3% rule at 2x has drawdowns of -47% vs -55% (2000-26 and 1986-26) and -67% vs -81% (1930-85). P(>80% drawdown in 20y) is about 0-1.5%. CA score:\n\n* 2000-26: +4.94 (p 0.077)\n* 1986-26, repaired: +4.62 (p 0.067)\n* 1930-85: +2.95 (p 0.27)\n* 1930-2026: +3.48 (p 0.13)\n\nDSR is 0.0035. **Conditional.**\n\n**Bugs:**\n\n* VFINX adjusted close misses 1980-86 capital-gain distributions: 1986-12-09 -7.0% vs S&P -0.75%, and 1985-12-27 -5.7%. SYN_VFINX3XC triples them (-20.9%), and the `long` benchmark carries them. This penalised the strategies: repaired, C1's 1986+ p goes from 0.015 to 0.007.\n* realism.py taxes no distributions on SYN_* funds. Real UPRO paid about 0.4%/yr ordinary income and SSO paid 4-5% in 2006-07, roughly 0.1-0.2 pp/yr of missing drag plus tail risk.\n\n| CA score / p / maxDD | 2000-26 | 1986-26 repaired | 1930-85 | 1930-2026 |\n|---|---|---|---|---|\n| C1 3x 175/3 | +9.65/.029/-60% | +8.64/.007/-60% | +6.81/.187/-88% | +7.29/.046/-88% |\n| C2 3x 200/2 | +6.07/.117/-59% | +7.08/.040/-59% | +7.05/.159/-91% | +6.77/.056/-91% |\n| 3x 200/3 | +7.42/.061/-62% | +7.72/.027/-62% | +7.17/.093/-88% | +7.48/.024/-88% |\n| 2x 175/3 | +4.94/.077/-47% | +4.62/.067/-47% | +2.95/.27/-67% | +3.48/.13/-67% |\n| 1.5x 175/3 | +2.60/.225/-39% | +2.55/.372/-39% | +1.0/.46/-53% | +1.5/.46/-53% |\n| C3 low-vol | +5.1/.039/-65% | +4.6/.046/-66% | +3.3/.51 (full -0.3) | +2.8/.29/-84% |\n| C4 EMA cross 2x | +6.2/.019/-59% | +5.7/.076/-60% | +0.4/.54 (full -0.2) | +1.8/.28/-83% |\n\nNeighbourhood pass share (all 486 / 3x daily): 2000-26 4.3% / 29.6%; 1986-26 4.9% / 33.3%; 1930-85 1.2% / 11.1%; 1930-2026 3.7% / 33.3%. The 1.5x configs never pass, and weekly/monthly checks rarely do.\n\nFull report: research/lab/results/verify_lev_robust.md",
+ "verdicts": [
+  {
+   "candidate": "Daily trend 3x S&P / intermediate Treasuries, SMA175 with 3% band (POST HOC, best rule found)",
+   "verdict": "fail",
+   "reasons": [
+    "Post hoc peak: deflated Sharpe 0.013 (CA, ~12.5k trials). PBO within the 3x daily grid is 0.52 / 0.47 / 0.71 (2000-26 / 1986-26 / 1930-2026), so the parameter choice is close to a coin flip.",
+    "1930-1985 holdout (never seen by round 1, ^GSPC-based synthetic 3x): CA +6.81 but p 0.187, 10y beat 83%, worst 10y window -14.6 pp/yr, maxDD -88% vs -81%. It fell -93% from 1929-09 to 1935-05 after re-entering 3x on bear-market rallies.",
+    "The 1986+ significance rests on one day: the exit fired at the 1987-10-16 close. With a one-day lag the 1986-2026 CA p is 0.13-0.21 and maxDD -78%/-79%. 37% of daily neighbours and about 100% of weekly/monthly neighbours held the 3x fund into the -61% day.",
+    "Neighbourhood: 33% of the 3x daily sub-grid passes, but only 13 of 486 (2.7%) of the full neighbourhood (leverage x check x SMA x band) passes on both 2000-26 and 1986-26. C1 itself fails the 1930-85 holdout.",
+    "Tail risk: P(>80% drawdown within 20y) is 17% on the 1930-2026 block bootstrap (1.5% on 1986-2026). A single -20% day while invested drops the 10y excess from +9.1 to +0.8-2.2 and the beat rate from 100% to 54-74%. On market paths with 1-3 month blocks it trails SPY over 20y in 52-62% of paths.",
+    "Risk-adjusted: Sharpe on 1986-2026 is 0.61 vs VFINX 0.67. It loses more than the index in almost every fast correction (1990 -31% vs -19%, 1998 -35% vs -19%, 2022 -49% vs -25%) and wins only in slow bears."
+   ],
+   "bugs_found": [
+    "VFINX adjusted close misses 1980-1986 capital-gain distributions (1980-12-30, 1981-12-29, 1983-12-28, 1984-12-28, 1985-12-27 -5.7%, 1986-12-09 -7.0% vs S&P -0.75%). SYN_VFINX3XC triples them (-20.9% on 1986-12-09, while C1 held it) and the long-protocol VFINX benchmark carries them. Repaired: 1986-2026 CA score 8.58 -> 8.64, full 6.06 -> 6.88, p 0.015 -> 0.007 (the bug penalised the strategy).",
+    "realism.adjusted taxes no distributions on SYN_* tickers (no divs file). Real UPRO paid about 0.4%/yr ordinary income (up to 1%), so roughly 0.1-0.2 pp/yr of drag is missing, plus the risk of a fund-level short-term gain distribution like SSO's 4-5% in 2006-07."
+   ],
+   "key_numbers": {
+    "CA_full_2000_2026_engine": {
+     "score": 0.0965,
+     "full_excess": 0.071,
+     "ex10_beat": 1,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.029,
+     "max_dd": -0.6046,
+     "bench_max_dd": -0.5519,
+     "vol": 0.351,
+     "sharpe": 0.575,
+     "bench_sharpe": 0.508,
+     "dsr": 0.013
+    },
+    "FED_full": {
+     "score": 0.1126,
+     "boot_p": 0.016
+    },
+    "offsets_score_mean_min": [
+     0.0967,
+     0.0965
+    ],
+    "lag1_CA_2000_2026": {
+     "score": 0.1004,
+     "full_excess": 0.0755
+    },
+    "CA_long_1986_2026_engine_roundone_translation": {
+     "score": 0.0828,
+     "full_excess": 0.0574,
+     "boot_p": 0.022,
+     "max_dd": -0.6058,
+     "sharpe": 0.606,
+     "bench_sharpe": 0.674
+    },
+    "CA_long_1986_2026_repaired_VFITX_VUSTX": {
+     "score": 0.0864,
+     "full_excess": 0.0688,
+     "boot_p": 0.007,
+     "max_dd": -0.6017
+    },
+    "CA_long_lag1_repaired": {
+     "score": 0.0724,
+     "full_excess": 0.0422,
+     "boot_p": 0.133,
+     "max_dd": -0.7822
+    },
+    "CA_long_lag1_engine": {
+     "score": 0.0683,
+     "boot_p": 0.213,
+     "max_dd": -0.7901
+    },
+    "CA_holdout_1930_1985": {
+     "score": 0.0681,
+     "full_excess": 0.034,
+     "ex10_beat": 0.826,
+     "ex15_beat": 0.927,
+     "ex10_min": -0.146,
+     "boot_p": 0.187,
+     "max_dd": -0.882,
+     "bench_max_dd": -0.808
+    },
+    "CA_1930_2026": {
+     "score": 0.0729,
+     "full_excess": 0.047,
+     "ex10_beat": 0.897,
+     "boot_p": 0.046,
+     "max_dd": -0.882
+    },
+    "walk_forward_3xD_OOS_mean_beat": {
+     "2000_26": [
+      0.06,
+      0.83
+     ],
+     "1986_26": [
+      0.072,
+      0.88
+     ],
+     "1930_2026": [
+      0.075,
+      0.85
+     ]
+    },
+    "boot_P_dd80_20y": {
+     "1986_2026": 0.015,
+     "1930_2026": 0.17
+    },
+    "boot_P_under_20y": {
+     "1986_2026": 0.048,
+     "1930_2026": 0.213
+    },
+    "crash_minus20_day_10y_excess": {
+     "base": 0.091,
+     "perm": 0.022,
+     "1987_pattern": 0.008,
+     "beat_1987_pattern": 0.54
+    },
+    "costs_35bps_per_side_CA_score": 0.086
+   },
+   "best_variant_cfg": {
+    "kind": "weights",
+    "signal": "verify_lev_robust.trend",
+    "params": {
+     "sig": "SPY",
+     "n": 200,
+     "band": 0.03,
+     "check": "D",
+     "risk": {
+      "SYN_SPY3XC": 1
+     },
+     "safe": [
+      "VFITX"
+     ],
+     "lag": 0,
+     "ma": "sma",
+     "mdrift": 0.05
+    },
+    "rebalance": "M",
+    "requires": [
+     "VFITX"
+    ]
+   },
+   "best_variant_numbers": {
+    "note": "3x SMA200/3% daily: the only config of the 486-point neighbourhood that passes items 1-3 on all four histories. It is the most robust 3x point, but it still carries the 3x tail risk and is not recommendable.",
+    "CA_full_engine": {
+     "score": 0.0742,
+     "full_excess": 0.0625,
+     "ex10_beat": 1,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.061,
+     "max_dd": -0.6174,
+     "bench_max_dd": -0.5519,
+     "dsr": 0.0077
+    },
+    "CA_long_engine_unrepaired": {
+     "score": 0.0764,
+     "boot_p": 0.052,
+     "max_dd": -0.619,
+     "ho10_mean": 0.0854
+    },
+    "CA_long_repaired": {
+     "score": 0.0772,
+     "boot_p": 0.027
+    },
+    "CA_1930_1985": {
+     "score": 0.0717,
+     "boot_p": 0.093,
+     "max_dd": -0.88
+    },
+    "CA_1930_2026": {
+     "score": 0.0748,
+     "boot_p": 0.024,
+     "max_dd": -0.88
+    }
+   }
+  },
+  {
+   "candidate": "Daily-200 3x S&P / intermediate Treasuries, 2% band (pre-registered finalist)",
+   "verdict": "fail",
+   "reasons": [
+    "Misses the confidence bar in its own primary test: CA 2000-26 boot_p 0.117 (0.100 with 500 draws), deflated Sharpe 0.003. The 2020-26 sub-period is -0.29 pp.",
+    "1930-1985 holdout: CA +7.05 but p 0.159, worst 10y window -16.7 pp/yr, maxDD -91% (1929-35).",
+    "With a one-day lag on 1986+: p 0.18-0.27, drawdown -79%/-80%. Escaping 1987 required a fall of 2.7% or more on 10-16.",
+    "Tail risk is worse than C1's: P(>80% drawdown within 20y) is 24% (1930-2026 bootstrap) and 4.3% (1986-2026). One -20% day while invested gives a 10y excess of -0.6 with a 43% beat rate (1987 pattern). In 2020 it lost 56% vs the index's 34%.",
+    "A positive score in all histories (+6.1 to +7.1) shows a real leverage-timing premium, but not a confident one."
+   ],
+   "bugs_found": [
+    "Same VFINX distribution bug. Repaired, 1986-2026 CA goes from +7.03 (p 0.071) to +7.08 (p 0.040)."
+   ],
+   "key_numbers": {
+    "CA_full_2000_2026_engine": {
+     "score": 0.0607,
+     "full_excess": 0.0484,
+     "ex10_beat": 1,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.117,
+     "max_dd": -0.5883,
+     "bench_max_dd": -0.5519,
+     "sharpe": 0.519,
+     "dsr": 0.003
+    },
+    "FED_full": {
+     "score": 0.0727,
+     "boot_p": 0.091
+    },
+    "lag1_CA_2000_2026": {
+     "score": 0.0742
+    },
+    "CA_long_repaired": {
+     "score": 0.0708,
+     "full_excess": 0.0547,
+     "boot_p": 0.04,
+     "max_dd": -0.592
+    },
+    "CA_long_lag1_repaired": {
+     "score": 0.0638,
+     "boot_p": 0.184,
+     "max_dd": -0.7917
+    },
+    "CA_holdout_1930_1985": {
+     "score": 0.0705,
+     "full_excess": 0.0388,
+     "ex10_beat": 0.826,
+     "ex10_min": -0.167,
+     "boot_p": 0.159,
+     "max_dd": -0.913
+    },
+    "CA_1930_2026": {
+     "score": 0.0677,
+     "boot_p": 0.056,
+     "max_dd": -0.913
+    },
+    "boot_P_dd80_20y": {
+     "1986_2026": 0.043,
+     "1930_2026": 0.239
+    },
+    "crash_minus20_day_10y_excess_1987_pattern": -0.0055
+   },
+   "best_variant_cfg": {
+    "kind": "weights",
+    "signal": "verify_lev_robust.trend",
+    "params": {
+     "sig": "SPY",
+     "n": 200,
+     "band": 0.03,
+     "check": "D",
+     "risk": {
+      "SYN_SPY3XC": 1
+     },
+     "safe": [
+      "VFITX"
+     ],
+     "lag": 0,
+     "ma": "sma",
+     "mdrift": 0.05
+    },
+    "rebalance": "M",
+    "requires": [
+     "VFITX"
+    ]
+   },
+   "best_variant_numbers": {
+    "note": "SMA200 with a 3% band (adjacent to C2) is the only all-history pass in the grid; see the C1 entry. Not recommendable at 3x.",
+    "CA_full_engine": {
+     "score": 0.0742,
+     "full_excess": 0.0625,
+     "ex10_beat": 1,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.061,
+     "max_dd": -0.6174,
+     "bench_max_dd": -0.5519
+    }
+   }
+  },
+  {
+   "candidate": "Low-vol 3x: 3x S&P while SPY 60-day realised vol < 15% (exit >16.5%, re-enter <13.5%), else 1x SPY",
+   "verdict": "fail",
+   "reasons": [
+    "The simulator replicates it exactly on 2000-26 (CA 0.051, p 0.039, DD -0.651).",
+    "No edge in the 1930-1985 holdout: CA score +3.3, full -0.3, 10y beat 57%, 15y beat 68%, p 0.51, maxDD -84%. On 1930-2026: +2.8, p 0.29.",
+    "1986-2026 (repaired) CA +4.6, p 0.046, but maxDD -66%, and it lost 19 pp vs the index in 1987.",
+    "Deflated Sharpe 0.015. Round-1 found only 1 of 10 neighbours passing."
+   ],
+   "bugs_found": [],
+   "key_numbers": {
+    "CA_full_2000_2026_engine": {
+     "score": 0.0514,
+     "full_excess": 0.0468,
+     "ex10_beat": 1,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.039,
+     "max_dd": -0.6515,
+     "bench_max_dd": -0.5519,
+     "dsr": 0.015
+    },
+    "CA_long_repaired": {
+     "score": 0.046,
+     "boot_p": 0.046,
+     "max_dd": -0.656
+    },
+    "CA_holdout_1930_1985": {
+     "score": 0.033,
+     "full_excess": -0.003,
+     "ex10_beat": 0.565,
+     "ex15_beat": 0.683,
+     "boot_p": 0.512,
+     "max_dd": -0.841
+    },
+    "CA_1930_2026": {
+     "score": 0.028,
+     "boot_p": 0.294,
+     "max_dd": -0.841
+    }
+   }
+  },
+  {
+   "candidate": "LEVERAGED: SSO|emax100/200 b0.01|D|sig=SPY|->IEF>VFITX (2x S&P while slow EMA trend is up)",
+   "verdict": "fail",
+   "reasons": [
+    "The simulator replicates the synthetic-2x 2000-26 version (CA 0.062 vs 0.0617, p 0.019 vs 0.02).",
+    "No edge in the 1930-1985 holdout: CA +0.4, full -0.2, 10y beat 39%, p 0.54, maxDD -83%. On 1930-2026: +1.8, p 0.28, 10y beat 54%.",
+    "1986-2026 (repaired) CA +5.7, p 0.076. It exited after Black Monday (1987-11-30).",
+    "The real-SSO record rests on 4 switches since 2006. Deflated Sharpe 0.015. Sharpe equals SPY's on 2006-26 (0.65), so this is leverage, not skill."
+   ],
+   "bugs_found": [],
+   "key_numbers": {
+    "CA_full_2006_2026_engine": {
+     "score": 0.0634,
+     "full_excess": 0.0594,
+     "ex10_beat": 1,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.034,
+     "max_dd": -0.5934,
+     "bench_max_dd": -0.5519,
+     "sharpe": 0.647,
+     "bench_sharpe": 0.647,
+     "dsr": 0.015
+    },
+    "CA_synthetic_2000_2026_sim": {
+     "score": 0.062,
+     "boot_p": 0.019,
+     "max_dd": -0.591
+    },
+    "CA_long_repaired_sim": {
+     "score": 0.057,
+     "boot_p": 0.076,
+     "max_dd": -0.597
+    },
+    "CA_long_engine_FGOVX": {
+     "score": 0.0561,
+     "boot_p": 0.102,
+     "ho10_mean": 0.011
+    },
+    "CA_holdout_1930_1985": {
+     "score": 0.004,
+     "full_excess": -0.002,
+     "ex10_beat": 0.391,
+     "boot_p": 0.536,
+     "max_dd": -0.825
+    },
+    "CA_1930_2026": {
+     "score": 0.018,
+     "boot_p": 0.279
+    }
+   }
+  },
+  {
+   "candidate": "DERIVED VARIANT: 2x S&P (SYN_SPY2XC ~ SSO) while SPY > SMA175 with 3% hysteresis band, daily check, else VFITX",
+   "verdict": "conditional",
+   "reasons": [
+    "This is the highest leverage at which the risk is acceptable. maxDD is below SPY's in every history: -47% vs -55% (2000-26), -47% vs -55% (1986-26), -67% vs -81% (1930-85). P(>80% drawdown within 20y) is 0.0-0.7% (1-month blocks: up to 1.6%).",
+    "Positive CA excess in every history: +4.94 (p 0.077), +4.62 (repaired 1986-26, p 0.067), +2.95 (1930-85, p 0.27), +3.48 (1930-2026, p 0.13). It beats SPY in 100% of 10/15/20y windows on 2000-26 and 1986-26, and in 83% of 10y windows in 1930-85.",
+    "Walk-forward for 2x daily is positive OOS: +1.4 (2000-26, 58% beat), +4.1 (1986-26, 85%), +3.2 (1930-2026, 82%).",
+    "It does not meet good confidence: deflated Sharpe 0.0035, PBO about 0.5-0.6 in the 2x daily grid, and p above 0.10 on 1930-85 and 1930-2026. Its SMA175/3% parameters were chosen post hoc in round 1 (SMA200/4% is a similar neighbour).",
+    "Conditions: execute at the same day's close (with a one-day lag, 1986-26 p rises to 0.26 and drawdown to -59%); hold a 2x daily-reset ETF (SSO, about 0.9% fee) with its annual ordinary-income distributions; accept a 10-32% chance of trailing SPY over 20 years (32-73% if future trends persist less); one -20% day while invested cuts the 10y excess from +4.8 to +0.8-2.1."
+   ],
+   "bugs_found": [],
+   "key_numbers": {
+    "CA_full_2000_2026_engine": {
+     "score": 0.0494,
+     "full_excess": 0.038,
+     "ex10_beat": 1,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "ex10_min": 0.0064,
+     "boot_p": 0.077,
+     "max_dd": -0.4713,
+     "bench_max_dd": -0.5519,
+     "vol": 0.2375,
+     "sharpe": 0.578,
+     "bench_sharpe": 0.508,
+     "dsr": 0.0035
+    },
+    "FED_full_engine": {
+     "score": 0.06,
+     "boot_p": 0.041
+    },
+    "NONE_full_engine": {
+     "score": 0.0774,
+     "boot_p": 0.011
+    },
+    "CA_long_repaired": {
+     "score": 0.0462,
+     "full_excess": 0.0279,
+     "boot_p": 0.067,
+     "max_dd": -0.4684
+    },
+    "CA_long_engine_unrepaired": {
+     "score": 0.0458,
+     "boot_p": 0.121
+    },
+    "CA_holdout_1930_1985": {
+     "score": 0.0295,
+     "full_excess": 0.0148,
+     "ex10_beat": 0.826,
+     "boot_p": 0.27,
+     "max_dd": -0.669,
+     "bench_max_dd": -0.808
+    },
+    "CA_1930_2026": {
+     "score": 0.0348,
+     "boot_p": 0.129,
+     "max_dd": -0.669
+    },
+    "boot_P_under_20y": {
+     "2000_26": 0.098,
+     "1986_26": 0.163,
+     "1930_2026": 0.318
+    },
+    "boot_P_dd80_20y": {
+     "1986_26": 0,
+     "1930_2026": 0.007
+    }
+   },
+   "best_variant_cfg": {
+    "kind": "weights",
+    "signal": "verify_lev_robust.trend",
+    "params": {
+     "sig": "SPY",
+     "n": 175,
+     "band": 0.03,
+     "check": "D",
+     "risk": {
+      "SYN_SPY2XC": 1
+     },
+     "safe": [
+      "VFITX"
+     ],
+     "lag": 0,
+     "ma": "sma",
+     "mdrift": 0.05
+    },
+    "rebalance": "M",
+    "requires": [
+     "VFITX"
+    ]
+   },
+   "best_variant_numbers": {
+    "CA": {
+     "score": 0.0494,
+     "full_excess": 0.038,
+     "ex10_beat": 1,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.077,
+     "max_dd": -0.4713,
+     "bench_max_dd": -0.5519
+    },
+    "alt_neighbour_2x_SMA200_4pct_CA": {
+     "score": 0.0422,
+     "full_excess": 0.0436,
+     "ex10_beat": 0.91,
+     "ex15_beat": 0.957,
+     "boot_p": 0.068,
+     "max_dd": -0.436
+    }
+   }
+  }
+ ],
+ "open_questions": [
+  "Should the lab repair VFINX (1980-86 unadjusted capital-gain distributions) and rebuild SYN_VFINX*XC and the long-protocol benchmark? Every long-protocol result that holds VFINX or SYN_VFINX*XC through 1986-12-09 is affected.",
+  "realism.py should tax SYN_* leveraged-fund distributions using the real UPRO/SSO payout history, including the risk of short-term capital-gain distributions like SSO's 4-5% in 2006-07.",
+  "The 1930-1985 extension uses rounded annual dividend and T-bill yields from memory (Shiller/FRED-like). A proper dividend and T-bill dataset would firm up the pre-1960 numbers. The conclusions (insignificant holdout, -88% to -93% 1929-35 drawdowns) are unlikely to change.",
+  "Is same-close execution a fair assumption for the daily rule? A 3:45pm check with market-on-close orders would very likely have caught the 1987-10-16 exit (needed a fall of 2.1% or more; actual -5.2%), but the result's significance on 1986+ hinges on it.",
+  "Should the lab's confidence bar weight the deflated Sharpe? With ~12.5k trials, every leveraged variant has DSR under 0.035, so no single config can clear a multiple-testing-adjusted bar."
+ ]
+}

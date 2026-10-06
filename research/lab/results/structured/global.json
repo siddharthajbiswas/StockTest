@@ -1,0 +1,1006 @@
+{
+ "family": "global",
+ "module_path": "/Users/siddhartha/dev/StockTest/research/lab/families/global.py",
+ "results_md": "/Users/siddhartha/dev/StockTest/research/lab/results/global.md (full table of every run: /Users/siddhartha/dev/StockTest/research/lab/results/global_table.csv, 2967 rows, protocol/block/cfg_json columns; scripts, logs and finalist lists in /Users/siddhartha/dev/StockTest/research/lab/scratch/global/)",
+ "n_configs_tested": 1459,
+ "headline": "No. Going global did not beat buy-and-hold SPY after California (or federal) tax with good confidence, and none of the 1459 configs clears the PROTOCOL section 3 bar in CA, FED or NONE. Static international exposure lost over 2000-2026; country rotation, regional rotation and cheap-country reversal lost even before tax. The only meaningful positive after-tax results are one bet on emerging markets (VEIEX held through roughly 2001-2011). The family's best CA config (SPY vs VEIEX 30-month ratio switch, +2.67 pp/yr, boot_p 0.04) switched only twice in 26 years, has a 10-year beat rate of 0.46, and loses on ETFs and on random menus. Pre-2010 and 2010-2026 evidence point in opposite directions (every finalist ahead in 5-year windows ending by 2010; behind in nearly every window starting 2010 or later), and the 1986-1999 long-history holdout sides with 2010-2026.",
+ "findings": [
+  "Scope: 1277 ETF-era configs screened (24 yearly starts, CA+NONE; tax variants CA only), 67 long-history configs (1986-2026, VFINX benchmark), 96 hindsight controls, 22 finalists on full x CA/FED/NONE, 15 distinct long twins on long x CA/FED/NONE, 18 timing-battery variants: 1459 distinct configs. 0 pass the bar in any regime.",
+  "Static international exposure: all 30 static mixes (VGTSX, EFA, EEM, VEIEX, VEU, VXUS, ACWI, VT, regional funds, equal-weight 20 countries, SPY+intl 80/20..50/50) trail SPY over 2000-2026 in CA and NONE. The best, buy-and-hold SPY 80 / VEIEX 20, scores -0.08 pp/yr CA on the full protocol. Every one was ahead on average in 5-year windows ending by 2010 (+1.2 to +13 pp/yr CA) and behind in every 5-year window starting 2010 or later (beat rate 0.00, CA and NONE).",
+  "Positive results are an emerging-markets bet: 133 of the 140 family configs with a positive CA screen score have VEIEX or EEM in the menu. The other 7 are slow SPY-vs-VGTSX switches scoring at most +0.84 pp/yr. No positive config has a 10-year beat rate above 0.53 (the bar is 0.75).",
+  "Family best CA (N1: ratio SPY vs VEIEX, 30-month ratio momentum, 5% band, quarterly), full protocol: CA score +2.67, full excess +3.63, ex10_beat 0.46, ex15_beat 0.66, boot_p 0.039. It switched exactly twice (into VEIEX 2001-04-02, back to SPY 2012-01-03). 5-year windows starting 2010 or later: mean -0.59 pp/yr, 0 of 47 beat. ETF twin SPY vs EEM: -2.06. Without VEIEX (SPY vs VGTSX): +0.82. Same rule with 24 random away funds: mean -0.29 CA, and none reaches its score.",
+  "Classic GEM (Antonacci) loses: SPY vs EFA with T-bill test and bond fallback scores -3.04 CA / -2.36 NONE (ex10_beat 0.23). The mutual-fund version SPY vs VGTSX (2000+) scores -0.79 CA / +0.34 NONE. GEM with VEU or VXUS (2009+/2013+) scores -2.6 to -6.0 CA.",
+  "US-vs-intl rotations and ratio switches that include VEIEX score +0.7 to +1.7 pp/yr CA on the full protocol (A1 +0.91, F1 +1.37, F2 +1.36, F3 +1.23, N2 +1.69, N3 +1.28), but every one has ex10_beat 0.42-0.51 and boot_p 0.28-0.41. Their ETF-only twins (SPY/EFA/EEM 2005+, SPY/VEA/VWO and SPY/VEU/EEM 2009+) lose 3.7-4.3 pp/yr CA with 10-year beat 0.",
+  "Country rotation (20 iShares country funds, 96 configs plus refinements): best CA screen -3.18, B1 full CA -3.36 / NONE -0.78. Regional ETF rotation: best CA -5.65. Long-term reversal ('cheap country'): best lt_rev CA -2.29 (the long-term momentum contrast -1.15). US/intl reversal: -3.27. Global equal weight C20+SPY: -2.36 CA full. All negative in NONE as well.",
+  "Adding the 20 country funds to the incumbent preset's 22-ETF TaxManagedCombo menu makes it worse: full CA +0.34 vs the incumbent's +0.66, ex10_beat 0.34 vs 0.70, boot_p 0.46 vs 0.025; NONE -1.88.",
+  "Pre-2010 vs 2010-2026 (full protocol, all finalists, CA and NONE): mean excess of 5-year windows ending by 2010 ranges +1.97 to +24.47 pp/yr; for windows starting 2010 or later it ranges -11.74 to 0.00 with beat rates 0.00-0.19. Sub-periods for A1 CA: 2000-10 +6.77, 2010-20 -2.41, 2020-26 -3.21.",
+  "Long history: all 12 distinct long twins that can hold an international fund before 2000 (PRITX-based) lost to VFINX in 5-year windows ending before 2000. CA holdout means range -0.82 to -3.78 pp/yr, FED -0.81 to -4.01, NONE +0.22 to -3.56 (1 of 12 positive). VEIEX-based twins equal VFINX before 1996-97, so they carry no holdout information. Positive long-protocol scores come only from windows overlapping 2001-2011.",
+  "Tax-managed execution doesn't help. Versus the same signal with standard execution, a 1% gain budget changes CA score by +0.10 pp on average and the 10-year beat by -0.08; the 10% budget with no short-term gains changes them by -0.14 and -0.01. Best tax variant +2.25 (N1 rule), 0 of 61 pass. The 50%-drift-band variants were degenerate (never invested).",
+  "Timing battery: every rebalance-boundary offset keeps the score positive. N1 CA ranges +0.98 to +2.70 over 7 offsets, F1 +0.66 to +1.80, A1 +0.38 to +0.91, and a one-day execution lag changes little (N1 +2.62, F1 +1.32, A1 +0.79). 10-year beat rates stay at 0.34-0.49 under every variant: the problem is one decade, not rebalance luck.",
+  "Diagnostics on the ETF-era grid: walk-forward 10y->5y OOS -3.41 pp/yr CA (beat 0.00) and -7.76 NONE; 5y->3y -6.35 / -5.50. PBO 0.64 CA / 0.59 NONE; deflated Sharpe of best 0.39 / 0.13. Long grid: WF OOS +1.23 CA, but it comes entirely from the 2002 and 2006 decision dates (+18.1, +9.6); 2010/2014/2018 are -7.4/-3.6/-9.5. PBO 0.56, DSR 0.03."
+ ],
+ "candidates": [
+  {
+   "label": "N1 ratio switch SPY vs VEIEX, 30-month ratio momentum, 5% band, quarterly (family best CA score; 2 switches in 26 years)",
+   "cfg": {
+    "kind": "weights",
+    "signal": "global.ratio",
+    "params": {
+     "home_w": {
+      "SPY": 1
+     },
+     "away_w": {
+      "VEIEX": 1
+     },
+     "rule": "mom",
+     "lookback": 630,
+     "band": 0.05,
+     "tilt": 1
+    },
+    "rebalance": "Q",
+    "execution": "standard"
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.0267,
+     "full_excess": 0.0363,
+     "ex5_mean": 0.0351,
+     "ex10_mean": 0.0243,
+     "ex10_beat": 0.4627,
+     "ex10_min": -0.0292,
+     "ex15_beat": 0.6596,
+     "ex20_beat": 1,
+     "boot_p": 0.039,
+     "max_dd": -0.6658,
+     "bench_max_dd": -0.5519,
+     "trades": 12,
+     "turnover": 0.0323
+    },
+    "FED": {
+     "score": 0.0301,
+     "full_excess": 0.0404,
+     "ex5_mean": 0.0393,
+     "ex10_mean": 0.0272,
+     "ex10_beat": 0.4627,
+     "ex10_min": -0.0303,
+     "ex15_beat": 0.6596,
+     "ex20_beat": 1,
+     "boot_p": 0.039,
+     "max_dd": -0.6658,
+     "bench_max_dd": -0.5519,
+     "trades": 11,
+     "turnover": 0.0279
+    },
+    "NONE": {
+     "score": 0.0338,
+     "full_excess": 0.0446,
+     "ex5_mean": 0.044,
+     "ex10_mean": 0.0304,
+     "ex10_beat": 0.4925,
+     "ex10_min": -0.0288,
+     "ex15_beat": 0.7021,
+     "ex20_beat": 1,
+     "boot_p": 0.037,
+     "max_dd": -0.6658,
+     "bench_max_dd": -0.5519,
+     "trades": 5,
+     "turnover": 0.0237
+    }
+   },
+   "long_protocol": {
+    "twin_cfg": {
+     "kind": "weights",
+     "signal": "global.ratio",
+     "params": {
+      "home_w": {
+       "VFINX": 1
+      },
+      "away_w": {
+       "VEIEX": 1
+      },
+      "rule": "mom",
+      "lookback": 630,
+      "band": 0.05,
+      "tilt": 1
+     },
+     "rebalance": "Q",
+     "execution": "standard"
+    },
+    "CA": {
+     "score": 0.0308,
+     "full_excess": 0.0178,
+     "ho5_mean": 0,
+     "ho5_beat": 0,
+     "ho10_mean": 0
+    },
+    "FED": {
+     "score": 0.0346,
+     "full_excess": 0.0239,
+     "ho5_mean": 0,
+     "ho5_beat": 0,
+     "ho10_mean": 0
+    },
+    "NONE": {
+     "score": 0.0388,
+     "full_excess": 0.03,
+     "ho5_mean": 0,
+     "ho5_beat": 0,
+     "ho10_mean": 0
+    },
+    "note": "identical to VFINX before 2000 (VEIEX starts 1994): no holdout information; the PRITX version (N1b twin) loses the holdout, CA ho5 -0.0279"
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "high",
+   "robustness_notes": "Fails bar items 2 (ex10_beat 0.46, ex15_beat 0.66), 4 (family walk-forward OOS -3.41 pp/yr CA, PBO 0.64), 6 (depends on VEIEX: SPY vs VGTSX +0.82, ETF twin SPY vs EEM 2005-10+ -2.06, 24 random away funds mean -0.29 CA with 0 of 24 reaching its score) and 7 (no pre-2000 holdout; PRITX version loses there). It made exactly two switches (into VEIEX 2001-04-02, back to SPY 2012-01-03), so boot_p 0.04 overstates confidence: the effective sample is one regime call. Holds VEIEX 40% of months. In 5-year windows starting 2010+ it averages -0.59 pp/yr and beats SPY in 0 of 47. Robust to rebalance offsets (7 offsets, CA score +0.98..+2.70, all positive) and a 1-day lag (+2.62). The neighborhood (30m lookback, 5-10% band, M/Q) is all about +2.0..+2.8 CA, but no neighbour reaches ex10_beat 0.75. VEIEX is a Vanguard mutual fund, not tradable on the site; historical purchase/redemption fees are not modelled."
+  },
+  {
+   "label": "F1 ratio switch SPY vs VEIEX, 24-month ratio momentum, 5% band, monthly (best of the screened ratio block)",
+   "cfg": {
+    "kind": "weights",
+    "signal": "global.ratio",
+    "params": {
+     "home_w": {
+      "SPY": 1
+     },
+     "away_w": {
+      "VEIEX": 1
+     },
+     "rule": "mom",
+     "lookback": 504,
+     "band": 0.05,
+     "tilt": 1
+    },
+    "rebalance": "M",
+    "execution": "standard"
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.0137,
+     "full_excess": 0.0104,
+     "ex5_mean": 0.0234,
+     "ex10_mean": 0.0107,
+     "ex10_beat": 0.4478,
+     "ex10_min": -0.0408,
+     "ex15_beat": 0.4894,
+     "ex20_beat": 0.8519,
+     "boot_p": 0.363,
+     "max_dd": -0.6658,
+     "bench_max_dd": -0.5519,
+     "trades": 24,
+     "turnover": 0.3157
+    },
+    "FED": {
+     "score": 0.0169,
+     "full_excess": 0.0154,
+     "ex5_mean": 0.0267,
+     "ex10_mean": 0.0136,
+     "ex10_beat": 0.4478,
+     "ex10_min": -0.041,
+     "ex15_beat": 0.5106,
+     "ex20_beat": 0.8519,
+     "boot_p": 0.299,
+     "max_dd": -0.6658,
+     "bench_max_dd": -0.5519,
+     "trades": 25,
+     "turnover": 0.3039
+    },
+    "NONE": {
+     "score": 0.0214,
+     "full_excess": 0.0218,
+     "ex5_mean": 0.0312,
+     "ex10_mean": 0.0178,
+     "ex10_beat": 0.4478,
+     "ex10_min": -0.0385,
+     "ex15_beat": 0.5532,
+     "ex20_beat": 0.9259,
+     "boot_p": 0.222,
+     "max_dd": -0.6658,
+     "bench_max_dd": -0.5519,
+     "trades": 20,
+     "turnover": 0.2919
+    }
+   },
+   "long_protocol": {
+    "twin_cfg": {
+     "kind": "weights",
+     "signal": "global.ratio",
+     "params": {
+      "home_w": {
+       "VFINX": 1
+      },
+      "away_w": {
+       "VEIEX": 1
+      },
+      "rule": "mom",
+      "lookback": 504,
+      "band": 0.05,
+      "tilt": 1
+     },
+     "rebalance": "M",
+     "execution": "standard"
+    },
+    "CA": {
+     "score": 0.013,
+     "full_excess": -0.0018,
+     "ho5_mean": 0,
+     "ho5_beat": 0,
+     "ho10_mean": 0
+    },
+    "FED": {
+     "score": 0.017,
+     "full_excess": 0.0059,
+     "ho5_mean": 0,
+     "ho5_beat": 0,
+     "ho10_mean": 0
+    },
+    "NONE": {
+     "score": 0.0219,
+     "full_excess": 0.0146,
+     "ho5_mean": 0,
+     "ho5_beat": 0,
+     "ho10_mean": 0
+    },
+    "note": "identical to VFINX before 2000; the PRITX version (F1b twin) scores -0.0192 CA with ho5 -0.0316"
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "high",
+   "robustness_notes": "ex10_beat 0.45, ex15_beat 0.49, boot_p 0.36 in CA. Rebalance offsets give CA score +0.66..+1.80 (all positive), 1-day lag +1.32. Without VEIEX (SPY vs VGTSX, F1b) +0.03 CA. With 24 random away funds the same rule averages -0.67 CA and none scores at or above the VEIEX version. 5-year windows starting 2010+: mean -1.52 pp/yr, 1 of 47 beat. 2000-10 +7.70, 2010-20 -3.26, 2020-26 -1.01 (CA). Holds VEIEX 41% of months."
+  },
+  {
+   "label": "A1 rotation SPY/VGTSX/VEIEX, 12-month momentum, top 1, 3% hysteresis, monthly (GEM-style 3-way relative momentum, no absolute filter)",
+   "cfg": {
+    "kind": "weights",
+    "signal": "global.rot",
+    "params": {
+     "menu": [
+      "SPY",
+      "VGTSX",
+      "VEIEX"
+     ],
+     "lookback": 252,
+     "skip": 0,
+     "top_n": 1,
+     "hysteresis": 0.03
+    },
+    "rebalance": "M",
+    "execution": "standard"
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.0091,
+     "full_excess": 0.0074,
+     "ex5_mean": 0.0163,
+     "ex10_mean": 0.0068,
+     "ex10_beat": 0.4179,
+     "ex10_min": -0.0404,
+     "ex15_beat": 0.4894,
+     "ex20_beat": 0.6667,
+     "boot_p": 0.387,
+     "max_dd": -0.7004,
+     "bench_max_dd": -0.5519,
+     "trades": 45,
+     "turnover": 0.6087
+    },
+    "FED": {
+     "score": 0.0126,
+     "full_excess": 0.0131,
+     "ex5_mean": 0.0199,
+     "ex10_mean": 0.0098,
+     "ex10_beat": 0.4179,
+     "ex10_min": -0.0397,
+     "ex15_beat": 0.4894,
+     "ex20_beat": 0.7407,
+     "boot_p": 0.326,
+     "max_dd": -0.677,
+     "bench_max_dd": -0.5519,
+     "trades": 44,
+     "turnover": 0.5976
+    },
+    "NONE": {
+     "score": 0.0187,
+     "full_excess": 0.0214,
+     "ex5_mean": 0.0268,
+     "ex10_mean": 0.0149,
+     "ex10_beat": 0.4328,
+     "ex10_min": -0.0356,
+     "ex15_beat": 0.5319,
+     "ex20_beat": 0.8519,
+     "boot_p": 0.232,
+     "max_dd": -0.6502,
+     "bench_max_dd": -0.5519,
+     "trades": 32,
+     "turnover": 0.5851
+    }
+   },
+   "long_protocol": {
+    "twin_cfg": {
+     "kind": "weights",
+     "signal": "global.rot",
+     "params": {
+      "menu": [
+       "VFINX",
+       "PRITX",
+       "VEIEX"
+      ],
+      "lookback": 252,
+      "skip": 0,
+      "top_n": 1,
+      "hysteresis": 0.03
+     },
+     "rebalance": "M",
+     "execution": "standard"
+    },
+    "CA": {
+     "score": 0.0155,
+     "full_excess": 0.0002,
+     "ho5_mean": -0.0105,
+     "ho5_beat": 0.3514,
+     "ho10_mean": -0.0154
+    },
+    "FED": {
+     "score": 0.0203,
+     "full_excess": 0.0109,
+     "ho5_mean": -0.0095,
+     "ho5_beat": 0.3784,
+     "ho10_mean": -0.0114
+    },
+    "NONE": {
+     "score": 0.0273,
+     "full_excess": 0.0242,
+     "ho5_mean": -0.003,
+     "ho5_beat": 0.4595,
+     "ho10_mean": -0.0024
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "high",
+   "robustness_notes": "The pre-2000 holdout contradicts it (CA ho5 -1.05, ho10 -1.54 pp/yr). Without VEIEX (SPY/VGTSX) -0.88 CA screen; ETF twin SPY/EFA/EEM (2005+) -3.69 CA screen. On 24 random menus [SPY + 2 funds from BROAD_EQUITY_POOL_2003] the same rule averages -1.65 CA (21% positive). Rebalance offsets +0.38..+0.91 CA, 1-day lag +0.79. It held VEIEX continuously from Dec 2001 to Feb 2007 (41% of months overall). 5-year windows starting 2010+: -2.80 pp/yr, 0 of 47 beat; 2000-10 +6.77, 2010-20 -2.41, 2020-26 -3.21 (CA). Max DD -70% vs SPY -55%."
+  },
+  {
+   "label": "N2 rotation SPY/VGTSX/VEIEX, 9-month momentum, top 1, 6% hysteresis, monthly (best rotation neighbour; closest to the bar in NONE)",
+   "cfg": {
+    "kind": "weights",
+    "signal": "global.rot",
+    "params": {
+     "menu": [
+      "SPY",
+      "VGTSX",
+      "VEIEX"
+     ],
+     "lookback": 189,
+     "skip": 0,
+     "top_n": 1,
+     "hysteresis": 0.06
+    },
+    "rebalance": "M",
+    "execution": "standard"
+   },
+   "regime_target": "NONE",
+   "stats": {
+    "CA": {
+     "score": 0.0169,
+     "full_excess": 0.0135,
+     "ex5_mean": 0.0242,
+     "ex10_mean": 0.0145,
+     "ex10_beat": 0.4627,
+     "ex10_min": -0.0421,
+     "ex15_beat": 0.5319,
+     "ex20_beat": 0.8148,
+     "boot_p": 0.303,
+     "max_dd": -0.6815,
+     "bench_max_dd": -0.5519,
+     "trades": 35,
+     "turnover": 0.4394
+    },
+    "FED": {
+     "score": 0.023,
+     "full_excess": 0.0219,
+     "ex5_mean": 0.0296,
+     "ex10_mean": 0.0206,
+     "ex10_beat": 0.4627,
+     "ex10_min": -0.0423,
+     "ex15_beat": 0.5745,
+     "ex20_beat": 0.8519,
+     "boot_p": 0.218,
+     "max_dd": -0.6351,
+     "bench_max_dd": -0.5519,
+     "trades": 35,
+     "turnover": 0.427
+    },
+    "NONE": {
+     "score": 0.0312,
+     "full_excess": 0.0332,
+     "ex5_mean": 0.0372,
+     "ex10_mean": 0.0286,
+     "ex10_beat": 0.4925,
+     "ex10_min": -0.0418,
+     "ex15_beat": 0.5957,
+     "ex20_beat": 1,
+     "boot_p": 0.108,
+     "max_dd": -0.5821,
+     "bench_max_dd": -0.5519,
+     "trades": 22,
+     "turnover": 0.4117
+    }
+   },
+   "long_protocol": {
+    "twin_cfg": {
+     "kind": "weights",
+     "signal": "global.rot",
+     "params": {
+      "menu": [
+       "VFINX",
+       "PRITX",
+       "VEIEX"
+      ],
+      "lookback": 189,
+      "skip": 0,
+      "top_n": 1,
+      "hysteresis": 0.06
+     },
+     "rebalance": "M",
+     "execution": "standard"
+    },
+    "CA": {
+     "score": 0.0202,
+     "full_excess": 0.0025,
+     "ho5_mean": -0.0137,
+     "ho5_beat": 0.3514,
+     "ho10_mean": -0.02
+    },
+    "FED": {
+     "score": 0.0263,
+     "full_excess": 0.014,
+     "ho5_mean": -0.0138,
+     "ho5_beat": 0.3784,
+     "ho10_mean": -0.0173
+    },
+    "NONE": {
+     "score": 0.035,
+     "full_excess": 0.0287,
+     "ho5_mean": -0.01,
+     "ho5_beat": 0.4865,
+     "ho10_mean": -0.0116
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "high",
+   "robustness_notes": "Selected from a 114-config neighbourhood built around the screen winners (selection bias). In NONE: ex10_beat 0.49, ex15_beat 0.60, boot_p 0.11, all below the bar. Long protocol NONE score +3.50 with boot_p 0.061 and ex10_beat 0.60, but the pre-2000 holdout is negative (NONE ho5 -1.00, ho10 -1.16; CA -1.37/-2.00). Holds VEIEX 44% of months. 5-year windows starting 2010+: CA -2.56 (0 of 47 beat), NONE -2.58 (2 of 47). Star VEIEX, as for A1."
+  },
+  {
+   "label": "A5 classic GEM on ETFs: SPY vs EFA, 12-month momentum, T-bill test on SPY, bond fallback (Antonacci's rule; representative failure)",
+   "cfg": {
+    "kind": "weights",
+    "signal": "global.rot",
+    "params": {
+     "menu": [
+      "SPY",
+      "EFA"
+     ],
+     "lookback": 252,
+     "skip": 0,
+     "top_n": 1,
+     "abs_mode": "tbill",
+     "abs_signal": "SPY",
+     "safe": "VBMFX"
+    },
+    "rebalance": "M",
+    "execution": "standard",
+    "requires": [
+     "EFA"
+    ],
+    "require_days": 400
+   },
+   "regime_target": "ALL",
+   "stats": {
+    "CA": {
+     "score": -0.0304,
+     "full_excess": -0.0319,
+     "ex5_mean": -0.0218,
+     "ex10_mean": -0.0336,
+     "ex10_beat": 0.2321,
+     "ex10_min": -0.0854,
+     "ex15_beat": 0.1111,
+     "ex20_beat": 0,
+     "boot_p": 0.877,
+     "max_dd": -0.3372,
+     "bench_max_dd": -0.5519,
+     "trades": 106,
+     "turnover": 1.7949
+    },
+    "FED": {
+     "score": -0.0303,
+     "full_excess": -0.0269,
+     "ex5_mean": -0.0225,
+     "ex10_mean": -0.0338,
+     "ex10_beat": 0.2321,
+     "ex10_min": -0.0897,
+     "ex15_beat": 0.1667,
+     "ex20_beat": 0,
+     "boot_p": 0.83,
+     "max_dd": -0.3372,
+     "bench_max_dd": -0.5519,
+     "trades": 105,
+     "turnover": 1.8094
+    },
+    "NONE": {
+     "score": -0.0236,
+     "full_excess": -0.0141,
+     "ex5_mean": -0.0169,
+     "ex10_mean": -0.0273,
+     "ex10_beat": 0.3036,
+     "ex10_min": -0.0849,
+     "ex15_beat": 0.3056,
+     "ex20_beat": 0,
+     "boot_p": 0.691,
+     "max_dd": -0.3372,
+     "bench_max_dd": -0.5519,
+     "trades": 81,
+     "turnover": 1.8181
+    }
+   },
+   "long_protocol": {
+    "twin_cfg": {
+     "kind": "weights",
+     "signal": "global.rot",
+     "params": {
+      "menu": [
+       "VFINX",
+       "PRITX"
+      ],
+      "lookback": 252,
+      "skip": 0,
+      "top_n": 1,
+      "abs_mode": "tbill",
+      "abs_signal": "VFINX",
+      "safe": [
+       "VBMFX",
+       "VFIIX"
+      ]
+     },
+     "rebalance": "M",
+     "execution": "standard"
+    },
+    "CA": {
+     "score": -0.0055,
+     "full_excess": -0.0203,
+     "ho5_mean": -0.0247,
+     "ho5_beat": 0.0811,
+     "ho10_mean": -0.031
+    },
+    "FED": {
+     "score": -0.0022,
+     "full_excess": -0.0104,
+     "ho5_mean": -0.0234,
+     "ho5_beat": 0.1351,
+     "ho10_mean": -0.0263
+    },
+    "NONE": {
+     "score": 0.0096,
+     "full_excess": 0.0088,
+     "ho5_mean": -0.0068,
+     "ho5_beat": 0.3514,
+     "ho10_mean": -0.0064
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "low",
+   "robustness_notes": "The published rule, with instruments a buyer could have used (windows start 2002-10). It loses in every regime: CA -3.04, NONE -2.36, ex10_beat 0.23. Mutual-fund version SPY/VGTSX from 2000: -0.79 CA / +0.34 NONE. The long twin loses the pre-2000 holdout (CA ho5 -2.47). It holds the bond fund about 24% of months; the engine taxes bond interest as deferred gains, which flatters it in CA. Smaller drawdown (-34% vs SPY -55%) is the only plus. GEM with VEU or VXUS (2009+/2013+) does worse (-2.6 to -6.0 CA)."
+  },
+  {
+   "label": "B1 country rotation: 20 iShares country funds + SPY, 6-month momentum, top 1, per-pick T-bill test -> VFITX, monthly (best of 96+ country configs; representative failure)",
+   "cfg": {
+    "kind": "weights",
+    "signal": "global.rot",
+    "params": {
+     "menu": [
+      "EWA",
+      "EWC",
+      "EWD",
+      "EWG",
+      "EWH",
+      "EWI",
+      "EWJ",
+      "EWK",
+      "EWL",
+      "EWM",
+      "EWN",
+      "EWO",
+      "EWP",
+      "EWQ",
+      "EWS",
+      "EWU",
+      "EWW",
+      "EWZ",
+      "EWT",
+      "EWY",
+      "SPY"
+     ],
+     "lookback": 126,
+     "skip": 0,
+     "top_n": 1,
+     "abs_mode": "tbill",
+     "safe": "VFITX"
+    },
+    "rebalance": "M",
+    "execution": "standard"
+   },
+   "regime_target": "ALL",
+   "stats": {
+    "CA": {
+     "score": -0.0336,
+     "full_excess": -0.004,
+     "ex5_mean": -0.0257,
+     "ex10_mean": -0.0343,
+     "ex10_beat": 0.2836,
+     "ex10_min": -0.1418,
+     "ex15_beat": 0.383,
+     "ex20_beat": 0.0741,
+     "boot_p": 0.556,
+     "max_dd": -0.5803,
+     "bench_max_dd": -0.5519,
+     "trades": 285,
+     "turnover": 5.0053
+    },
+    "FED": {
+     "score": -0.0301,
+     "full_excess": 0.0041,
+     "ex5_mean": -0.0211,
+     "ex10_mean": -0.0312,
+     "ex10_beat": 0.2985,
+     "ex10_min": -0.1514,
+     "ex15_beat": 0.383,
+     "ex20_beat": 0.1481,
+     "boot_p": 0.501,
+     "max_dd": -0.5803,
+     "bench_max_dd": -0.5519,
+     "trades": 285,
+     "turnover": 5.0172
+    },
+    "NONE": {
+     "score": -0.0078,
+     "full_excess": 0.0319,
+     "ex5_mean": 0.0061,
+     "ex10_mean": -0.01,
+     "ex10_beat": 0.3881,
+     "ex10_min": -0.1584,
+     "ex15_beat": 0.4468,
+     "ex20_beat": 0.4815,
+     "boot_p": 0.329,
+     "max_dd": -0.5803,
+     "bench_max_dd": -0.5519,
+     "trades": 273,
+     "turnover": 5.0367
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "low",
+   "robustness_notes": "No long-history proxy (country funds start 1996/2000). Every one of the 96 screened country configs, the 10 refinements (cash/short-Treasury fallback, breadth gate, trend gate, inverse-vol, Sharpe score) and the site TaxManagedCombo on SPY+20 countries has a negative CA score; the best NONE screen score is -0.61. Turnover is 5x/yr. 2000-10 +10.33 CA, 2010-20 -9.24. 5-year windows starting 2010+: -10.70 pp/yr CA, 1 of 47 beat. The 5 bps slippage is optimistic for 1996-2005 country ETFs, so even this is overstated."
+  },
+  {
+   "label": "H1 the incumbent's site TaxManagedCombo (12-1 momentum, top 5, quarterly, 1% gain budget) with the 20 country funds added to its 22-ETF menu",
+   "cfg": {
+    "kind": "combo",
+    "picker": "momentum",
+    "picker_params": {
+     "lookback": 252,
+     "skip": 21
+    },
+    "timer": "buy_hold",
+    "timer_params": {},
+    "top_n": 5,
+    "rebalance": "Q",
+    "menu": [
+     "SPY",
+     "QQQ",
+     "DIA",
+     "MDY",
+     "IWM",
+     "IJR",
+     "EFA",
+     "EEM",
+     "IWD",
+     "IWF",
+     "RSP",
+     "XLB",
+     "XLC",
+     "XLE",
+     "XLF",
+     "XLI",
+     "XLK",
+     "XLP",
+     "XLRE",
+     "XLU",
+     "XLV",
+     "XLY",
+     "EWA",
+     "EWC",
+     "EWD",
+     "EWG",
+     "EWH",
+     "EWI",
+     "EWJ",
+     "EWK",
+     "EWL",
+     "EWM",
+     "EWN",
+     "EWO",
+     "EWP",
+     "EWQ",
+     "EWS",
+     "EWU",
+     "EWW",
+     "EWZ",
+     "EWT",
+     "EWY"
+    ],
+    "trade_rule": "tax_managed",
+    "gain_budget": 0.01,
+    "wash_days": 31
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.0034,
+     "full_excess": 0.0041,
+     "ex5_mean": 0.0071,
+     "ex10_mean": 0.0032,
+     "ex10_beat": 0.3433,
+     "ex10_min": -0.0457,
+     "ex15_beat": 0.4894,
+     "ex20_beat": 0.8519,
+     "boot_p": 0.462,
+     "max_dd": -0.6729,
+     "bench_max_dd": -0.5519,
+     "trades": 290,
+     "turnover": 0.1189
+    },
+    "FED": {
+     "score": 0.004,
+     "full_excess": 0.0042,
+     "ex5_mean": 0.0081,
+     "ex10_mean": 0.0041,
+     "ex10_beat": 0.3582,
+     "ex10_min": -0.0506,
+     "ex15_beat": 0.4894,
+     "ex20_beat": 0.8148,
+     "boot_p": 0.462,
+     "max_dd": -0.6729,
+     "bench_max_dd": -0.5519,
+     "trades": 290,
+     "turnover": 0.1191
+    },
+    "NONE": {
+     "score": -0.0188,
+     "full_excess": -0.0076,
+     "ex5_mean": -0.0044,
+     "ex10_mean": -0.0248,
+     "ex10_beat": 0.2836,
+     "ex10_min": -0.0951,
+     "ex15_beat": 0.1915,
+     "ex20_beat": 0.1111,
+     "boot_p": 0.641,
+     "max_dd": -0.6129,
+     "bench_max_dd": -0.5519,
+     "trades": 770,
+     "turnover": 1.809
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "medium",
+   "robustness_notes": "Site-expressible. It shows that adding international country funds makes the incumbent worse. CA full: score +0.34 vs the incumbent's +0.66, ex10_beat 0.34 vs 0.70, ex15_beat 0.49 vs 0.83, boot_p 0.46 vs 0.025. NONE -1.88 vs +0.14. It inherits the incumbent menu's hindsight exposure (QQQ, XLK). 5-year windows starting 2010+: -3.00 CA, 2 of 47 beat."
+  },
+  {
+   "label": "S1 static buy-and-hold SPY 80% / VEIEX 20% (best static international allocation)",
+   "cfg": {
+    "kind": "buyhold",
+    "weights": {
+     "SPY": 0.8,
+     "VEIEX": 0.2
+    }
+   },
+   "regime_target": "ALL",
+   "stats": {
+    "CA": {
+     "score": -0.0008,
+     "full_excess": -0.0025,
+     "ex5_mean": 0.0019,
+     "ex10_mean": -0.0009,
+     "ex10_beat": 0.3134,
+     "ex10_min": -0.0142,
+     "ex15_beat": 0.3191,
+     "ex20_beat": 0.2963,
+     "boot_p": 0.629,
+     "max_dd": -0.5906,
+     "bench_max_dd": -0.5519,
+     "trades": 2,
+     "turnover": 0
+    },
+    "FED": {
+     "score": -0.0007,
+     "full_excess": -0.0025,
+     "ex5_mean": 0.002,
+     "ex10_mean": -0.0007,
+     "ex10_beat": 0.3134,
+     "ex10_min": -0.0151,
+     "ex15_beat": 0.3191,
+     "ex20_beat": 0.2963,
+     "boot_p": 0.623,
+     "max_dd": -0.5906,
+     "bench_max_dd": -0.5519,
+     "trades": 2,
+     "turnover": 0
+    },
+    "NONE": {
+     "score": -0.0006,
+     "full_excess": -0.0026,
+     "ex5_mean": 0.0022,
+     "ex10_mean": -0.0005,
+     "ex10_beat": 0.3134,
+     "ex10_min": -0.0159,
+     "ex15_beat": 0.3191,
+     "ex20_beat": 0.2963,
+     "boot_p": 0.612,
+     "max_dd": -0.5906,
+     "bench_max_dd": -0.5519,
+     "trades": 2,
+     "turnover": 0
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "medium",
+   "robustness_notes": "The diversification answer: even the best static international mix trails SPY slightly in every regime (CA -0.08 pp/yr), with a higher drawdown (-59% vs -55%). 2000-10 +2.57 CA, 2010-20 -1.29, 2020-26 -1.18; 5-year windows starting 2010+: -1.39 pp/yr, 0 of 47 beat. Annual rebalancing is worse (-0.30 CA screen). An unmodelled foreign tax credit could lift it to about zero, but not above SPY with any confidence. Choosing EM rather than developed international is mild hindsight; SPY 70 / VGTSX 30 scores -0.79 CA."
+  }
+ ],
+ "diagnostics": {
+  "CA": {
+   "grid": "ETF-era screen grid (1277 family configs screened; 895 with first start 2000-01-01 used for PBO/DSR/walk-forward; hindsight controls excluded)",
+   "walk_forward_10_5": {
+    "oos_mean": -0.0341,
+    "oos_beat": 0,
+    "is_mean": 0.0747,
+    "avg_config_oos_mean": -0.0676,
+    "mean_oos_rank_pct": 0.7438
+   },
+   "walk_forward_5_3": {
+    "oos_mean": -0.0635,
+    "oos_beat": 0.25,
+    "is_mean": 0.1375,
+    "avg_config_oos_mean": -0.0421,
+    "mean_oos_rank_pct": 0.4573
+   },
+   "pbo": 0.6362,
+   "pbo_oos_of_is_best_mean": -0.0283,
+   "dsr_best": 0.3924,
+   "best_by_monthly_mean": "ratio[SPY v VEIEX] mom630s0 band0.05 tilt1.0 | std|Q",
+   "walk_forward_choices": [
+    [
+     "2012-01-01",
+     "rot[C20+SPY] 126s0 top1 abs=tbill:each safe=VFITX | tax0.01|M",
+     0.1827,
+     -0.0226
+    ],
+    [
+     "2016-01-01",
+     "rot[SPY/VGTSX/VEIEX] 252s0 top1 abs=tbill:SPY safe=VBMFX hyst0.06 | std|M",
+     0.0414,
+     -0.0796
+    ],
+    [
+     "2020-01-01",
+     "ratio[SPY v VGTSX+VEIEX] sma300 band0.06 tilt1.0 | std|M",
+     0,
+     0
+    ]
+   ],
+   "long_screen": {
+    "n_configs_used": 54,
+    "walk_forward_10_5": {
+     "oos_mean": 0.0123,
+     "oos_beat": 0.3333,
+     "is_mean": 0.0597,
+     "avg_config_oos_mean": -0.001
+    },
+    "walk_forward_5_3": {
+     "oos_mean": 0.0137,
+     "oos_beat": 0.25
+    },
+    "pbo": 0.5566,
+    "dsr_best": 0.0269,
+    "note": "the positive OOS mean comes only from the 2002 (+18.13) and 2006 (+9.62) decision dates; 2010 -7.37, 2014 -3.56, 2018 -9.47"
+   }
+  },
+  "NONE": {
+   "grid": "ETF-era screen grid (1216 family configs with NONE runs; 843 with first start 2000-01-01 used)",
+   "walk_forward_10_5": {
+    "oos_mean": -0.0776,
+    "oos_beat": 0,
+    "is_mean": 0.0942,
+    "avg_config_oos_mean": -0.0788,
+    "mean_oos_rank_pct": 0.4223
+   },
+   "walk_forward_5_3": {
+    "oos_mean": -0.055,
+    "oos_beat": 0,
+    "is_mean": 0.1523,
+    "avg_config_oos_mean": -0.043,
+    "mean_oos_rank_pct": 0.4961
+   },
+   "pbo": 0.5854,
+   "pbo_oos_of_is_best_mean": -0.0126,
+   "dsr_best": 0.1305,
+   "best_by_monthly_mean": "rot[C20+SPY] 126s0 top1 abs=tbill:each safe=VFITX breadth=gate0.5 | std|M",
+   "walk_forward_choices": [
+    [
+     "2012-01-01",
+     "rot[SPY/VGTSX/VEIEX] 21-63-126s0 top1 abs=zero:each safe=VUSTX | std|M",
+     0.2133,
+     -0.0939
+    ],
+    [
+     "2016-01-01",
+     "rot[SPY/VGTSX/VEIEX] 21-63-126s0 top1 abs=zero:each safe=VUSTX | std|M",
+     0.0694,
+     -0.1388
+    ],
+    [
+     "2020-01-01",
+     "ratio[SPY v VGTSX+VEIEX] sma300 band0.06 tilt1.0 | std|M",
+     0,
+     0
+    ]
+   ],
+   "long_screen": {
+    "n_configs_used": 54,
+    "walk_forward_10_5": {
+     "oos_mean": 0.0121,
+     "oos_beat": 0.5,
+     "is_mean": 0.0853,
+     "avg_config_oos_mean": 0.0073
+    },
+    "walk_forward_5_3": {
+     "oos_mean": 0.0248,
+     "oos_beat": 0.375
+    },
+    "pbo": 0.5464,
+    "dsr_best": 0.1019
+   }
+  }
+ },
+ "hindsight_checks": "The star instrument of every positive result is VEIEX (Vanguard Emerging Markets Index), the best asset class of 2002-2007. Rule-level controls used 24 fixed-seed random draws each from common.BROAD_EQUITY_POOL_2003 on the screen protocol. (H1) The A1 rule (12m momentum, top 1, 3% hysteresis) on [SPY + 2 random funds]: CA mean -1.65 / median -1.59 pp/yr, 21% positive, 2 of 24 at or above the VEIEX version (+0.97), 0 pass; NONE mean -0.78. (H2) The same with a T-bill test on SPY -> VBMFX: CA mean -1.31, NONE -0.05, 0 pass. (H3) The F1 ratio rule SPY vs random X: CA mean -0.67, max +0.99 vs +1.44 for VEIEX, 0 of 24 at or above it, 0 pass. (H4) The N1 rule (30m ratio momentum, 5% band, quarterly) SPY vs random X: CA mean -0.29, max +1.87 vs +2.77 for VEIEX, 0 of 24 at or above, 0 pass; NONE mean +0.03. The best random draws are themselves hindsight-flavoured (SPY/QQQ/IBB; Singapore and Canada from the same 2000s commodity/EM boom). Star removed (full protocol, CA): F1 +1.37 -> +0.03 (SPY vs VGTSX); F2 +1.36 -> +0.31; N1 +2.67 -> +0.82; A1 +0.91 -> -0.88 (screen). ETF-only twins that a buyer could have used: A1 on SPY/EFA/EEM (2005+) -3.69, on SPY/VEA/VWO or SPY/VEU/EEM (2009+) -4.30/-3.93 (screen); N1 on SPY vs EEM (2005-10+) -2.06 (full); classic GEM SPY/EFA -3.04 (full). Long-history twins using PRITX all lose the 1986-1999 holdout in CA (ho5 -0.82 to -3.78). VEIEX twins carry no pre-2000 information.",
+ "concerns": [
+  "N1's boot_p 0.04 is not meaningful evidence: the strategy made two decisions in 26 years. A 12-month-block bootstrap of 318 months cannot see that the whole excess is one 2001-2011 holding. Beat rates, walk-forward and hindsight are the honest summary.",
+  "The ETF-era winners trade Vanguard mutual funds (VGTSX, VEIEX) that are not on the site, because they reach back before EFA (2001) and EEM (2003). Historical purchase/redemption fees (if any applied) are not modelled (engine charges 5+5 bps), and fund distributions are taxed as deferred gains. Both flatter switching in CA. The ETF-only versions lose.",
+  "Early iShares country funds (1996-2005) had wide spreads and high fees; 5 bps slippage is optimistic, so country rotation is overstated, and it still loses.",
+  "The foreign tax credit on international dividends is not modelled. It could lift near-zero static mixes (SPY 80 / VEIEX 20 at -0.08 pp/yr CA) to about zero, but not the beat rates or the post-2010 record.",
+  "GEM-type rules hold the bond fund about 24% of the time. The engine taxes bond interest as deferred gains, which flatters them in CA/FED (PROTOCOL 5.5).",
+  "Long-history proxies PRITX/VWIGX/VTRIX/FOSFX are active funds, not indexes. VEIEX starts in 1994, so the EM winners have no pre-2000 holdout at all.",
+  "The screened grid includes a dense neighbourhood (block N, 114 configs) around the winners, built after seeing the screen. N1 and N2 were chosen from it (selection bias); the family diagnostics include it and are negative.",
+  "Seven 50%-drift-band variants in the inherited stage-2 design (s08) were degenerate (never invested, all cash). They are counted and reported but are not a test of anything.",
+  "The first researcher's 672-config GEM block and 195-config ratio block were screened before this session (cached, same code hash). Everything was re-loaded from cache, not re-derived."
+ ],
+ "untested_ideas": [
+  "Valuation-based country/region selection (CAPE, P/B, dividend yield): no valuation data in the lab; long-term price reversal was the only proxy and it lost.",
+  "Currency-hedged international (HEFA/DBEF) and international small-cap/value (SCZ, EFV, DLS): histories start 2005-2014, too short for 10/15-year windows.",
+  "Modelling the foreign tax credit and the qualified-dividend share of foreign funds in the CA/FED regimes.",
+  "A slow US/international switch inside the incumbent's sector-momentum menu (e.g. replacing its EFA/EEM slots with one ratio-switched international sleeve).",
+  "US/international switching with a total-market (VTI) or equal-weight (RSP) home asset instead of SPY.",
+  "Rebalance-offset and execution-lag battery for the remaining finalists (only A1, F1, N1 were run), and realism.py stricter distribution taxation for the GEM bond-fallback rules."
+ ],
+ "lab_bugs": [
+  "metrics.monthly_matrix ends with .dropna(), so report.diagnostics' PBO and deflated Sharpe silently use only months common to every config. One late-starting config (e.g. a VXUS menu, 2013+) shrinks the whole family's PBO sample to 2013-2026, with no warning. Worked around by passing only configs whose first start equals the protocol's first start.",
+  "metrics.walk_forward(step_quarters=4) steps over protocol starts, not quarters. On the 'screen' protocol (yearly starts) it samples every 4 years, so the 10y->5y walk-forward has only 3 decision dates (2012, 2016, 2020) and oos_beat is very coarse (0/3, 1/3, ...). On 'full' it is yearly, as intended.",
+  "blocks.WeightStrategy band: the band also gates opening new positions (|0 - target| < band means skip). With band >= target weight (e.g. band 0.5 on a top-2/top-3 rotation), names are never bought and the account silently stays in cash. It matches the docstring wording but is an easy trap; a warning or an exemption for zero-weight entries would help."
+ ]
+}

@@ -1,0 +1,1518 @@
+[
+ {
+  "family": "tax_rotation",
+  "label": "KX3: 378-0 momentum, top 5, semiannual, 1% budget, keep-in-top-2N + no-trim + worst-ranked-first gain spending (WS, proportional buys)",
+  "cfg": {
+   "kind": "tax_rotation.ws",
+   "signal": "tax_rotation.rank",
+   "params": {
+    "menu": [
+     "SPY",
+     "QQQ",
+     "DIA",
+     "MDY",
+     "IWM",
+     "IJR",
+     "EFA",
+     "EEM",
+     "IWD",
+     "IWF",
+     "RSP",
+     "XLB",
+     "XLC",
+     "XLE",
+     "XLF",
+     "XLI",
+     "XLK",
+     "XLP",
+     "XLRE",
+     "XLU",
+     "XLV",
+     "XLY"
+    ],
+    "score": "ret",
+    "lookback": 378,
+    "skip": 0,
+    "top_n": 5,
+    "hold_buffer": 5
+   },
+   "rebalance": "S",
+   "execution": "tax",
+   "gain_budget": 0.01,
+   "wash_days": 31,
+   "buy_order": "prop",
+   "trim": false,
+   "gain_order": "rank"
+  },
+  "stats": {
+   "CA": {
+    "score": 0.0099,
+    "full_excess": 0.0184,
+    "ex5_mean": 0.0078,
+    "ex10_mean": 0.0117,
+    "ex10_beat": 0.8955,
+    "ex10_min": -0.0038,
+    "ex15_beat": 0.8511,
+    "ex20_beat": 0.963,
+    "boot_p": 0.011,
+    "max_dd": -0.5366,
+    "bench_max_dd": -0.5519,
+    "trades": 224,
+    "turnover": 0.0469
+   },
+   "FED": {
+    "score": 0.011,
+    "full_excess": 0.0194,
+    "ex5_mean": 0.0088,
+    "ex10_mean": 0.013,
+    "ex10_beat": 0.8955,
+    "ex10_min": -0.0038,
+    "ex15_beat": 0.8723,
+    "ex20_beat": 1,
+    "boot_p": 0.006,
+    "max_dd": -0.5366,
+    "bench_max_dd": -0.5519,
+    "trades": 224,
+    "turnover": 0.0471
+   },
+   "NONE": {
+    "score": 0.0091,
+    "full_excess": 0.0148,
+    "ex5_mean": 0.0102,
+    "ex10_mean": 0.0085,
+    "ex10_beat": 0.6567,
+    "ex10_min": -0.02,
+    "ex15_beat": 0.7021,
+    "ex20_beat": 0.8519,
+    "boot_p": 0.135,
+    "max_dd": -0.54,
+    "bench_max_dd": -0.5519,
+    "trades": 188,
+    "turnover": 0.4499
+   }
+  },
+  "long": {
+   "note": "same rule on LONG_MENU mutual-fund proxies, protocol long, benchmark VFINX",
+   "CA": {
+    "score": 0.0096,
+    "full_excess": -0.0034,
+    "ho5_mean": -0.0012,
+    "ho5_beat": 0.5676,
+    "ho10_mean": -0.0023
+   },
+   "NONE": {
+    "score": 0.0083,
+    "full_excess": 0.0059,
+    "ho5_mean": 0.0183,
+    "ho5_beat": 0.7027,
+    "ho10_mean": 0.0178
+   }
+  },
+  "notes": "Passes criteria 1-3 on full in CA and FED. Fails 4: family PBO 0.605; K-execution sub-family PBO 0.68; walk-forward OOS ~0. Fails 6: -QQQ score 0.0044 (ex10_beat 0.59, ex15 0.58, boot 0.33); -XLK 0.0056; -both -0.0010; 30 random menus mean score +0.0039, full +0.0016, 1/30 pass. 7 contradicted mildly: long CA full -0.0034, ho5 -0.0012, ho10 -0.0023 (beat 0.24). 5 partial: 14/14 full-protocol neighbours have score >0 (median 0.0092) but 4/14 pass 1-3. The 6 rebalance-month schedules all have positive score (0.0068-0.0109) and full (0.0075-0.0184), mean boot_p 0.093, 3/6 pass; the default schedule has the best full_excess. Same-execution random-rank control (20 seeds) mean score +0.0006 (z 3.5). 2026 holdings: QQQ 33%, XLK 23%, MDY 18%; growth/tech 56%; unrealized gains 87% of value. Sub-periods CA: 2000-10 +2.93pp, 2010-20 +0.89, 2020-26 -0.40. Turnover 0.047/yr. Needs the trim/gain_order knobs added to research/lab/families/tax_rotation.py (not site-expressible today)."
+ },
+ {
+  "family": "tax_rotation",
+  "label": "KX1: incumbent signal (252-21 momentum, top 5, quarterly) with keep-in-top-2N + no-trim + worst-ranked-first, long-term gains only, 2% budget (WS)",
+  "cfg": {
+   "kind": "tax_rotation.ws",
+   "signal": "tax_rotation.rank",
+   "params": {
+    "menu": [
+     "SPY",
+     "QQQ",
+     "DIA",
+     "MDY",
+     "IWM",
+     "IJR",
+     "EFA",
+     "EEM",
+     "IWD",
+     "IWF",
+     "RSP",
+     "XLB",
+     "XLC",
+     "XLE",
+     "XLF",
+     "XLI",
+     "XLK",
+     "XLP",
+     "XLRE",
+     "XLU",
+     "XLV",
+     "XLY"
+    ],
+    "score": "ret",
+    "lookback": 252,
+    "skip": 21,
+    "top_n": 5,
+    "hold_buffer": 5
+   },
+   "rebalance": "Q",
+   "execution": "tax",
+   "gain_budget": 0.02,
+   "wash_days": 31,
+   "buy_order": "prop",
+   "st_gains": false,
+   "trim": false,
+   "gain_order": "rank"
+  },
+  "stats": {
+   "CA": {
+    "score": 0.0093,
+    "full_excess": 0.0182,
+    "ex5_mean": 0.0072,
+    "ex10_mean": 0.0107,
+    "ex10_beat": 0.9104,
+    "ex10_min": -0.0047,
+    "ex15_beat": 0.8936,
+    "ex20_beat": 0.963,
+    "boot_p": 0.011,
+    "max_dd": -0.5658,
+    "bench_max_dd": -0.5519,
+    "trades": 279,
+    "turnover": 0.071
+   },
+   "FED": {
+    "score": 0.0105,
+    "full_excess": 0.0196,
+    "ex5_mean": 0.0082,
+    "ex10_mean": 0.012,
+    "ex10_beat": 0.9254,
+    "ex10_min": -0.0046,
+    "ex15_beat": 0.9149,
+    "ex20_beat": 1,
+    "boot_p": 0.009,
+    "max_dd": -0.5631,
+    "bench_max_dd": -0.5519,
+    "trades": 281,
+    "turnover": 0.0714
+   },
+   "NONE": {
+    "score": 0.0071,
+    "full_excess": 0.0162,
+    "ex5_mean": 0.0101,
+    "ex10_mean": 0.006,
+    "ex10_beat": 0.4776,
+    "ex10_min": -0.0191,
+    "ex15_beat": 0.5957,
+    "ex20_beat": 0.8519,
+    "boot_p": 0.124,
+    "max_dd": -0.5466,
+    "bench_max_dd": -0.5519,
+    "trades": 288,
+    "turnover": 0.7473
+   }
+  },
+  "long": {
+   "note": "same rule on LONG_MENU mutual-fund proxies, protocol long, benchmark VFINX",
+   "CA": {
+    "score": 0.0068,
+    "full_excess": -0.0054,
+    "ho5_mean": -0.003,
+    "ho5_beat": 0.5946,
+    "ho10_mean": -0.0028
+   },
+   "NONE": {
+    "score": 0.006,
+    "full_excess": 0.0037,
+    "ho5_mean": 0.0122,
+    "ho5_beat": 0.7027,
+    "ho10_mean": 0.0107
+   }
+  },
+  "notes": "Passes 1-3 on full in CA and FED. Fails 4 (PBO 0.605 family-wide; K sub-family 0.68). Fails 6: -QQQ score 0.0075 (ex10_beat 0.59, ex15 0.75, boot 0.071); -XLK 0.0095 (0.65/0.83/0.095); -both 0.0042; 30 random menus score +0.0042, full +0.0070 (87% >0) but ex10_beat mean 0.48, 1/30 pass. 7 mildly contradicted: long CA full -0.0054, ho5 -0.0030, ho10 -0.0028. 5 partial: 11/11 neighbours have positive score and full (median score 0.0076), 3/11 pass. Q-offset schedules: 0.0061 / 0.0057 (both fail); the default is best. Same-execution random-rank control mean +0.0012 (z 5.2). Paired vs random rank on 30 random menus: +0.0080 score (t 7.2). 2026: XLK 32%, QQQ 25%, growth/tech 60%. Sub-periods CA: +3.57 / +0.74 / -0.64 pp. On screen, budget 1-5% (LT-only) all pass 1-3."
+ },
+ {
+  "family": "leverage",
+  "label": "Daily trend 3x S&P / intermediate Treasuries, SMA175 with 3% band (POST HOC, best rule found)",
+  "cfg": {
+   "kind": "weights",
+   "params": {
+    "check": "D",
+    "conds": [
+     {
+      "band": 0.03,
+      "n": 175,
+      "ticker": "SPY",
+      "type": "sma"
+     }
+    ],
+    "confirm": 1,
+    "drift": 0,
+    "map": {
+     "0": {
+      "VFITX": 1
+     },
+     "1": {
+      "SYN_SPY3XC": 1
+     }
+    }
+   },
+   "rebalance": "M",
+   "requires": [
+    "VFITX"
+   ],
+   "signal": "leverage.regime"
+  },
+  "stats": {
+   "CA": {
+    "score": 0.0965,
+    "full_excess": 0.071,
+    "ex5_mean": 0.0902,
+    "ex10_mean": 0.0997,
+    "ex10_beat": 1,
+    "ex10_min": 0.0481,
+    "ex15_beat": 1,
+    "ex20_beat": 1,
+    "boot_p": 0.029,
+    "max_dd": -0.6046,
+    "bench_max_dd": -0.5519,
+    "trades": 107,
+    "turnover": 1.3624
+   },
+   "FED": {
+    "score": 0.1126,
+    "full_excess": 0.0857,
+    "ex5_mean": 0.1047,
+    "ex10_mean": 0.1162,
+    "ex10_beat": 1,
+    "ex10_min": 0.0606,
+    "ex15_beat": 1,
+    "ex20_beat": 1,
+    "boot_p": 0.016,
+    "max_dd": -0.5751,
+    "bench_max_dd": -0.5519,
+    "trades": 107,
+    "turnover": 1.3879
+   },
+   "NONE": {
+    "score": 0.1367,
+    "full_excess": 0.1071,
+    "ex5_mean": 0.1284,
+    "ex10_mean": 0.1407,
+    "ex10_beat": 1,
+    "ex10_min": 0.0797,
+    "ex15_beat": 1,
+    "ex20_beat": 1,
+    "boot_p": 0.007,
+    "max_dd": -0.542,
+    "bench_max_dd": -0.5519,
+    "trades": 75,
+    "turnover": 1.4138
+   }
+  },
+  "long": {
+   "protocol": "long (quarterly 1986-2023 starts, VFINX benchmark, LONG translation: SYN_VFINX3XC / FGOVX)",
+   "CA": {
+    "score": 0.0828,
+    "full_excess": 0.0574,
+    "ho5_mean": 0.0872,
+    "ho5_beat": 0.7838,
+    "ho10_mean": 0.0781,
+    "ho10_beat": 1,
+    "boot_p": 0.022,
+    "max_dd": -0.6058
+   },
+   "NONE": {
+    "score": 0.1146,
+    "full_excess": 0.1001,
+    "ho5_mean": 0.1144,
+    "ho5_beat": 0.8108,
+    "ho10_mean": 0.1083,
+    "ho10_beat": 1,
+    "boot_p": 0.003,
+    "max_dd": -0.5472
+   },
+   "lag1_CA": {
+    "score": 0.0683,
+    "full_excess": 0.032,
+    "ho5_mean": 0.039,
+    "ho5_beat": 0.7,
+    "ho10_mean": 0.0261,
+    "ho10_beat": 0.53,
+    "boot_p": 0.209,
+    "max_dd": -0.79,
+    "excess_1987": -0.58
+   },
+   "lag1_NONE": {
+    "score": 0.0977,
+    "full_excess": 0.0654,
+    "ho5_mean": 0.0558,
+    "ho10_mean": 0.0407,
+    "boot_p": 0.101
+   }
+  },
+  "notes": "Selected POST HOC: it is the best of the neighbourhood scan around the pre-registered SMA200/2% finalist, picked after seeing about 750 screened configs; the 1986+ results of the 1-3% band grid had been seen before it was singled out. Items 1-3 pass in CA on 2000-2026 (p 0.029), on real UPRO/IEF 2009+ (CA +9.03, p 0.031) and on the 1986-2026 LONG history (p 0.022). Item 5: 8/8 neighbours (SMA150-200 x 2-4%) beat SPY in CA and 5/8 pass items 1-3; every 3-4% band member passes on both histories. Item 4 fails at the family level (PBO 0.67, DSR 0.20; trend sub-family PBO 0.39 after refinements). Item 7 is fragile: the only gap crash in the data (1987-10-19) was escaped by selling at the 1987-10-16 close. With a one-day lag, 1987 is -58 pp vs VFINX, drawdown -79%, p 0.21. On 2000-2026 the lag is harmless (CA +10.01, p 0.031). Risk: average equity leverage 2.17x (3x about 72% of days), after-tax vol 24.0% vs SPY 14.0%, Sharpe 0.58 vs 0.51, M2 +0.91, beta 0.94, worst 10y CAGR +6.24% vs SPY -1.81%, worst after-tax wealth 0.51 vs 0.54. Bad years (CA after-tax): 2000 -23.5% (SPY -8.9%), 2007 -18.4% (+3.8%), 2022 -43.1% (-16.8%). Sub-periods: 2000-10 +7.16, 2010-20 +9.61, 2020-26 +2.09 pp/yr. Stricter annual distribution tax: -0.24 pp. Synthetic SYN_SPY3XC tracks UPRO within +0.03 pp/yr. Not runnable on the website: leverage.* signals and the SYN/leveraged tickers are research-only."
+ },
+ {
+  "family": "leverage",
+  "label": "Daily-200 3x S&P / intermediate Treasuries, 2% band (pre-registered finalist)",
+  "cfg": {
+   "kind": "weights",
+   "params": {
+    "check": "D",
+    "conds": [
+     {
+      "band": 0.02,
+      "n": 200,
+      "ticker": "SPY",
+      "type": "sma"
+     }
+    ],
+    "confirm": 1,
+    "drift": 0,
+    "map": {
+     "0": {
+      "VFITX": 1
+     },
+     "1": {
+      "SYN_SPY3XC": 1
+     }
+    }
+   },
+   "rebalance": "M",
+   "requires": [
+    "VFITX"
+   ],
+   "signal": "leverage.regime"
+  },
+  "stats": {
+   "CA": {
+    "score": 0.0607,
+    "full_excess": 0.0484,
+    "ex5_mean": 0.0574,
+    "ex10_mean": 0.0619,
+    "ex10_beat": 1,
+    "ex10_min": 0.0022,
+    "ex15_beat": 1,
+    "ex20_beat": 1,
+    "boot_p": 0.117,
+    "max_dd": -0.5883,
+    "bench_max_dd": -0.5519,
+    "trades": 108,
+    "turnover": 1.541
+   },
+   "FED": {
+    "score": 0.0727,
+    "full_excess": 0.061,
+    "ex5_mean": 0.0679,
+    "ex10_mean": 0.0742,
+    "ex10_beat": 1,
+    "ex10_min": 0.0076,
+    "ex15_beat": 1,
+    "ex20_beat": 1,
+    "boot_p": 0.091,
+    "max_dd": -0.5743,
+    "bench_max_dd": -0.5519,
+    "trades": 112,
+    "turnover": 1.5515
+   },
+   "NONE": {
+    "score": 0.0936,
+    "full_excess": 0.0815,
+    "ex5_mean": 0.0878,
+    "ex10_mean": 0.0954,
+    "ex10_beat": 1,
+    "ex10_min": 0.0142,
+    "ex15_beat": 1,
+    "ex20_beat": 1,
+    "boot_p": 0.052,
+    "max_dd": -0.5743,
+    "bench_max_dd": -0.5519,
+    "trades": 96,
+    "turnover": 1.5606
+   }
+  },
+  "long": {
+   "protocol": "long (quarterly, LONG translation)",
+   "CA": {
+    "score": 0.0668,
+    "full_excess": 0.0433,
+    "ho5_mean": 0.0907,
+    "ho5_beat": 0.7027,
+    "ho10_mean": 0.0801,
+    "ho10_beat": 1,
+    "boot_p": 0.092,
+    "max_dd": -0.596
+   },
+   "NONE": {
+    "score": 0.094,
+    "full_excess": 0.0823,
+    "ho5_mean": 0.1175,
+    "ho5_beat": 0.7297,
+    "ho10_mean": 0.1082,
+    "ho10_beat": 1,
+    "boot_p": 0.016,
+    "max_dd": -0.5833
+   },
+   "lag1_CA": {
+    "score": 0.0592,
+    "full_excess": 0.0233,
+    "ho5_mean": 0.0414,
+    "ho10_mean": 0.0262,
+    "ho10_beat": 0.53,
+    "boot_p": 0.27,
+    "max_dd": -0.8,
+    "excess_1987": -0.577
+   }
+  },
+  "notes": "Fails item 3 in CA on 2000-2026 (p 0.117), passes it in FED (0.091) and NONE (0.052) and on CA 1986-2026 (0.092). Neighbourhood (SMA175-225 x 1-3%): 3/8 pass items 1-3 in CA and 8/8 pass items 1-2 (median score +6.43, median p 0.115); 4/8 pass on 1986-2026. 1987: exited at the 10-16 close (+7.9 pp vs index). Lag-1, weekly check, monthly check or the lagged ^GSPC signal take Black Monday (-47 to -60 pp, DD -79% to -80%). Lag-1 on 2000-26 is harmless (CA +7.38, p 0.071). T-bill off-state CA +5.12, p 0.18. Never-realise-ST-gains tax execution turns it negative (CA -1.19). Risk: M2 -0.60, vol 25.3% vs 14.0%, avg leverage 2.21x. 2022 -39.5% vs SPY -16.8%. REAL UPRO/IEF 2009+: CA +4.50, p 0.157; from a 2018 start -1.6 pp/yr."
+ },
+ {
+  "family": "leverage",
+  "label": "Low-vol 3x: 3x S&P while SPY 60-day realised vol < 15% (exit >16.5%, re-enter <13.5%), else 1x SPY",
+  "cfg": {
+   "kind": "weights",
+   "params": {
+    "check": "D",
+    "conds": [
+     {
+      "band": 0.1,
+      "max": 0.15,
+      "n": 60,
+      "ticker": "SPY",
+      "type": "vol"
+     }
+    ],
+    "confirm": 1,
+    "drift": 0,
+    "map": {
+     "0": {
+      "SPY": 1
+     },
+     "1": {
+      "SYN_SPY3XC": 1
+     }
+    }
+   },
+   "rebalance": "M",
+   "signal": "leverage.regime"
+  },
+  "stats": {
+   "CA": {
+    "score": 0.0514,
+    "full_excess": 0.0468,
+    "ex5_mean": 0.0511,
+    "ex10_mean": 0.0515,
+    "ex10_beat": 1,
+    "ex10_min": 0.0089,
+    "ex15_beat": 1,
+    "ex20_beat": 1,
+    "boot_p": 0.039,
+    "max_dd": -0.6515,
+    "bench_max_dd": -0.5519,
+    "trades": 68,
+    "turnover": 1.0287
+   },
+   "FED": {
+    "score": 0.0631,
+    "full_excess": 0.0597,
+    "ex5_mean": 0.0624,
+    "ex10_mean": 0.0629,
+    "ex10_beat": 1,
+    "ex10_min": 0.0134,
+    "ex15_beat": 1,
+    "ex20_beat": 1,
+    "boot_p": 0.014,
+    "max_dd": -0.6317,
+    "bench_max_dd": -0.5519,
+    "trades": 68,
+    "turnover": 1.0037
+   },
+   "NONE": {
+    "score": 0.0824,
+    "full_excess": 0.0804,
+    "ex5_mean": 0.0828,
+    "ex10_mean": 0.0817,
+    "ex10_beat": 1,
+    "ex10_min": 0.0184,
+    "ex15_beat": 1,
+    "ex20_beat": 1,
+    "boot_p": 0.003,
+    "max_dd": -0.6091,
+    "bench_max_dd": -0.5519,
+    "trades": 53,
+    "turnover": 0.9575
+   }
+  },
+  "long": {
+   "protocol": "long (quarterly, LONG translation)",
+   "CA": {
+    "score": 0.0452,
+    "full_excess": 0.0277,
+    "ho5_mean": 0.0612,
+    "ho5_beat": 0.6757,
+    "ho10_mean": 0.053,
+    "ho10_beat": 1,
+    "boot_p": 0.116,
+    "max_dd": -0.6561
+   },
+   "NONE": {
+    "score": 0.0692,
+    "full_excess": 0.061,
+    "ho5_mean": 0.0805,
+    "ho5_beat": 0.6757,
+    "ho10_mean": 0.0726,
+    "ho10_beat": 1,
+    "boot_p": 0.022,
+    "max_dd": -0.6114
+   }
+  },
+  "notes": "Items 1-3 pass in CA on 2000-2026 (p 0.039), but only 1/10 neighbours pass in CA (all have positive scores +2.6 to +5.5, median p 0.209). On 1986-2026 the CA p is 0.116 (item 3 fails) and it lost 19 pp vs the index in 1987: 60-day vol crossed the exit level only at the 10-14 close. Lag-1 is harmless (2000-26 CA +5.37, p 0.023; 1986+ p 0.100). The Treasuries-off variant looks better on 2000-26 (CA +5.37, DD -45.9%) but fails on 1986+ (ho10 +1.42). Sub-family PBO 0.38; family PBO 0.67. Risk: beta 1.45, M2 -0.18, vol 23.4% vs 14.0%, avg leverage 2.12x. REAL UPRO/SPY 2009+: CA +6.43, p 0.087."
+ },
+ {
+  "family": "leverage",
+  "label": "Real-ETF version of the post-hoc rule: UPRO / IEF, daily SMA175 3% band (2009-07 onward only)",
+  "cfg": {
+   "kind": "weights",
+   "params": {
+    "check": "D",
+    "conds": [
+     {
+      "band": 0.03,
+      "n": 175,
+      "ticker": "SPY",
+      "type": "sma"
+     }
+    ],
+    "confirm": 1,
+    "drift": 0,
+    "map": {
+     "0": {
+      "IEF": 1
+     },
+     "1": {
+      "UPRO": 1
+     }
+    }
+   },
+   "rebalance": "M",
+   "requires": [
+    "IEF",
+    "UPRO"
+   ],
+   "signal": "leverage.regime"
+  },
+  "stats": {
+   "CA": {
+    "score": 0.0902,
+    "full_excess": 0.077,
+    "ex5_mean": 0.0988,
+    "ex10_mean": 0.0924,
+    "ex10_beat": 1,
+    "ex10_min": 0.049,
+    "ex15_beat": 1,
+    "ex20_beat": null,
+    "boot_p": 0.031,
+    "max_dd": -0.6139,
+    "bench_max_dd": -0.5519,
+    "trades": 74,
+    "turnover": 1.3782
+   },
+   "FED": {
+    "score": 0.108,
+    "full_excess": 0.0989,
+    "ex5_mean": 0.1148,
+    "ex10_mean": 0.1107,
+    "ex10_beat": 1,
+    "ex10_min": 0.0618,
+    "ex15_beat": 1,
+    "ex20_beat": null,
+    "boot_p": 0.018,
+    "max_dd": -0.5845,
+    "bench_max_dd": -0.5519,
+    "trades": 78,
+    "turnover": 1.4006
+   },
+   "NONE": {
+    "score": 0.1361,
+    "full_excess": 0.1362,
+    "ex5_mean": 0.1411,
+    "ex10_mean": 0.1391,
+    "ex10_beat": 1,
+    "ex10_min": 0.0816,
+    "ex15_beat": 1,
+    "ex20_beat": null,
+    "boot_p": 0.005,
+    "max_dd": -0.5513,
+    "bench_max_dd": -0.5519,
+    "trades": 55,
+    "turnover": 1.4234
+   }
+  },
+  "long": {
+   "note": "no long history for real ETFs; see the SYN/LONG version (candidate 1)"
+  },
+  "notes": "Investable form of candidate 1, but the window is 2009-07..2026-07 only: a bull market with no 2000-02 or 2008 bear. bench_max_dd -0.5519 is the lab's 2000-start SPY value; SPY's same-period max DD was -0.3372. Passes items 1-3 in all regimes on this window. M2 -3.07 here because SPY's own 2009-2026 Sharpe was high. The SYN version of the same rule reproduces REAL results within -0.3..+0.1 pp/yr over the overlap. With real distributions charged yearly the CA excess moves +0.08 pp. CA excess from a 2015 start +4.09 pp/yr, from 2018 +2.17."
+ },
+ {
+  "family": "trend_timing",
+  "label": "SPY|emax100/200 b0.01|D|->IEF>VFITX (best after-tax CA, unlevered)",
+  "cfg": {
+   "kind": "weights",
+   "signal": "trend_timing.timing",
+   "params": {
+    "risk": "SPY",
+    "safe": [
+     "IEF",
+     "VFITX"
+    ],
+    "rule": "cross",
+    "fast": 100,
+    "slow": 200,
+    "ma": "ema",
+    "band": 0.01
+   },
+   "rebalance": "M"
+  },
+  "stats": {
+   "CA": {
+    "score": 0.0101,
+    "full_excess": 0.0136,
+    "ex5_mean": 0.0106,
+    "ex10_mean": 0.0103,
+    "ex10_beat": 0.5672,
+    "ex10_min": -0.0323,
+    "ex15_beat": 0.7447,
+    "ex20_beat": 0.5926,
+    "boot_p": 0.286,
+    "max_dd": -0.4043,
+    "bench_max_dd": -0.5519,
+    "trades": 25,
+    "turnover": 0.2118,
+    "sharpe": 0.6242
+   },
+   "FED": {
+    "score": 0.0124,
+    "full_excess": 0.0184,
+    "ex5_mean": 0.0125,
+    "ex10_mean": 0.0126,
+    "ex10_beat": 0.5672,
+    "ex10_min": -0.0345,
+    "ex15_beat": 0.7447,
+    "ex20_beat": 0.963,
+    "boot_p": 0.225,
+    "max_dd": -0.3372,
+    "bench_max_dd": -0.5519,
+    "trades": 25,
+    "turnover": 0.2023,
+    "sharpe": 0.6851
+   },
+   "NONE": {
+    "score": 0.0153,
+    "full_excess": 0.0238,
+    "ex5_mean": 0.0152,
+    "ex10_mean": 0.0155,
+    "ex10_beat": 0.5672,
+    "ex10_min": -0.0366,
+    "ex15_beat": 0.7447,
+    "ex20_beat": 1,
+    "boot_p": 0.163,
+    "max_dd": -0.3372,
+    "bench_max_dd": -0.5519,
+    "trades": 13,
+    "turnover": 0.1924,
+    "sharpe": 0.7409
+   }
+  },
+  "long": {
+   "protocol": "long (quarterly 1986-2023 starts, VFINX benchmark)",
+   "cfg": {
+    "kind": "weights",
+    "signal": "trend_timing.timing",
+    "params": {
+     "risk": "VFINX",
+     "safe": [
+      "VFITX",
+      "FGOVX"
+     ],
+     "rule": "cross",
+     "fast": 100,
+     "slow": 200,
+     "ma": "ema",
+     "band": 0.01
+    },
+    "rebalance": "M"
+   },
+   "CA": {
+    "score": 0.0115,
+    "full_excess": -0.0092,
+    "ho5_mean": -0.0231,
+    "ho5_beat": 0,
+    "ho10_mean": -0.0278
+   },
+   "FED": {
+    "score": 0.014,
+    "full_excess": -0.0022,
+    "ho5_mean": -0.0258,
+    "ho5_beat": 0,
+    "ho10_mean": -0.0285
+   },
+   "NONE": {
+    "score": 0.0174,
+    "full_excess": 0.0062,
+    "ho5_mean": -0.0272,
+    "ho5_beat": 0,
+    "ho10_mean": -0.0277
+   }
+  },
+  "notes": "Fails items 2 (ex10_beat 0.57, ex15 0.74), 3 (p 0.29), 4 (family PBO 0.69, walk-forward out-of-sample -1.9 pp) and 7 (pre-2000 holdout ho10 -2.78, 0% beat). Its record is three events: 6 switches in 26.5 years (out 2000-12..2003-07, 2008-02..2009-09, 2022-06..2023-06). Sub-periods CA: 2000-10 +5.63, 2010-20 0.00 (never traded), 2020-26 -2.38 pp/yr; 10-year windows starting 2009-16 average -1.02 pp/yr (6% beat). Neighbourhood: fast 100-120 x slow 150-250 x band 1-2% is a 0..+1.2 CA plateau (EMA100/225 full CA +1.06), but band 0 is -1.56, fast 50-80 is negative, and every member has ex10_beat <= 0.57. Safe asset: bills +0.73, cash +0.44 (full CA). 1-day lag +1.13 (robust). Selected as the best of about 660 configs (DSR of the family's best 0.11)."
+ },
+ {
+  "family": "trend_timing",
+  "label": "LEVERAGED: SSO|emax100/200 b0.01|D|sig=SPY|->IEF>VFITX (2x S&P while slow EMA trend is up)",
+  "cfg": {
+   "kind": "weights",
+   "signal": "trend_timing.timing",
+   "params": {
+    "risk": "SSO",
+    "safe": [
+     "IEF",
+     "VFITX"
+    ],
+    "rule": "cross",
+    "fast": 100,
+    "slow": 200,
+    "ma": "ema",
+    "band": 0.01,
+    "sig": "SPY"
+   },
+   "rebalance": "M",
+   "requires": [
+    "SSO"
+   ]
+  },
+  "stats": {
+   "CA": {
+    "score": 0.0634,
+    "full_excess": 0.0594,
+    "ex5_mean": 0.0596,
+    "ex10_mean": 0.0669,
+    "ex10_beat": 1,
+    "ex10_min": 0.0262,
+    "ex15_beat": 1,
+    "ex20_beat": 1,
+    "boot_p": 0.034,
+    "max_dd": -0.5934,
+    "bench_max_dd": -0.5519,
+    "trades": 17,
+    "turnover": 0.197,
+    "sharpe": 0.6466,
+    "first_start": "2006-07-01",
+    "note": "windows start 2006-07 (SSO launch); SPY's Sharpe over the same windows is 0.647"
+   },
+   "FED": {
+    "score": 0.0692,
+    "full_excess": 0.0662,
+    "ex5_mean": 0.0666,
+    "ex10_mean": 0.0724,
+    "ex10_beat": 1,
+    "ex10_min": 0.0317,
+    "ex15_beat": 1,
+    "ex20_beat": 1,
+    "boot_p": 0.02,
+    "max_dd": -0.5934,
+    "bench_max_dd": -0.5519,
+    "trades": 18,
+    "turnover": 0.1857,
+    "sharpe": 0.6751
+   },
+   "NONE": {
+    "score": 0.0756,
+    "full_excess": 0.0733,
+    "ex5_mean": 0.0745,
+    "ex10_mean": 0.0783,
+    "ex10_beat": 1,
+    "ex10_min": 0.0379,
+    "ex15_beat": 1,
+    "ex20_beat": 1,
+    "boot_p": 0.014,
+    "max_dd": -0.5934,
+    "bench_max_dd": -0.5519,
+    "trades": 11,
+    "turnover": 0.1744,
+    "sharpe": 0.702
+   },
+   "SYNTHETIC_2000_full": {
+    "cfg": {
+     "kind": "weights",
+     "signal": "trend_timing.timing",
+     "params": {
+      "risk": "SYN_SPY2XC",
+      "safe": [
+       "IEF",
+       "VFITX"
+      ],
+      "rule": "cross",
+      "fast": 100,
+      "slow": 200,
+      "ma": "ema",
+      "band": 0.01,
+      "sig": "SPY"
+     },
+     "rebalance": "M"
+    },
+    "CA": {
+     "score": 0.0617,
+     "full_excess": 0.0559,
+     "ex10_beat": 1,
+     "ex10_min": 0.0267,
+     "ex15_beat": 1,
+     "boot_p": 0.02,
+     "max_dd": -0.5923,
+     "sharpe": 0.5721
+    },
+    "FED": {
+     "score": 0.068,
+     "full_excess": 0.0626,
+     "boot_p": 0.006
+    },
+    "NONE": {
+     "score": 0.0751,
+     "full_excess": 0.0697,
+     "boot_p": 0.002
+    }
+   }
+  },
+  "long": {
+   "protocol": "long_screen, SYNTHETIC 2x VFINX analog (SYN_VFINX2XC; no real 2x fund before 2006)",
+   "cfg": {
+    "kind": "weights",
+    "signal": "trend_timing.timing",
+    "params": {
+     "risk": "SYN_VFINX2XC",
+     "safe": [
+      "VFITX",
+      "FGOVX"
+     ],
+     "rule": "cross",
+     "fast": 100,
+     "slow": 200,
+     "ma": "ema",
+     "band": 0.01,
+     "sig": "VFINX"
+    },
+    "rebalance": "M"
+   },
+   "CA": {
+    "score": 0.0568,
+    "full_excess": 0.0336,
+    "ho5_mean": 0.0275,
+    "ho5_beat": 0.5,
+    "ho10_mean": 0.018,
+    "ho10_beat": 0.6,
+    "boot_p": 0.102,
+    "max_dd": -0.613
+   },
+   "NONE": {
+    "score": 0.0697,
+    "full_excess": 0.051,
+    "ho5_mean": 0.0299,
+    "ho5_beat": 0.5,
+    "ho10_mean": 0.0213,
+    "ho10_beat": 0.6,
+    "boot_p": 0.053
+   }
+  },
+  "notes": "LEVERAGED, with synthetic data before 2006. Items 1-3 pass in CA, FED and NONE on full. Item 5 (neighbourhood) passes: 17/17 timed synthetic-2x variants are positive in CA, EMA100/150 is +6.01 (p 0.022), SMA100/250 +4.93 (p 0.018), SMA300 k5 +4.58 (p 0.033, DD -48%). Item 6: the safe asset does not matter (real SSO -> bills +6.32, p 0.026). Item 7: synthetic 1986-2026 holdout positive (ho10 +1.80, 60% beat), even though this slow rule exited only after the 1987 crash (1987-11-30). Item 4 fails narrowly: on the 18-config leveraged sub-grid, walk-forward out-of-sample is +6.1 pp (10y/5y) and +1.7 pp (5y/3y), but PBO is 0.53 (CA) and 0.65 (NONE); DSR 0.75. It is mostly more risk, not skill: vol 31.9% vs 19.3%, max DD -59% vs -55%, Sharpe 0.65 vs SPY 0.65 (2006-26), 0.57 vs 0.51 (2000-26 synthetic), 0.59 vs 0.67 (1986-2026 synthetic). It rests on 4 switches since 2006 (out 2008-02..2009-09 and 2022-06..2023-06). Static 1.5x buy-and-hold (SPY50/SSO50) scores +3.39 with DD -70.8%. Leveraged-ETF capital-gain distributions and tracking error are not modelled. Overlaps the leverage family, which owns this space."
+ },
+ {
+  "family": "risk_alloc",
+  "label": "TVT s21 t0.25 c2.0 v3 LSSO/DDM b0.1 gb0.01 (CA lead: tax-aware levered vol target)",
+  "cfg": {
+   "kind": "risk_alloc.taxvt",
+   "signal": {
+    "est": "simple",
+    "window": 21,
+    "target": 0.25,
+    "cap": 2
+   },
+   "vehicles": [
+    "SPY",
+    "IWB",
+    "VTI"
+   ],
+   "band": 0.1,
+   "cash": [
+    "SHY",
+    "VFISX"
+   ],
+   "lever": [
+    [
+     "SSO",
+     2
+    ],
+    [
+     "DDM",
+     2
+    ]
+   ],
+   "gain_budget": 0.01,
+   "requires": [
+    "SSO"
+   ]
+  },
+  "stats": {
+   "CA": {
+    "score": 0.03404,
+    "full_excess": 0.04847,
+    "ex5_mean": 0.02031,
+    "ex10_mean": 0.03918,
+    "ex10_beat": 0.97561,
+    "ex10_min": -0.02322,
+    "ex15_beat": 1,
+    "ex20_beat": 1,
+    "boot_p": 0.011,
+    "max_dd": -0.6068,
+    "bench_max_dd": -0.55189,
+    "trades": 992,
+    "turnover": 0.0824
+   },
+   "FED": {
+    "score": 0.03638,
+    "full_excess": 0.06316,
+    "ex5_mean": 0.02246,
+    "ex10_mean": 0.0419,
+    "ex10_beat": 0.97561,
+    "ex10_min": -0.02815,
+    "ex15_beat": 1,
+    "ex20_beat": 1,
+    "boot_p": 0.001,
+    "max_dd": -0.5879,
+    "bench_max_dd": -0.55189,
+    "trades": 1069,
+    "turnover": 0.07777
+   },
+   "NONE": {
+    "score": 0.04007,
+    "full_excess": 0.03398,
+    "ex5_mean": 0.04025,
+    "ex10_mean": 0.04143,
+    "ex10_beat": 1,
+    "ex10_min": 0.02667,
+    "ex15_beat": 1,
+    "ex20_beat": 1,
+    "boot_p": 0.024,
+    "max_dd": -0.53886,
+    "bench_max_dd": -0.55189,
+    "trades": 1167,
+    "turnover": 4.14335
+   }
+  },
+  "long": {
+   "CA": {
+    "protocol": "long (quarterly 1986-2023), synthetic analogue TVT s21 t0.25 c2.0 vVFINX LSYN_VFINX2XC gb0.01",
+    "score": 0.02463,
+    "full_excess": 0.01185,
+    "ho5_mean": 0.05829,
+    "ho5_beat": 0.81081,
+    "ho10_mean": 0.05373,
+    "ex10_beat": 0.73984,
+    "ex15_beat": 0.71845,
+    "boot_p": 0.26,
+    "max_dd": -0.78641
+   }
+  },
+  "notes": "Passes bar items 1-3 only on the SSO-era sample (2006-07..2026). Fails item 4: the CA family walk-forward is negative (-0.53 pp with lab default steps, -1.42 pp with yearly steps). Neighbourhood holds: all 18 screened tax-aware neighbours are positive (+2.2 to +5.0, boot_p <= 0.039), and full-protocol neighbours score +0.88 to +2.09. This is leverage, not risk management. Average exposure is 1.82x and the gain budget freezes it near 1.9x after 2009. A never-rebalanced 50/50 SPY/SSO scores the same (+3.39). Matched-vol excess is +0.12 pp. Synthetic history fails: 2000-2026 boot_p 0.35 (Sharpe 0.36 vs 0.42); 1986-2026 10y beat 74%, 15y beat 72%, boot_p 0.26, max drawdown -79% (pre-2000 holdout +5.8 pp). The rule beats its own index only on high-Sharpe indexes (QQQ, DIA). Battery: CA score +2.24 at 35 bps; stricter tax accounting costs -0.26 pp from 2006; DSR 0.067. About 21% of realized losses sit within 30 days of a same-fund purchase, i.e. unenforced wash sales. Results are path-dependent on the start date. Not runnable on the website (SSO/DDM/IWB/SHY are research tickers; custom kind)."
+ },
+ {
+  "family": "factor_style",
+  "label": "N5_vgh|VG_R|lb252|sk21|M|h0.06|tax1 (value/growth 12-1 switch, 6% hysteresis, monthly, tax-managed 1% budget)",
+  "cfg": {
+   "kind": "weights",
+   "signal": "factor_style.rotate",
+   "params": {
+    "menu": [
+     "IWD",
+     "IWF"
+    ],
+    "lookback": 252,
+    "skip": 21,
+    "top_n": 1,
+    "hyst": 0.06,
+    "proxies": {
+     "IWD": "VIVAX",
+     "IWF": "VIGRX"
+    }
+   },
+   "rebalance": "M",
+   "execution": "tax",
+   "gain_budget": 0.01,
+   "requires": [
+    "IWD",
+    "IWF"
+   ],
+   "tag": "N5_vgh|VG_R|lb252|sk21|M|h0.06|tax1"
+  },
+  "stats": {
+   "CA": {
+    "score": 0.0116,
+    "full_excess": 0.0183,
+    "ex5_mean": 0.0079,
+    "ex10_mean": 0.0106,
+    "ex10_beat": 0.8769,
+    "ex10_min": -0.0313,
+    "ex15_beat": 1,
+    "ex20_beat": 1,
+    "boot_p": 0.04,
+    "max_dd": -0.531,
+    "bench_max_dd": -0.5519,
+    "trades": 13,
+    "turnover": 0.0376
+   },
+   "FED": {
+    "score": 0.0126,
+    "full_excess": 0.0188,
+    "ex5_mean": 0.0089,
+    "ex10_mean": 0.0116,
+    "ex10_beat": 0.8769,
+    "ex10_min": -0.0336,
+    "ex15_beat": 1,
+    "ex20_beat": 1,
+    "boot_p": 0.041,
+    "max_dd": -0.531,
+    "bench_max_dd": -0.5519,
+    "trades": 13,
+    "turnover": 0.0376
+   },
+   "NONE": {
+    "score": 0.0123,
+    "full_excess": 0.013,
+    "ex5_mean": 0.0164,
+    "ex10_mean": 0.0107,
+    "ex10_beat": 0.7846,
+    "ex10_min": -0.01,
+    "ex15_beat": 1,
+    "ex20_beat": 1,
+    "boot_p": 0.117,
+    "max_dd": -0.5128,
+    "bench_max_dd": -0.5519,
+    "trades": 21,
+    "turnover": 0.334
+   }
+  },
+  "long": {
+   "twin": "LN6_vghm|VG_MF|lb252|sk21|M|h0.06|tax1 (same rule trading VIVAX/VIGRX vs VFINX, quarterly starts 1994-2023)",
+   "CA": {
+    "score": 0.0061,
+    "full_excess": 0.0079,
+    "ho5_mean": 0.0237,
+    "ho5_beat": 0.8,
+    "ho10_mean": null,
+    "ex10_beat": 0.6044,
+    "boot_p": 0.224
+   },
+   "NONE": {
+    "score": 0.0137,
+    "full_excess": 0.014,
+    "ho5_mean": 0.0364,
+    "ho5_beat": 1,
+    "ho10_mean": null,
+    "ex10_beat": 0.7912,
+    "boot_p": 0.059
+   }
+  },
+  "notes": "Clears criteria 1-3 in CA and FED on the full protocol and is the family's best CA result; it fails the bar. Neighbourhood: on screen, 11 of 13 monthly neighbours (hysteresis 3-10%, skip 0, tax0/tax5, S&P 500 / S&P 900 / IUSV-IUSG pairs, growth-vs-SPY) and 11 of 25 quarterly ones clear 1-3. On full, the quarterly versions fail boot_p (0.20-0.28) except SPYV/SPYG (0.014, from 2002); the standard-execution twin scores 0.00; lookbacks 189 and 315 fail. Rebalance offsets of 7/14/21 days and a 1-day lag score +0.86 to +1.22, boot_p 0.022-0.149, 4 of 5 pass in CA; in NONE none passes (boot_p 0.11-0.57). Realism (annual distribution tax) +1.83 becomes +1.85. Hindsight: on 24 random pairs, 1/24 (quarterly) and 2/24 (monthly) pass, only pairs with a growth/tech leg. The long-history twin fails in CA (10y beat 60%, boot_p 0.22). Walk-forward picked it in 2019 and it lost 1.0 pp/yr out of sample. Mechanism: 1-5 switches, each at a loss or within the budget, then frozen in growth since 2008-12. Starts in value years stay frozen in value (2013 start -2.9 pp/yr). A regime bet on growth, like the incumbent."
+ },
+ {
+  "family": "macro_regime",
+  "label": "GATED uninv540 & spy200 | chkM",
+  "cfg": {
+   "execution": "standard",
+   "kind": "weights",
+   "label": "GATED uninv540 & spy200 | chkM",
+   "params": {
+    "check": "M",
+    "combine": "any",
+    "ind": [
+     {
+      "after": 540,
+      "anchor": "end",
+      "confirm": 5,
+      "delay": 0,
+      "long": "^TNX",
+      "min_len": 30,
+      "short": "^IRX",
+      "thr": 0,
+      "type": "curve"
+     },
+     {
+      "n": 200,
+      "series": "SPY",
+      "type": "sma"
+     }
+    ],
+    "risk": {
+     "SPY": 1
+    },
+    "safe": {
+     "VFITX": 1
+    }
+   },
+   "rebalance": "M",
+   "signal": "macro_regime.switch"
+  },
+  "stats": {
+   "CA": {
+    "score": 0.031208,
+    "full_excess": 0.028022,
+    "ex5_mean": 0.029552,
+    "ex10_mean": 0.032491,
+    "ex10_beat": 0.641791,
+    "ex10_min": -0.021518,
+    "ex15_beat": 0.765957,
+    "ex20_beat": 1,
+    "boot_p": 0.101,
+    "max_dd": -0.354716,
+    "bench_max_dd": -0.551894,
+    "trades": 47,
+    "turnover": 0.607998
+   },
+   "FED": {
+    "score": 0.035931,
+    "full_excess": 0.033387,
+    "ex5_mean": 0.034259,
+    "ex10_mean": 0.03738,
+    "ex10_beat": 0.820896,
+    "ex10_min": -0.019989,
+    "ex15_beat": 0.765957,
+    "ex20_beat": 1,
+    "boot_p": 0.066,
+    "max_dd": -0.312435,
+    "bench_max_dd": -0.551894,
+    "trades": 43,
+    "turnover": 0.618417
+   },
+   "NONE": {
+    "score": 0.042693,
+    "full_excess": 0.041076,
+    "ex5_mean": 0.041471,
+    "ex10_mean": 0.044157,
+    "ex10_beat": 0.850746,
+    "ex10_min": -0.01427,
+    "ex15_beat": 0.893617,
+    "ex20_beat": 1,
+    "boot_p": 0.04,
+    "max_dd": -0.271317,
+    "bench_max_dd": -0.551894,
+    "trades": 28,
+    "turnover": 0.62993
+   }
+  },
+  "long": {
+   "long_cfg": {
+    "execution": "standard",
+    "kind": "weights",
+    "label": "L GATED uninv540 & vfinx200 | chkM",
+    "params": {
+     "check": "M",
+     "combine": "any",
+     "fallback": {
+      "VFITX": "FGOVX"
+     },
+     "ind": [
+      {
+       "after": 540,
+       "anchor": "end",
+       "confirm": 5,
+       "delay": 0,
+       "long": "^TNX",
+       "min_len": 30,
+       "short": "^IRX",
+       "thr": 0,
+       "type": "curve"
+      },
+      {
+       "n": 200,
+       "series": "VFINX",
+       "type": "sma"
+      }
+     ],
+     "risk": {
+      "VFINX": 1
+     },
+     "safe": {
+      "VFITX": 1
+     }
+    },
+    "rebalance": "M",
+    "signal": "macro_regime.switch"
+   },
+   "CA": {
+    "score": 0.030302,
+    "full_excess": 0.011889,
+    "ho5_mean": 0,
+    "ho5_beat": 0,
+    "ho10_mean": 0,
+    "ex10_beat": 0.634146,
+    "ex15_beat": 0.883495,
+    "boot_p": 0.248
+   },
+   "FED": {
+    "score": 0.034662,
+    "full_excess": 0.018783,
+    "ho5_mean": 0,
+    "ho5_beat": 0,
+    "ho10_mean": 0,
+    "ex10_beat": 0.731707,
+    "ex15_beat": 0.893204,
+    "boot_p": 0.146
+   },
+   "NONE": {
+    "score": 0.040481,
+    "full_excess": 0.027298,
+    "ho5_mean": 0,
+    "ho5_beat": 0,
+    "ho10_mean": 0,
+    "ex10_beat": 0.747967,
+    "ex15_beat": 0.941748,
+    "boot_p": 0.054
+   },
+   "note": "holdout windows (ending before 2000) contain no un-inversion event: ho = 0 exactly, uninformative"
+  },
+  "notes": "New design and the family's best-founded rule: risk-off only while the 540-day post-un-inversion window is open AND SPY < SMA200, monthly check, VFITX safe asset. Fails CA conditions 2a (0.64), 2b (0.77), 3 (boot_p 0.101) and 4 (family WF10/5 -3.38 pp/yr). FED fails only 2b (0.77). Passes 1-3 in NONE. Screen-CA neighbourhood: after450 +0.48 (cliff: re-enters 2008-08-13), 540 +3.23, 630 +4.11, 720 +2.62; SMA150 +2.97, SMA250 +3.11; weekly check +2.78; lag2 +3.23; safe=VFISX +3.03; core70+sleeve30 +1.27; tax exec gb5% noST +0.85. Realism -0.0 to -0.13 pp. Engine excess by start (CA): 2000 +2.80, 2005 +1.45, 2010 -1.62, 2015 -1.89 pp/yr. Off-engine 1962-85 +0.85%/yr pre-tax (not contradicted). The 540-day window was chosen after seeing the s1 screen. Best read as crash insurance (maxDD -35% vs -55%), not a way to beat SPY."
+ },
+ {
+  "family": "macro_regime",
+  "label": "uninv540 minlen90 | chkM",
+  "cfg": {
+   "execution": "standard",
+   "kind": "weights",
+   "label": "uninv540 minlen90 | chkM",
+   "params": {
+    "check": "M",
+    "combine": "all",
+    "ind": [
+     {
+      "after": 540,
+      "anchor": "end",
+      "confirm": 5,
+      "delay": 0,
+      "long": "^TNX",
+      "min_len": 90,
+      "short": "^IRX",
+      "thr": 0,
+      "type": "curve"
+     }
+    ],
+    "risk": {
+     "SPY": 1
+    },
+    "safe": {
+     "VFITX": 1
+    }
+   },
+   "rebalance": "M",
+   "signal": "macro_regime.switch"
+  },
+  "stats": {
+   "CA": {
+    "score": 0.03872,
+    "full_excess": 0.037602,
+    "ex5_mean": 0.036934,
+    "ex10_mean": 0.03994,
+    "ex10_beat": 0.567164,
+    "ex10_min": -0.021058,
+    "ex15_beat": 0.808511,
+    "ex20_beat": 1,
+    "boot_p": 0.064,
+    "max_dd": -0.337173,
+    "bench_max_dd": -0.551894,
+    "trades": 27,
+    "turnover": 0.291775
+   },
+   "FED": {
+    "score": 0.044031,
+    "full_excess": 0.042475,
+    "ex5_mean": 0.04256,
+    "ex10_mean": 0.045429,
+    "ex10_beat": 0.567164,
+    "ex10_min": -0.021683,
+    "ex15_beat": 0.808511,
+    "ex20_beat": 1,
+    "boot_p": 0.044,
+    "max_dd": -0.337173,
+    "bench_max_dd": -0.551894,
+    "trades": 25,
+    "turnover": 0.284269
+   },
+   "NONE": {
+    "score": 0.050327,
+    "full_excess": 0.047711,
+    "ex5_mean": 0.049706,
+    "ex10_mean": 0.051696,
+    "ex10_beat": 0.567164,
+    "ex10_min": -0.02206,
+    "ex15_beat": 0.808511,
+    "ex20_beat": 1,
+    "boot_p": 0.036,
+    "max_dd": -0.337173,
+    "bench_max_dd": -0.551894,
+    "trades": 15,
+    "turnover": 0.27634
+   }
+  },
+  "long": {
+   "long_cfg": {
+    "execution": "standard",
+    "kind": "weights",
+    "label": "L uninv540 minlen90 | chkM",
+    "params": {
+     "check": "M",
+     "combine": "all",
+     "fallback": {
+      "VFITX": "FGOVX"
+     },
+     "ind": [
+      {
+       "after": 540,
+       "anchor": "end",
+       "confirm": 5,
+       "delay": 0,
+       "long": "^TNX",
+       "min_len": 90,
+       "short": "^IRX",
+       "thr": 0,
+       "type": "curve"
+      }
+     ],
+     "risk": {
+      "VFINX": 1
+     },
+     "safe": {
+      "VFITX": 1
+     }
+    },
+    "rebalance": "M",
+    "signal": "macro_regime.switch"
+   },
+   "CA": {
+    "score": 0.037122,
+    "full_excess": 0.018382,
+    "ho5_mean": 0,
+    "ho5_beat": 0,
+    "ho10_mean": 0,
+    "ex10_beat": 0.593496,
+    "ex15_beat": 0.902913,
+    "boot_p": 0.166
+   },
+   "FED": {
+    "score": 0.042299,
+    "full_excess": 0.024966,
+    "ho5_mean": 0,
+    "ho5_beat": 0,
+    "ho10_mean": 0,
+    "ex10_beat": 0.593496,
+    "ex15_beat": 0.902913,
+    "boot_p": 0.098
+   },
+   "NONE": {
+    "score": 0.048359,
+    "full_excess": 0.031886,
+    "ho5_mean": 0,
+    "ho5_beat": 0,
+    "ho10_mean": 0,
+    "ex10_beat": 0.593496,
+    "ex15_beat": 0.902913,
+    "boot_p": 0.053
+   }
+  },
+  "notes": "Highest CA score of all 750 configs, so it is the maximum of a search. minlen90 is post-hoc and helps only because it skips the short 2019 inversion episodes (3 risk-off spells since 2000: 2001, 2007, 2024). Fails CA 2a (0.57) and 2b (0.81). Sub-periods CA: 2000-10 +10.98, 2010-20 -0.00, 2020-26 -2.99 pp/yr. Engine excess from 2010 -1.36, from 2015 -1.82 pp/yr. Off-engine 1962-85 -2.04%/yr: contradicted by the only holdout with events. Realism -0.16 pp from 2000."
+ },
+ {
+  "family": "seasonal",
+  "label": "Tax-managed cyclical season, Oct 1-May 1 boundary (G19 cyclicals Oct1-May1 / SPY TAX gb=0.01) - best-scoring CA neighbour, selected post hoc",
+  "cfg": {
+   "kind": "weights",
+   "signal": "seasonal.cal",
+   "params": {
+    "layers": [
+     {
+      "rule": {
+       "type": "window",
+       "start": [
+        10,
+        1
+       ],
+       "end": [
+        5,
+        1
+       ]
+      },
+      "w": {
+       "XLY": 0.25,
+       "XLI": 0.25,
+       "XLB": 0.25,
+       "XLK": 0.25
+      }
+     }
+    ],
+    "default": {
+     "SPY": 1
+    },
+    "rebalance_states": true
+   },
+   "rebalance": "M",
+   "execution": "tax",
+   "gain_budget": 0.01
+  },
+  "stats": {
+   "CA": {
+    "score": 0.0085,
+    "full_excess": 0.0144,
+    "ex5_mean": 0.0076,
+    "ex10_mean": 0.0094,
+    "ex10_beat": 0.9104,
+    "ex10_min": -0.0085,
+    "ex15_beat": 0.9362,
+    "ex20_beat": 0.963,
+    "boot_p": 0.035,
+    "max_dd": -0.5669,
+    "bench_max_dd": -0.5519,
+    "trades": 416,
+    "turnover": 0.0807
+   },
+   "FED": {
+    "score": 0.0096,
+    "full_excess": 0.0149,
+    "ex5_mean": 0.0088,
+    "ex10_mean": 0.0106,
+    "ex10_beat": 0.9254,
+    "ex10_min": -0.0086,
+    "ex15_beat": 0.9787,
+    "ex20_beat": 1,
+    "boot_p": 0.027,
+    "max_dd": -0.5669,
+    "bench_max_dd": -0.5519,
+    "trades": 416,
+    "turnover": 0.0805
+   },
+   "NONE": {
+    "score": 0.0122,
+    "full_excess": 0.0131,
+    "ex5_mean": 0.0115,
+    "ex10_mean": 0.0126,
+    "ex10_beat": 0.8955,
+    "ex10_min": -0.0032,
+    "ex15_beat": 0.9574,
+    "ex20_beat": 1,
+    "boot_p": 0.042,
+    "max_dd": -0.5607,
+    "bench_max_dd": -0.5519,
+    "trades": 1009,
+    "turnover": 2.0556
+   },
+   "subperiods_excess": {
+    "CA": {
+     "2000-2010": 0.0243,
+     "2010-2020": 0.0032,
+     "2020-2026": -0.0129
+    }
+   }
+  },
+  "long": {
+   "note": "no long-history twin with this boundary was run"
+  },
+  "notes": "Same mechanism and failures as the Nov-Apr version (items 4 and 6). It is the best of 7 boundary pairs, so it carries extra selection bias. 2020-26 sub-period -1.29 pp. The walk-forward inside the sector sub-family chose it for 2015/2017/2018 starts (OOS +0.88/+1.23/+0.63 pp), but the family-level selection is negative."
+ }
+]

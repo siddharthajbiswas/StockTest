@@ -1,0 +1,339 @@
+{
+ "key": "gap3",
+ "headline": "No crash-protection overlay on a never-sold SPY core beats SPY after California tax, so SPY buy-and-hold stays the default. Puts, put spreads and collars lose 0.4 to 3.6 pp/yr when they stay hedged; CBOE's own index prices and the calibrated option model agree on that. Section 1256 tax treatment recovers only 0 to 0.65 pp/yr, and the straddle rules that apply to an S&P 500 fund hedged with S&P options make it worse. The few positive overlays either inherit the round-1 trend rule's failure or come from one 2020 VIX-call trade.",
+ "results_md": "# r2_gap3: crash protection that never sells the core\n\nRound 2, critic gap 3: index put spreads, collars (SPX options, Section 1256) and a long-volatility sleeve, laid over an S&P 500 core that is bought once and not sold. Primary regime CA (48.1% short-term / 28.1% long-term), secondary FED (35/15), pre-tax NONE as a diagnostic. Every after-tax number comes from the lab's engine (`backtester.Backtest`, extended with an options book, see section 1), scored with the lab's own `metrics.summary` / `report.score` against the lab's own SPY (VFINXR on 1986+) benchmark. \"Score\" is the pre-registered mean of the average 5-, 10- and 15-year window excess; all excess numbers are after-tax CAGR minus the benchmark's, in percentage points per year.\n\n## Verdict\n\n**No option overlay beats buying and holding SPY after California tax, with or without confidence. Every structure that actually stays hedged loses 0.4 to 3.6 pp/yr; the verdict holds for 2000-2026 and 1986-2026, for actual CBOE index prices and for my calibrated option model, and for every tax treatment I tried. None of the 104 configurations passes bar items 1-3 in CA in either history on the lab's first-start bootstrap.**\n\nOne leverage comparator passes items 1-3 on 2000-2026 only when the bootstrap p is averaged over start dates. That is +0.5x long S&P futures with no options: start-averaged p 0.069, first-start p 0.28. It fails item 2 on 1986-2026 (15-year beat 80%), its drawdown is -71% to -73%, and it is leverage, not crash protection; section 8 covers it.\n\n* **It is the price of insurance, not the tax.** Before any tax, CBOE's own strategy indices (traded prices, 1986-2026) trail the S&P 500 total return by 3.2 pp/yr (PPUT, monthly 5% puts), 2.4 (PPUT3M, quarterly 10% puts), 3.1 (CLLZ, zero-cost put-spread collar), 4.5 (CLL3M, 95/110 collar) and 1.3 (VXTH, VIX calls, 2006-2026). PPUT beat the index in 2.5% of 10-year windows. Puts are priced above their average payoff, the variance risk premium.\n* **Section 1256 hardly changes that.** For the active overlays the CA score is only 0.0-0.65 pp better than the pre-tax score. The overlay's yearly losses mostly offset the long-term gains realised when core shares are sold to pay premiums. The rest offsets the terminal liquidation at 28.1%. The realistic law for an S&P 500 fund hedged with S&P 500 options or futures is the straddle rules, which make it worse (section 5).\n* **Drawdowns do fall**, from SPY's -55% to between -30% and -49%. But a never-rebalanced SPY/Treasury mix buys the same drawdown far more cheaply:\n  * a 70/30 SPY/VFITX mix gets -29% at -1.06 pp/yr, where the 95/110 collar gets -30% at -3.59;\n  * an 80/20 mix gets -37% at -0.68, where the 95/80 put spread gets -38% at -2.21.\n* **Only three kinds of overlay have a positive CA score, and each fails the bar:**\n  1. Hedges switched on by the round-1 EMA100/200 trend signal. These are a collar (+0.49), puts (+0.07), short futures (+0.59), and a synthetic SPY-to-IEF switch with futures (+0.99). They inherit that rule's weaknesses:\n     * 10-year beat rate 52-57%;\n     * bootstrap p averaged over start dates 0.77-0.82;\n     * 1986-1999 holdout 10-year windows 0% beaten.\n  2. VIX calls only while VIX < 20: +1.01 (+1.41 when scored from 2006). This rule was chosen after I saw pre-tax data. Its edge is one trade (February-March 2020), VXTH without 2020 trails by 4.4 pp/yr, the VIX < 25 neighbour scores -0.02, p is 0.40-0.53, and there is a 52-58% chance of trailing SPY over 10 years.\n  3. Long S&P futures on top of the core, with or without put spreads. **This is flagged as leverage.** Scores are +1.1 to +2.7, but p is 0.28-0.55 on the first start and drawdowns are -56% to -86%. The put spreads do not bring the drawdown back to SPY's.\n* **The critic's mechanism does not hold for the best timing rule.** I implemented the round-1 EMA100/200 SPY-to-IEF switch with Section 1256 futures instead of sales: short S&P futures plus long Treasury futures, with the core never sold. Its CA score is +0.99, against +1.01 for the version that sells the core. The 2000-start path gains (+1.75 vs +1.36 full excess), but averaged over windows nothing is saved, for three reasons:\n  * the hedge's own gains are taxed every year at the 36.1% 60/40 blend;\n  * losing hedges force sales of the appreciated core to meet variation margin, for example $191k of long-term gains realised in 2022-23 on the 2000 start;\n  * a full futures hedge of an S&P fund probably is a constructive sale, which costs a further 0.09.\n\nThe default for the taxable account stays SPY buy-and-hold. For someone who wants a smaller drawdown, a static allocation to Treasuries is three to five times cheaper per point of drawdown than a full option hedge in this data. That holds even after paying a one-time 28.1% tax on the long-term gain realised to fund it (section 6).\n\n## 1. What I built and how it was checked\n\n**Data** (research-only, new files `research/lab/data/R2G3_*.csv`):\n* 15 CBOE strategy and volatility index histories downloaded from Cboe's own index CDN. Yahoo carries only `^PUT` and `^SKEW` history; `^PPUT`, `^CLL` and `^BXM` return only today's value there. The series are PPUT, PPUT3M, CLL, CLL3M, CLL1M, CLLZ, VXTH, BXM, BXY, BXMD, PUT, CNDR, SKEW, VVIX and SPRO.\n* The methodology PDFs are in `scratch/r2_gap3/docs/`.\n* Lab data used: ^GSPC, ^VIX, ^VIX3M, ^IRX, ^SP500TR, VFINXR, SPY, IEF/VFITX/FGOVX.\n\n**Option model** (`families/r2_gap3.py`):\n* Black-Scholes on the forward. The ATM vol is `a x VIX` interpolated to VIX3M by maturity, with a smile in standardised moneyness (slope `b`, curvatures `cp`/`cc`).\n* The ATM ratio and the slope move with the CBOE SKEW index.\n* Trades pay a half-spread (`h_rel` x premium + 0.5 bp of the index).\n* 5-point strikes. Expiry at the SOQ (^GSPC open, or SPY's overnight gap where ^GSPC opens are stale), third-Friday rolls, new options opened at the roll day's close.\n* Trade prices use that day's VIX, because that is the market price at the trade. A lagged VIX would under-price puts bought right after a down day, which favours the strategy.\n* Every decision uses only data up to that close (trend rules, the lab convention) or the previous close (VIX conditions).\n\n**Calibration** (`scratch/r2_gap3/calib2.py`): 8 parameters fitted to 10 CBOE indices (puts bought, calls sold, put writes, collars, an iron condor), on both halves of the VIX era at once.\n\n| index (what it trades) | bias 1990-2007 | bias 2008-2026 | tracking error | corr |\n|---|---|---|---|---|\n| PPUT (5% put bought) | -0.18 | -0.48 | 1.1-1.6%/yr | 0.993-0.996 |\n| PPUT3M (10% 3M put bought) | +0.27 | -0.02 | 0.3-0.7% | 0.999 |\n| BXM / BXY / BXMD (calls sold) | -0.10 / +0.16 / -0.22 | -0.28 / +0.40 / +0.46 | 1.7-2.8% | 0.96-0.99 |\n| CLL3M / CLL1M (collars) | -0.18 / -0.26 | -0.45 / -0.65 | 1.2-2.7% | 0.90-0.99 |\n| CLLZ (put-spread collar) | +1.00 | +0.56 | 1.7-2.1% | 0.99 |\n| PUT (ATM put write) / CNDR (condor) | n/a / -0.02 | -1.16 / +0.52 | 2.5-3.0% | 0.90-0.98 |\n\nBias is the replica's CAGR minus the index's, in pp/yr.\n\n* The model is therefore conservative for bought puts: its puts are slightly too dear.\n* It is about 0.5-1 pp/yr generous to the CLLZ-type collar.\n* A fit on 1990-2007 alone, checked on 2008-2026, was off by +1.3-1.6 pp on call writing, because the smile steepened after 2008. The SKEW term in the final model absorbs that.\n* For 1986-1989 there is no VIX. A realised-volatility proxy reproduces PPUT to +0.1 pp/yr outside September-December 1987. Over the whole period it is -2.45, because CBOE bought its put at midday on 16 October 1987 and the replica at that day's close, after a 5% fall.\n* An attempt to back an implied level out of the indices (`imp8689.py`) did not improve matters and was dropped.\n\n**Engine** (`OptBacktest`, a subclass of `backtester.Backtest`, following r2_gap1's FutBacktest):\n* The SPY core and FIFO tax lots trade through the engine exactly as on the site: 5+5 bps costs, the January settlement, the two-step terminal tax.\n* Options are held at model value, settle at the SOQ, and are marked to market on the last trading day of each year.\n* Cash earns T-bills less 0.1%/yr; the interest is taxed yearly as ordinary income.\n* Cash is never borrowed: a deficit is covered by selling core.\n* \"Never sells the core\" can only be approximate. A hedge costing 3-8% of equity a year has to be paid from somewhere. The default `core` funding keeps a 2% cash reserve and sells core (FIFO) only for premiums, taxes or variation margin beyond it. Payoffs above 4% of equity are swept back into the core at the next roll. The `res` rule pays only from a 5% reserve, and the hedge then dies within about a year.\n* The tax ledger is adapted from r2_gap1: federal (with NIIT) and California ledgers, Section 1256 60/40, the federal 3-year 1256 carryback, and California carryforward.\n* Tax modes:\n  * `T1`: the textbook 1256 treatment the critic proposed;\n  * `T1nocb`: T1 without the carryback;\n  * `T2`: the straddle rules (section 5);\n  * `cs`: a constructive sale on full futures hedges.\n* Model-free overlays add the daily return of a CBOE index over the S&P 500 TR, at actual traded prices.\n\n**Checks:**\n* With the overlay off, OptBacktest reproduces the lab's SPY benchmark to 1e-10 at every checkpoint (full, CA) and the VFINXR benchmark to 9e-10 (long_r, CA and NONE).\n* Pre-tax plumbing, against the CBOE indices over the same days (2000-2026 / 2006-2026):\n\n  | overlay | overlay CAGR | index CAGR |\n  |---|---|---|\n  | P95-1M replica | 5.46% / 7.96% | PPUT 6.04% / 8.31% |\n  | PPUT series | 5.89% / 8.10% | PPUT 6.04% / 8.31% |\n  | VXTH series (2006-2026 only) | 9.86% | VXTH 10.01% |\n  | CLLZ series | 5.27% / 7.22% | CLLZ 5.47% / 7.44% |\n  | CLLZ-type replica | 5.86% / 7.92% | CLLZ 5.47% / 7.44% |\n\n* The engine runs through `run_cfg`/`batch.py`, not `sweep.run`. The records use the sweep format, so `metrics` and `report` apply unchanged.\n\n## 2. Pre-tax reality check: the CBOE indices themselves (1986-2026)\n\n| index | what it holds | from | CAGR | S&P TR | excess | max DD (S&P) | 10y windows beaten |\n|---|---|---|---|---|---|---|---|\n| PPUT | S&P + monthly 5% OTM put | 1986 | 8.00% | 11.18% | **-3.18** | -42% (-55%) | 2% |\n| PPUT3M | S&P + quarterly 10% OTM put | 2004 | 8.63% | 11.07% | **-2.43** | -40% | 0% |\n| CLLZ | S&P + 2.5-5% put spread paid by a call | 1986 | 8.12% | 11.21% | **-3.09** | -47% | 3% |\n| CLL3M | S&P + quarterly 95 put / 110 call | 2004 | 6.58% | 11.07% | **-4.49** | -30% | 0% |\n| CLL | 95 put (quarterly) / 110 call (monthly) | 2008 | 6.93% | 12.59% | **-5.66** | -26% (-47%) | 0% |\n| CLL1M | monthly 95 put / ATM call | 2004 | 3.45% | 11.07% | **-7.62** | -24% | 0% |\n| VXTH | S&P + 0-1%/month 30-delta VIX calls | 2006 | 9.91% | 11.19% | **-1.28** | -43% | 14% |\n| SPRO | S&P buffer-protect (defined outcome) | 2005 | 8.18% | 11.20% | -3.02 | -44% | 0% |\n| BXMD / BXY / BXM | covered calls (not hedges) | 1986-2002 | | | -0.56 / -1.07 / -3.91 | | |\n\nThe payoffs come from a handful of years, which is the nature of insurance:\n\n* Annual excess of PPUT was +10.7 pp in 1987, +9.8 in 2001, +16.9 in 2008 and +10.7 in 2020, and -3 to -12 pp in most other years.\n* VXTH: -1.28 overall, **-4.41 without 2020**, and -5.24 without 2020 and 2008-09.\n* PPUT is robust to removing events: -3.41 without 2020, and -3.44 without 1987.\n\n**Conditional use, model-free, pre-tax.** Each monthly roll either holds the index's overlay or not:\n\n| overlay used only\u2026 | PPUT | CLLZ | PPUT3M | VXTH |\n|---|---|---|---|---|\n| always | -3.19 | -3.09 | -2.43 | -1.29 |\n| while S&P TR < SMA200 (22% of months) | -0.81 | -0.95 | -0.29 | -0.60 |\n| while VIX < 15 | -0.86 | -0.62 | +0.32 | -1.05 |\n| while VIX < 20 | -0.77 | -1.39 | -0.63 | **+1.43** |\n\nSelling the index for T-bills on the same monthly SMA200 signal earned -1.97 over the same period.\n\nI saw the VXTH \"VIX < 20\" cell before writing the after-tax grid and added that rule to it. It is therefore post hoc, and it is 2020 (section 3).\n\n## 3. After-tax results, 2000-2026 (protocol `full`, 95 quarterly starts, SPY core)\n\n**Screen.** 104 configurations were run on `screen` and `long_r_screen` in CA and NONE (`scratch/r2_gap3/grid.py`; all pre-registered except where labelled). Summary by family on 2000-2026, in CA:\n\n* \"Active\" means the hedge stays on. The `res` funding rule (5% reserve, hedge only what the reserve can pay) runs dry within about a year and then holds almost nothing.\n* No family has a configuration that passes items 1-3.\n\n| family | configs (active) | score > 0 | best score | median score, active (NONE) | median max DD, active |\n|---|---|---|---|---|---|\n| puts (1M 85-95%, 3M 80-95%) | 25 (13) | 0 | -0.09 (inactive) | -1.24 (-1.43) | -47% |\n| put spreads (95/85, 95/80, 90/75) | 13 (7) | 0 | -0.03 (inactive) | -1.09 (-1.24) | -44% |\n| collars (95/110, 95/105, zero-cost) | 10 (5) | 1 (inactive) | +0.07 | -2.24 (-2.47) | -36% |\n| conditional (trend down / VIX low) | 18 (18) | 4 | +0.52 | -0.75 (-0.71) | -45% |\n| model-free PPUT / CLLZ (CBOE prices) | 8 (4) | 0 | -0.23 | -1.68 / -2.36 | -45% / -49% |\n| model-free VXTH (VIX calls) | 10 (8) | 3 | +1.34 | -0.18 (+0.04) | -51% |\n| short futures while trend down | 6 (6) | 2 | +0.71 | -0.77 | -35% |\n| synthetic SPY-to-IEF switch (futures) | 4 (4) | 3 | +1.12 | +0.82 (+1.38) | -35% |\n| hedged leverage (flagged) | 10 (10) | 8 | +2.60 | +0.72 (+1.62) | -67% |\n\n**Finalists on `full`, with all three regimes and a monthly series for every start.** \"boot p (avg)\" is averaged over the 95 start dates. The step-up score uses pre-liquidation equity for both sides, for an investor who never liquidates.\n\n| config | CA score | CA full | 10/15/20y beat | boot p (1st / avg) | max DD (SPY -55%) | FED | NONE | step-up |\n|---|---|---|---|---|---|---|---|---|\n| **LEV** +1.0x futures, no hedge | +2.72 | +0.95 | 85/87/93% | 0.37 / 0.10 | -86% | +3.50 | +4.75 | +1.89 |\n| **LEV** +1.0x + 90/75 3M put spread | +2.59 | +1.26 | 75/81/96% | 0.31 / 0.07 | -71% | +3.27 | +4.45 | +1.81 |\n| **LEV** +0.5x futures, no hedge | +1.75 | +0.95 | 85/91/100% | 0.28 / 0.07 | -71% | +2.14 | +2.83 | +1.42 |\n| VXTH calls while VIX<20, from 2006 (post hoc) | +1.41 | +0.78 | 64/95/100% | 0.40 / 0.53 | -57% | +1.62 | +2.02 | +1.19 |\n| **LEV** +0.5x + 90/75 put spread | +1.12 | +0.55 | 63/72/96% | 0.34 / 0.11 | -56% | +1.39 | +1.88 | +0.75 |\n| VXTH calls while VIX<20 (post hoc) | +1.01 | +0.59 | 72/64/96% | 0.42 / 0.50 | -57% | +1.19 | +1.54 | +0.87 |\n| Synthetic switch (ES short + ZN long) while R1 EMA100/200 off | +0.99 | +1.75 | 57/74/96% | 0.20 / 0.77 | -34% | +1.22 | +1.54 | +0.99 |\n| same, constructive sale on each hedge | +0.90 | +1.22 | 55/74/56% | 0.29 / 0.82 | -39% | +1.19 | +1.54 | +0.55 |\n| ES short only while R1 off | +0.59 | +1.18 | 55/70/96% | 0.25 / 0.78 | -34% | +0.74 | +0.97 | +0.56 |\n| 95/105 1M collar while R1 off | +0.49 | +0.62 | 52/74/100% | 0.28 / 0.78 | -38% | +0.63 | +0.89 | +0.48 |\n| 1M 95% puts while R1 off | +0.07 | +0.25 | 52/70/41% | 0.40 / 0.82 | -43% | +0.13 | +0.26 | +0.03 |\n| 90/75 3M put spread, half notional | -0.40 | -0.30 | 15/0/4% | 0.78 / 0.79 | -49% | -0.42 | -0.41 | -0.51 |\n| VXTH calls, always (CBOE prices) | -0.44 | -1.11 | 40/38/44% | 0.72 / 0.77 | -46% | -0.37 | -0.16 | -0.79 |\n| 1M 85% puts, half notional | -0.51 | -0.59 | 0/0/0% | 0.97 / 0.95 | -53% | -0.54 | -0.56 | -0.61 |\n| PPUT, half notional (CBOE prices) | -1.08 | -1.03 | 4/0/0% | 0.95 / 0.96 | -48% | -1.16 | -1.23 | -1.29 |\n| CLLZ, half notional (CBOE prices) | -1.62 | -1.42 | 3/0/0% | 1.00 / 1.00 | -51% | -1.76 | -1.89 | -1.92 |\n| 3M 90% puts | -1.95 | -1.93 | 1/0/0% | 0.96 / 0.98 | -42% | -2.10 | -2.25 | -2.35 |\n| zero-cost 95/85 put-spread collar | -2.06 | -2.24 | 18/11/0% | 0.94 / 0.99 | -36% | -2.17 | -2.21 | -2.56 |\n| 95/80 3M put spread | -2.21 | -1.74 | 6/0/0% | 0.92 / 0.95 | -38% | -2.38 | -2.55 | -2.70 |\n| PPUT, full notional (CBOE prices) | -2.26 | -2.21 | 1/0/0% | 0.96 / 0.97 | -42% | -2.45 | -2.64 | -2.73 |\n| zero-cost 97.5/95 put-spread collar (CLLZ-like) | -2.29 | -2.32 | 16/0/0% | 0.98 / 1.00 | -43% | -2.44 | -2.54 | -2.79 |\n| 1M 95% puts (PPUT-like) | -2.36 | -2.59 | 1/0/0% | 0.97 / 0.98 | -42% | -2.56 | -2.75 | -2.85 |\n| 95/110 3M collar (CLL3M-like) | -3.59 | -3.26 | 6/0/0% | 0.97 / 1.00 | -30% | -3.90 | -4.24 | -4.36 |\n\nReading the table:\n\n* **Cost and payoff of a full hedge.** The 1M 95% put overlay pays premiums of 8.2% of equity a year and collects 4.2%, for an option P&L of -3.6%/yr. The 3M 95/80 put spread pays 8.2% for its long legs and nets -2.2%/yr after the short legs' premium and payoffs. The 95/110 collar, net of the calls sold, gives up 4.5%/yr.\n* **Sharpe.** The equity-curve Sharpe of the static overlays is 0.44-0.52, against SPY's 0.51. The overlays buy lower volatility at full price; they do not improve risk-adjusted return.\n* **Never liquidating makes it worse.** Every option overlay's step-up score is below its liquidation score. The overlay's tax losses only pay off when the core is finally sold.\n* **Cost scales with notional.** On the screen, the full hedges (h = 1) cost almost exactly twice the half hedges: P95-1M -2.38 vs -1.14, PS95/80-3M -2.24 vs -1.09. Nothing is gained from scale.\n\n## 4. Long history, 1986-2026 (protocol `long_r`, 151 starts, VFINXR core)\n\nSame finalists. \"ho10\" is the mean CA excess of 10-year windows ending before 2000, which is the holdout.\n\n| config | CA score | CA full | 10/15/20y beat | boot p | max DD (S&P -55%) | ho10 (beat) | NONE |\n|---|---|---|---|---|---|---|---|\n| **LEV** +1.0x futures, no hedge | +2.42 | +2.00 | 85/75/92% | 0.16 | -83% | +5.54 (100%) | +4.19 |\n| **LEV** +1.0x + 90/75 put spread | +1.53 | +1.23 | 67/58/51% | 0.18 | -70% | +3.46 (100%) | +3.03 |\n| **LEV** +0.5x, no hedge | +1.51 | +0.89 | 85/80/99% | 0.15 | -73% | +3.00 (100%) | +2.49 |\n| VXTH while VIX<20, from 2006 | +1.41 | +0.77 | 64/95/100% | 0.41 | -57% | n/a | +2.01 |\n| Synthetic switch while R1 off | +1.08 | -0.48 | 59/83/89% | 0.65 | -34% | **-2.58 (0%)** | +1.73 |\n| same, constructive sale | +0.99 | -0.96 | 59/82/75% | 0.75 | -39% | -2.68 (0%) | +1.73 |\n| 95/105 collar while R1 off | +0.45 | -0.14 | 56/83/100% | 0.61 | -40% | -0.79 (0%) | +0.79 |\n| ES short while R1 off | +0.44 | -1.09 | 58/78/86% | 0.80 | -35% | -3.06 (0%) | +0.83 |\n| 1M 95% puts while R1 off | +0.08 | -0.57 | 56/80/67% | 0.83 | -46% | -0.91 (0%) | +0.24 |\n| VXTH calls always (2006+) | -0.19 | -1.32 | 26/39/37% | 0.81 | -50% | n/a | +0.00 |\n| 90/75 put spread, half notional | -0.52 | -0.66 | 11/0/1% | 0.97 | -50% | -0.76 (0%) | -0.55 |\n| PPUT, half notional (CBOE) | -1.35 | -1.83 | 4/0/0% | 1.00 | -51% | -2.17 (0%) | -1.55 |\n| zero-cost 97.5/95 put-spread collar | -1.93 | -2.82 | 14/0/0% | 1.00 | -45% | -1.78 (0%) | -2.13 |\n| 3M 90% puts | -2.04 | -2.70 | 4/0/0% | 1.00 | -44% | -2.32 (0%) | -2.36 |\n| 95/80 3M put spread | -2.24 | -3.09 | 7/0/0% | 1.00 | -42% | -3.34 (0%) | -2.56 |\n| PPUT, full notional (CBOE) | -2.75 | -3.75 | 2/0/0% | 1.00 | -47% | -4.29 (0%) | -3.22 |\n| 1M 95% puts | -2.87 | -4.07 | 1/0/0% | 1.00 | -48% | -4.28 (0%) | -3.36 |\n| 95/110 3M collar | -3.09 | -4.30 | 8/0/0% | 1.00 | -34% | -3.64 (0%) | -3.60 |\n\nThe round-1 rule that sells the core (EMA100/200, VFINXR to VFITX/FGOVX), run through the lab on the same protocol, scores CA +1.13 with full excess -1.01, p 0.74 and ho10 -2.9 pp with 0% beaten. Doing the same thing with futures leaves the long-history picture unchanged. Every option overlay loses in the 1986-1999 holdout. That includes 1987, the crash the puts were made for: the October 1987 roll happened at the close of the -5% day, so the hedge was only partly in place.\n\n## 5. Tax law: 1256 helps a little; the straddle rules apply and hurt\n\n**Tax-law and option-price variants (protocol `full`, CA score; FED in brackets).** T2 is the straddle treatment described below the table. The `px` columns use alternative calibrations: without the SKEW term (v1), fitted on 1990-2007 only (early), and with doubled option spreads (wide).\n\n| config | T1 | T1, no carryback | T2 (straddle) | px: v1 | px: early | px: wide |\n|---|---|---|---|---|---|---|\n| 1M 95% puts | -2.36 (-2.56) | -2.42 | -2.45 (-2.57) | -2.16 | -2.34 | -2.72 |\n| 95/80 3M put spread | -2.21 (-2.38) | -2.27 | -2.26 (-2.37) | -2.31 | -3.13 | -2.64 |\n| 95/110 3M collar | -3.59 (-3.90) | -3.72 | -3.55 (-3.78) | -3.57 | -3.99 | -4.02 |\n| 95/105 collar while R1 off | +0.49 (+0.63) | +0.47 | +0.32 (+0.43) | +0.39 | +0.44 | +0.34 |\n| synthetic switch while R1 off | +0.99 (+1.22) | +0.85 | **+0.48** (+0.65) | | | |\n| same, constructive sale | +0.90 (+1.19) | +0.74 | +0.37 (+0.61) | | | |\n| ES short while R1 off | +0.59 (+0.74) | +0.49 | +0.25 (+0.37) | | | |\n| VXTH VIX calls, always | -0.44 (-0.37) | -0.47 | (-1.06)* | | | |\n| VXTH while VIX<20 | +1.01 (+1.19) | +1.00 | (+0.76)* | | | |\n| **LEV** +1.0x + 90/75 put spread | +2.59 (+3.27) | +2.51 | n/a | +2.53 | **+1.31** | +2.05 |\n| **LEV** +0.5x + 90/75 put spread | +1.12 (+1.39) | +1.10 | n/a | +1.08 | +0.17 | +0.72 |\n| **LEV** +1.0x, no hedge | +2.72 (+3.50) | +2.53 | n/a | | | |\n\n\\* VIX options are probably not offsetting positions to an S&P fund under 1092, so T1 is the applicable treatment and the T2 column is only a stress case. Long futures are not offsetting positions either, so T2 is not shown for the leverage rows.\n\nWhat the variants show:\n\n* The federal carryback is worth 0.0-0.2 pp.\n* The straddle rules cost the futures-based switches 0.3-0.5 pp.\n* They change the static option overlays little on average, for two reasons. Those overlays' losses were mostly sheltering the gains from core sales anyway. And T2's one-year start delay saves a year of premium in every window.\n* The long-window damage of T2 is in the worked example below.\n* No pricing alternative brings a static overlay anywhere near zero; the spread assumption alone is worth about 0.4 pp.\n* The hedged-leverage scores are fragile: the 1990-2007 calibration halves or erases them.\n\n\nThe textbook treatment (T1) taxes the overlay as a Section 1256 contract: marked to market every 31 December, 60% long-term and 40% short-term. That is 36.1% blended in CA and 23% in FED, and net losses can be carried back three years federally.\n\n**For an S&P 500 fund hedged with S&P 500 options or futures, the straddle rules of IRC 1092 almost certainly apply.** The hedge is an offsetting position in \"substantially similar or related property\" (Reg. 1.246-5, overlap close to 100%). Three consequences follow:\n\n* **Loss deferral.** A year's loss on the hedge is deferred to the extent of the core's unrecognised gain, so it is in practice deferred until the core is sold, while hedge gains are taxed at once.\n* **Holding period.** The holding period of core lots that are less than a year old when hedged does not run, so lots bought with hedge payoffs stay short-term. This is Temp. Reg. 1.1092(b)-2T, which I approximate by resetting the lot's purchase date.\n* **No easy election.** The mixed-straddle elections exist but do not restore the T1 result.\n\nT2 models the first two, and starts hedging only after 366 days so that the first core lot is already long-term. A full futures hedge of the fund also risks being a constructive sale under IRC 1259. That is the `cs` variant: a deemed sale of every appreciated lot each time the hedge is put on.\n\nWorked example, 1M 95% puts with h = 1, started 2000-01, CA:\n\n| outcome | after-tax value on 2026-07-01 |\n|---|---|\n| SPY buy-and-hold | $616k |\n| overlay, T1 | $322k |\n| overlay, T2 | $255k |\n\n* **Under T1:** the yearly 1256 losses ($3-26k) exactly offset the long-term gains realised by selling core to pay premiums, so no tax falls due in any year.\n* **Under T2:**\n  * the losses pile up deferred ($136k by 2025);\n  * the core sales are taxed, and by 2015 they are sales of short-term \"suspended\" lots taxed at 48.1%;\n  * the deferred pool only comes back at liquidation.\n\n## 6. Drawdowns and crash episodes\n\n**Crash episodes.** These are pre-tax changes from the pre-crash peak to the trough date, as engine equity. The 1987 column comes from the 1986-start VFINXR run; the rest from the 2000-start SPY run.\n\n| strategy | 1987 | 2000-02 | 2007-09 | 2020 | 2022 | max DD 2000-26 |\n|---|---|---|---|---|---|---|\n| SPY buy-and-hold | -33.0% | -47.5% | -55.2% | -33.7% | -24.5% | -55.2% |\n| 1M 95% puts | -26.6% | -40.6% | -39.9% | -12.7% | -21.7% | -42.1% |\n| PPUT overlay (CBOE prices) | -21.9% | -36.2% | -41.2% | -9.1% | -21.6% | -41.6% |\n| 3M 90% puts | -15.7% | -40.8% | -37.4% | -21.1% | -19.8% | -41.8% |\n| 3M 80% puts (tail hedge) | -25.6% | -48.5% | -48.7% | -30.3% | -25.9% | -48.7% |\n| 95/80 3M put spread | -20.6% | -29.9% | -37.3% | -20.1% | -15.4% | -37.7% |\n| 95/110 3M collar | -11.8% | -26.1% | -25.0% | -14.5% | -13.8% | -27.0% |\n| zero-cost 95/85 put-spread collar | -23.7% | -32.2% | -31.9% | -23.0% | -17.4% | -32.8% |\n| VXTH VIX calls | n/a | -46.4% | -41.3% | **+28.0%** | -29.6% | -46.4% |\n| 1M 95% puts while R1 off | -32.6% | -36.3% | -40.5% | -33.7% | -22.7% | -40.5% |\n| synthetic SPY-to-IEF switch (futures) | -32.2% | **+6.5%** | -5.4% | -33.6% | -23.3% | -33.6% |\n| R1 EMA100/200 timing (sells core) | -32.8% | +4.9% | -6.7% | -33.7% | -23.4% | -33.7% |\n| R1 2x SMA175/3% (sells, leveraged) | | -17.0% | -5.6% | -22.3% | -37.3% | -40.8% |\n| **LEV** +0.5x + 95/80 put spread | -28.7% | -43.5% | -49.4% | -27.7% | -22.8% | -49.8% |\n\nThe two kinds of protection are complementary. Options cut fast crashes, where trend rules are still invested: in 2020 the puts lost -9% to -21% against -34%, and VIX calls gained +28%. Trend rules (and their futures twin) cut slow bear markets: about +5% in 2000-02 and -6% in 2008, against -48% / -55%. Only the collar protects in both, at 3.6 pp/yr.\n\n\n**Price per point of drawdown, full protocol, CA.** The overlays cut SPY's -55% maximum drawdown, but at 2-6 times the cost per point of a static Treasury allocation, and 3-5 times for the full hedges. The mixes cost about 0.04 pp of score per point of drawdown removed; the full option hedges cost 0.11-0.18.\n\n| route to a lower drawdown | CA score | max DD | Sharpe |\n|---|---|---|---|\n| SPY | 0 | -55% | 0.51 |\n| B&H SPY 90 / VFITX 10 | -0.33 | -46% | 0.55 |\n| B&H SPY 80 / VFITX 20 | -0.68 | -37% | 0.61 |\n| B&H SPY 70 / VFITX 30 | -1.06 | -29% | 0.67 |\n| 1M 85% puts, half notional | -0.51 | -53% | 0.50 |\n| 90/75 put spread, half notional | -0.40 | -49% | 0.53 |\n| 1M 95% puts | -2.36 | -42% | 0.44 |\n| 95/80 put spread | -2.21 | -38% | 0.52 |\n| zero-cost 95/85 put-spread collar | -2.06 | -36% | 0.51 |\n| 95/110 collar | -3.59 | -30% | 0.49 |\n| R1 EMA100/200 timing, sells core | +1.01 | -40% | 0.62 |\n| R1 2x SMA175/3% (conditional lead) | +4.94 | -47% | 0.58 |\n\nA holder who already has a large embedded gain pays a one-time tax to move into Treasuries. Selling 30% of a position that is 90% gain costs 0.3 x 0.9 x 28.1% = 7.6% of the sold amount, or 2.3% of the portfolio, once. The collar costs about 4.5% a year in option P&L. The one-time sale is cheaper after about half a year.\n\n## 7. The VIX-call sleeve\n\n* **VXTH as published** holds 30-delta 1-month VIX calls, 1% of the portfolio a month when VIX futures are between 15 and 30.\n  * Over the S&P core it scores CA -0.44 on `full`. The calls only exist from 2006, so the 2000-2005 years carry no overlay.\n  * Scored from 2006 it is -1.14 on the screen; half size gives -0.30, double size -3.80.\n  * Its pre-tax deficit is -1.28 pp/yr, all of it cost. The payoffs are 2020 (+95 pp relative in that year) and 2008 (+18 pp).\n* **The VIX < 20 version** is the only option-family result above +1. Six facts argue against it:\n  * it was chosen after seeing pre-tax data;\n  * it is not robust to the threshold: VIX < 25 gives -0.02;\n  * its first-start boot p is 0.40, and the average over starts is 0.50-0.53;\n  * the bootstrap chance of trailing SPY over 10 years is 52-58%;\n  * its deflated Sharpe is 0.000;\n  * its 10- and 15-year beats come from windows that contain March 2020.\n* VIX options exist only from 2006, so there is no older history to test it on.\n\n## 8. Hedged leverage (flagged; overlaps r2_gap1)\n\nConstant long S&P futures on top of the never-sold core (+0.5x or +1.0x, 1256 taxed) score CA +1.75 / +2.72. Their drawdowns are -71% / -86%, and 2000-start p is 0.28 / 0.37; the start-averaged p is about 0.07-0.10, because 2000 was the worst start.\n\nAdding a 90/75 put spread on the whole exposure costs 0.1-0.6 pp. It cuts the drawdown only to -56% / -71%, never back to SPY's -55%. Tighter hedges (95/85 monthly, 95/80 quarterly) cost 1.5-2.4 pp.\n\nThe round-1 trend-switched 2x rule (+4.94, p 0.077, drawdown -47%) dominates every hedged-leverage combination. Options do not make constant leverage acceptable.\n\n## 9. Overfitting diagnostics (lab functions)\n\n* **Walk-forward** (`report.diagnostics` on the 104 screened configs, CA):\n  * across all configs: 10-to-5-year out of sample +1.36 pp, beating SPY in 42% of decisions. The gain comes from picking the leverage configs.\n  * option overlays only (84 configs): out of sample **-0.73 pp, 17% beat**; 5-to-3-year: -1.29, 21%.\n* **PBO:** 0.64 for all configs, 0.55 for options only.\n* **Deflated Sharpe** of the best config: 0.02-0.03 within the family, and 0.0000-0.0012 for every finalist given about 12.8k configurations tried overall.\n* **Bootstrap of the first start's monthly after-tax excess** (12-month blocks): the chance of trailing SPY after 10 years is 33-40% for the leverage configs, 34% for the synthetic switch and 52-58% for the VXTH VIX < 20 rule. After 20 years it is 24-54%.\n\n## 10. Against SPY and round-1's leads (full protocol, CA)\n\n| strategy | score | full | 10/15y beat | boot p | max DD | verdict |\n|---|---|---|---|---|---|---|\n| SPY buy-and-hold | 0 | 0 | | | -55% | default |\n| round-1 KX3 tax-managed momentum | +0.99 | +1.84 | 90/85% | 0.011 | -54% | failed items 4, 6, 7 |\n| round-1 EMA100/200 timing (sells core) | +1.01 | +1.36 | 57/75% | 0.29 | -40% | fail |\n| round-1 2x SMA175/3% (sells, leveraged) | +4.94 | +3.80 | 100/100% | 0.077 | -47% | conditional |\n| best option hedge that stays on (90/75 spread, half notional) | -0.40 | -0.30 | 15/0% | 0.78 | -49% | fail |\n| best conditional option hedge (95/105 collar while R1 off) | +0.49 | +0.62 | 52/74% | 0.28 | -38% | fail |\n| synthetic switch with futures (R1 signal) | +0.99 | +1.75 | 57/74% | 0.20 | -34% | fail (= R1 sell version) |\n| VXTH VIX calls while VIX<20 (post hoc) | +1.01 | +0.59 | 72/64% | 0.42 | -57% | fail |\n\n## 11. What was tried\n\n* **Configurations: 150.**\n  * 104 overlay configurations, in `grid.py`:\n    * 60 option structures, hedge ratios and funding rules;\n    * 13 model-free CBOE-index overlays;\n    * 4 futures hedges;\n    * 18 second-stage configurations: round-1 signal via overlay, hedged leverage, ladders;\n    * 5 VIX-sleeve variants scored from 2006;\n    * 4 synthetic switches.\n  * 46 tax-law and pricing variants of 15 finalists.\n* **Comparators run through the lab:** the round-1 EMA100/200 rule on 4 protocols and 6 static SPY/Treasury mixes. The round-1 leads were already cached.\n* **Calibration:** two option-model versions (6 and 8 parameters) fitted to 10 CBOE indices, a 1990-2007-only refit, and one discarded attempt to back out 1986-89 implied volatility.\n* **Runs:** about 725 config x regime x protocol runs (screen and long_r_screen 416; full 96 with monthly series for all 95 starts; long_r 96; variants about 117). That is roughly 50,000 engine backtests.\n* **Search size.** The global count rises from about 12.5k to about 12.65k configurations; the deflated Sharpe ratios above use 12.8k.\n\n\n## 12. Caveats\n\n* **Contract size.** XSP (1/10 SPX) has about $77k notional, so hedging is lumpy below roughly $250k; SPX ($770k) needs about $2M or more. The model trades fractional contracts.\n* **The $3,000 deduction against ordinary income is not modelled**, in keeping with the engine. Under T1 it would add up to about $1.3k a year at 44% for loss-making overlays. That is material only for small accounts and is not available under the straddle deferral.\n* **Option prices are a calibrated model, not quotes.**\n  * The model-free CBOE-index overlays (PPUT, CLLZ, VXTH) carry the same verdict at actual traded prices.\n  * The replica is about 0.2-0.5 pp/yr conservative for bought puts and about 0.5-1 pp/yr generous for collars.\n  * Pricing sensitivity is in section 5.\n* **The model's own conventions:**\n  * premiums are funded by selling core (FIFO) once the 2% reserve is used;\n  * the reserve's T-bill interest is taxed yearly;\n  * the strategy never borrows;\n  * futures roll and basis costs are 0.2%/yr for ES and 0.1%/yr for ZN, plus 1-2 bp per trade.\n* **Legal treatment.** The straddle and constructive-sale treatment is my reading of IRC 1092/1259 and the regulations. It needs a tax adviser's confirmation before anyone relies on it.\n\n## 13. Files\n\n* `research/lab/families/r2_gap3.py`: option model, Ledger, OptBacktest/OptGate/OverlayStrategy, `run_cfg`/`run_many`.\n* `research/lab/scratch/r2_gap3/`:\n  * `grid.py` (all configs);\n  * `batch.py` and `run_batch.py` (runner);\n  * `calib2.py` and `replica2.py` (calibration);\n  * `pretax.py` and `cond_quick.py` (CBOE pre-tax);\n  * `validate_plumbing.py`;\n  * `stage_b.py` / `stage_c.py` (finalists, variants);\n  * `diag.py`, `episodes.py`, `run_episodes.py`, `robust.py`, `make_tables.py`, `mixes.py`, `r1_comp.py`;\n  * outputs in `out/` (calibration parameters, CSV tables, `finalists.json`, diagnostics);\n  * `cboe/` and `docs/` hold the downloaded CBOE histories and methodologies.\n* `research/lab/data/R2G3_*.csv`: CBOE index and SKEW/VVIX histories (signals and calibration only, never tradable).\n",
+ "recommendation": {
+  "label": "NOT RECOMMENDED: keep SPY buy-and-hold. Shown for reference only: the best crash-protection construct found that never sells the core. It is a synthetic SPY-to-IEF switch on the round-1 EMA100/200 signal using Section 1256 futures (short ES plus long ZN, both on the core's value while the signal is off), over a SPY core that is never sold. It fails the bar.",
+  "verdict": "FAIL",
+  "cfg": {
+   "kind": "r2_gap3.overlay",
+   "core": "SPY",
+   "tax": "T1",
+   "params": "full",
+   "r0": 0.02,
+   "cap": 0.04,
+   "fund": "core",
+   "fut": {
+    "h": 1,
+    "cond": {
+     "type": "tt",
+     "when": "off",
+     "params": {
+      "rule": "cross",
+      "fast": 100,
+      "slow": 200,
+      "ma": "ema",
+      "band": 0.01
+     }
+    },
+    "basis": 0.002,
+    "cost": 0.0002,
+    "cs": false,
+    "bond": {
+     "h": 1,
+     "basis": 0.001,
+     "cost": 0.0001
+    }
+   },
+   "label": "SYN-switch(ES short + ZN long)|h1.0|R1-EMA100/200-off|T1"
+  },
+  "how_to_run": "research.lab.families.r2_gap3.run_cfg(cfg, regime, protocol) (OptBacktest; not sweep.run). For the 1986+ history use core=VFINXR with protocol long_r.",
+  "regime_target": "CA (primary), FED (secondary)",
+  "CA": {
+   "score": 0.0099,
+   "full_excess": 0.0175,
+   "ex10_beat": 0.567,
+   "ex15_beat": 0.745,
+   "ex20_beat": 0.963,
+   "boot_p": 0.201,
+   "boot_p_avg_over_starts": 0.773,
+   "max_dd": -0.335,
+   "bench_max_dd": -0.552
+  },
+  "FED": {
+   "score": 0.0122,
+   "full_excess": 0.0205,
+   "ex10_beat": 0.567,
+   "ex15_beat": 0.745,
+   "ex20_beat": 1,
+   "boot_p": 0.174,
+   "boot_p_avg_over_starts": 0.758,
+   "max_dd": -0.335,
+   "bench_max_dd": -0.552
+  },
+  "NONE": {
+   "score": 0.0154,
+   "full_excess": 0.0247,
+   "boot_p": 0.156
+  },
+  "long_r": {
+   "CA": {
+    "score": 0.0108,
+    "full_excess": -0.0048,
+    "ex10_beat": 0.594,
+    "ex15_beat": 0.825,
+    "ex20_beat": 0.892,
+    "boot_p": 0.645,
+    "max_dd": -0.336,
+    "bench_max_dd": -0.553,
+    "ho10_mean": -0.0258,
+    "ho10_beat": 0
+   },
+   "FED": {
+    "score": 0.0133,
+    "full_excess": -0.0001,
+    "boot_p": 0.522,
+    "ho10_mean": -0.0276,
+    "ho10_beat": 0
+   }
+  },
+  "holdout_1930_1985": "not tested: there was no option market before 1983 and VIX options start in 2006. The 1986-1999 holdout is negative (ho10 -2.6 pp, 0% of windows beaten).",
+  "tax_variants_CA_score": {
+   "T1": 0.0099,
+   "T1_no_carryback": 0.0085,
+   "T2_straddle_rules": 0.0048,
+   "constructive_sale_T1": 0.009,
+   "constructive_sale_T2": 0.0037
+  },
+  "comparison": "Same CA score as the round-1 rule that sells the core (+1.01), so replacing exits with Section 1256 hedges saves nothing on average.",
+  "risks": [
+   "It inherits the round-1 EMA100/200 timing failure: 10-year beat rate 57%, start-averaged p 0.77, 1986-1999 holdout negative.",
+   "Straddle rules (IRC 1092) defer the hedge's losses and suspend lot holding periods; under them the CA score falls to +0.48.",
+   "A full-notional short futures hedge of an S&P fund risks being a constructive sale (IRC 1259).",
+   "Variation margin on losing hedges forces sales of the appreciated core, about $191k of long-term gains in 2022-23 on the 2000 start.",
+   "It does not protect in fast crashes: 1987 -32%, 2020 -34%."
+  ],
+  "conditions": "None. The default for the taxable account remains SPY buy-and-hold. An investor who wants a smaller drawdown should use a static SPY/Treasury allocation, which is three to five times cheaper per point of drawdown than a full option hedge.",
+  "confidence": "low"
+ },
+ "alternatives": [
+  {
+   "label": "95/105 1M collar (buy 95% put, sell 105% call) only while the round-1 EMA100/200 signal is off",
+   "cfg_label": "C95/105-1M|h1.0|core|R1-EMA100/200-off|T1",
+   "verdict": "FAIL",
+   "CA": {
+    "score": 0.0049,
+    "full_excess": 0.0062,
+    "ex10_beat": 0.522,
+    "ex15_beat": 0.745,
+    "ex20_beat": 1,
+    "boot_p": 0.28,
+    "boot_p_avg": 0.778,
+    "max_dd": -0.376,
+    "bench_max_dd": -0.552
+   },
+   "FED_score": 0.0063,
+   "long_r_CA": {
+    "score": 0.0045,
+    "full_excess": -0.0014,
+    "boot_p": 0.611,
+    "ho10_mean": -0.0079,
+    "ho10_beat": 0
+   },
+   "T2_CA_score": 0.0032
+  },
+  {
+   "label": "VXTH VIX-call sleeve only while VIX < 20 (post hoc; one event, 2020)",
+   "cfg_label": "VXTH-index|h1.0|core|vix<20|T1",
+   "verdict": "FAIL",
+   "CA": {
+    "score": 0.0101,
+    "full_excess": 0.0059,
+    "ex10_beat": 0.716,
+    "ex15_beat": 0.638,
+    "ex20_beat": 0.963,
+    "boot_p": 0.417,
+    "boot_p_avg": 0.5,
+    "max_dd": -0.569,
+    "bench_max_dd": -0.552
+   },
+   "CA_scored_from_2006": {
+    "score": 0.0141,
+    "full_excess": 0.0078,
+    "ex10_beat": 0.643,
+    "ex15_beat": 0.955,
+    "boot_p": 0.404,
+    "boot_p_avg": 0.526
+   },
+   "FED_score": 0.0119,
+   "long_r_CA_score": 0.0058,
+   "neighbour_vix_lt_25_score_2006plus": -0.0002,
+   "VXTH_pretax_excess_without_2020": -0.0441
+  },
+  {
+   "label": "Monthly 5% OTM SPX puts on the full core (PPUT-like)",
+   "cfg_label": "P95-1M|h1.0|core|T1",
+   "verdict": "FAIL",
+   "CA": {
+    "score": -0.0236,
+    "full_excess": -0.0259,
+    "ex10_beat": 0.015,
+    "ex15_beat": 0,
+    "ex20_beat": 0,
+    "boot_p": 0.969,
+    "max_dd": -0.421,
+    "bench_max_dd": -0.552
+   },
+   "FED_score": -0.0256,
+   "long_r_CA": {
+    "score": -0.0287,
+    "full_excess": -0.0407,
+    "ho10_mean": -0.0428
+   },
+   "T2_CA_score": -0.0245
+  },
+  {
+   "label": "Quarterly 95/110 collar (CLL3M-like)",
+   "cfg_label": "C95/110-3M|h1.0|core|T1",
+   "verdict": "FAIL",
+   "CA": {
+    "score": -0.0359,
+    "full_excess": -0.0326,
+    "ex10_beat": 0.06,
+    "ex15_beat": 0,
+    "boot_p": 0.97,
+    "max_dd": -0.297,
+    "bench_max_dd": -0.552
+   },
+   "FED_score": -0.039,
+   "long_r_CA": {
+    "score": -0.0309,
+    "full_excess": -0.043,
+    "ho10_mean": -0.0364
+   }
+  },
+  {
+   "label": "Quarterly 95/80 put spread",
+   "cfg_label": "PS95/80-3M|h1.0|core|T1",
+   "verdict": "FAIL",
+   "CA": {
+    "score": -0.0221,
+    "full_excess": -0.0174,
+    "ex10_beat": 0.06,
+    "ex15_beat": 0,
+    "boot_p": 0.919,
+    "max_dd": -0.377,
+    "bench_max_dd": -0.552
+   },
+   "FED_score": -0.0238,
+   "long_r_CA": {
+    "score": -0.0224,
+    "ho10_mean": -0.0334
+   }
+  },
+  {
+   "label": "Model-free PPUT overlay (actual CBOE prices)",
+   "cfg_label": "PPUT-index|h1.0|core|T1",
+   "verdict": "FAIL",
+   "CA": {
+    "score": -0.0226,
+    "full_excess": -0.0221,
+    "boot_p": 0.961,
+    "max_dd": -0.416
+   },
+   "long_r_CA_score": -0.0275
+  },
+  {
+   "label": "VXTH VIX-call sleeve, always on (CBOE prices)",
+   "cfg_label": "VXTH-index|h1.0|core|T1",
+   "verdict": "FAIL",
+   "CA": {
+    "score": -0.0044,
+    "full_excess": -0.0111,
+    "ex10_beat": 0.403,
+    "boot_p": 0.717,
+    "max_dd": -0.465
+   },
+   "FED_score": -0.0037,
+   "long_r_CA_score": -0.0019
+  },
+  {
+   "label": "LEVERAGE (flagged): +0.5x long S&P futures plus a 90/75 quarterly put spread on the whole exposure",
+   "cfg_label": "LEV+0.5x futures + PS90/75-3M on exposure|T1",
+   "verdict": "FAIL",
+   "CA": {
+    "score": 0.0112,
+    "full_excess": 0.0055,
+    "ex10_beat": 0.627,
+    "ex15_beat": 0.723,
+    "boot_p": 0.341,
+    "boot_p_avg": 0.108,
+    "max_dd": -0.563
+   },
+   "FED_score": 0.0139,
+   "long_r_CA": {
+    "score": 0.0053,
+    "full_excess": 0.0001,
+    "ex15_beat": 0.388,
+    "boot_p": 0.534,
+    "max_dd": -0.608
+   },
+   "px_early_calibration_CA_score": 0.0017
+  },
+  {
+   "label": "LEVERAGE (flagged): +0.5x long S&P futures, no hedge (comparator)",
+   "cfg_label": "LEV+0.5x futures (no hedge)|T1",
+   "verdict": "FAIL (passes items 1-3 on 2000-2026 only with the start-averaged p)",
+   "CA": {
+    "score": 0.0175,
+    "full_excess": 0.0095,
+    "ex10_beat": 0.85,
+    "ex15_beat": 0.91,
+    "ex20_beat": 1,
+    "boot_p": 0.279,
+    "boot_p_avg": 0.069,
+    "max_dd": -0.71
+   },
+   "long_r_CA": {
+    "score": 0.0151,
+    "ex15_beat": 0.8,
+    "boot_p": 0.148,
+    "max_dd": -0.73
+   }
+  },
+  {
+   "label": "Short S&P futures only (no bond leg) while the R1 signal is off",
+   "cfg_label": "FUT-short|h1.0|R1-EMA100/200-off|T1",
+   "verdict": "FAIL",
+   "CA": {
+    "score": 0.0059,
+    "full_excess": 0.0118,
+    "ex10_beat": 0.55,
+    "boot_p": 0.247,
+    "boot_p_avg": 0.776,
+    "max_dd": -0.34
+   },
+   "long_r_CA": {
+    "score": 0.0044,
+    "full_excess": -0.0109,
+    "ho10_mean": -0.0306
+   },
+   "T2_CA_score": 0.0025
+  }
+ ],
+ "findings": [
+  "Pre-tax, at actual CBOE traded prices over 1986-2026, every hedging index trails the S&P 500 total return: PPUT -3.18 pp/yr (beating it in 2.5% of 10-year windows), PPUT3M -2.43, CLLZ -3.09, CLL3M -4.49, CLL -5.66 (2008+), VXTH -1.28 (2006+), and the SPRO buffer index -3.02. The cause is the variance risk premium, not tax.",
+  "After CA tax (engine, 95 starts, 2000-2026), every option overlay that stays hedged loses 0.4 to 3.6 pp/yr: 1M 95% puts -2.36, 3M 90% puts -1.95, 95/80 put spread -2.21, zero-cost put-spread collars -2.06 to -2.29, 95/110 collar -3.59, PPUT at CBOE prices -2.26. On 1986-2026 the results are the same or worse, and every overlay's 1986-1999 holdout is negative.",
+  "None of the 104 overlay configurations passes bar items 1-3 in CA on either 2000-2026 or 1986-2026 using the lab's first-start bootstrap. The family's walk-forward is -0.73 pp out of sample (17% beat), PBO is 0.55, and DSR is about 0.",
+  "Section 1256 treatment recovers only 0.0-0.65 pp of the pre-tax cost. The overlay's losses mostly offset the long-term gains realised by selling core to pay premiums.",
+  "Hedging an S&P 500 fund with S&P 500 options or futures very likely falls under the straddle rules (IRC 1092): loss deferral plus a suspended holding period for young lots. Under them, 1M 95% puts from 2000 end at $255k against $322k under textbook 1256 and $616k for SPY. A full futures hedge also risks a constructive sale (IRC 1259).",
+  "Options do cut drawdowns (-30% to -49% vs SPY's -55%) and protect in fast crashes where trend rules do not: 2020 -9% to -21% vs -34%, and 1987 -12% to -27% vs -33%. But they cost 3-5 times more per point of drawdown than a static SPY/Treasury mix: 70/30 gives -29% at -1.06 pp/yr, while the 95/110 collar gives -30% at -3.59.",
+  "The critic's mechanism (that exits lose in CA because they realise low-basis gains) does not rescue the best timing rule. The round-1 EMA100/200 SPY-to-IEF switch done with Section 1256 futures and a never-sold core scores CA +0.99, against +1.01 for the version that sells. Three things cancel the deferral: the hedge's gains are taxed yearly at 36.1%, variation margin forces sales of the appreciated core, and the constructive-sale risk costs another 0.09.",
+  "The only positive option results come from hedging only while the round-1 trend signal is off (collar +0.49, puts +0.07). They inherit that rule's failure: 10-year beat rate 52%, start-averaged p 0.78-0.82, negative holdout.",
+  "The VIX-call sleeve (VXTH) loses 0.44 always-on. The VIX < 20 version scores +1.01 (+1.41 from 2006), but it was chosen post hoc, comes from one event, and fails the neighbour test (VIX < 25: -0.02). Without 2020, VXTH trails the S&P by 4.4 pp/yr pre-tax.",
+  "Constant long-futures leverage with or without put spreads (flagged, overlapping r2_gap1) scores +1.1 to +2.7. Drawdowns are -56% to -86%, and the hedges never bring them back to SPY's. Its results are fragile to the option-price calibration. The round-1 trend-switched 2x rule dominates every combination.",
+  "Option-price model: an 8-parameter BS/VIX/SKEW smile with a spread, calibrated on 10 CBOE indices for both halves of 1990-2026. Bias is within about 0.5 pp/yr for bought puts (conservative) and up to +1.0 for the CLLZ collar (generous). The engine extension reproduces the lab's SPY and VFINXR benchmarks to 1e-9. Model-free CBOE-index overlays agree with the replica's verdict."
+ ],
+ "n_configs_tested": 150,
+ "concerns": [
+  "The engine cannot trade options. All numbers come from OptBacktest, a subclass of backtester.Backtest adding an options book and a federal/California 1256 ledger (pattern from r2_gap1). With the overlay off it matches the lab benchmarks to 1e-9, but the overlay itself is research-only and the website cannot run it.",
+  "Option prices come from a calibrated BS/VIX/SKEW model, not historical quotes. It is about 0.2-0.5 pp/yr conservative for bought puts and about 0.5-1 pp/yr generous for collars. The 1986-1989 prices use a realised-volatility proxy, and CBOE's midday roll on 1987-10-16 is not reproduced. Model-free CBOE-index overlays and three alternative calibrations agree on the sign everywhere for static overlays.",
+  "The straddle (IRC 1092), constructive-sale (IRC 1259) and mixed-straddle treatment is my reading of the law, approximated in the ledger (loss deferral, holding-period reset, deemed sale). A tax adviser should confirm it. T1, the textbook 1256 treatment, is shown as the optimistic case and also fails.",
+  "A core that is literally never sold cannot fund a 3-8%/yr hedge. The default funding sells core FIFO beyond a 2% reserve (the engine has no specific-lot or HIFO sales). The reserve-only rule makes the hedge die within about a year.",
+  "The $3,000/yr capital-loss offset against ordinary income is not modelled, as in the engine. For loss-making overlays under T1 it would be worth up to about $1.3k/yr, which matters only for small accounts. Contract granularity (XSP about $77k notional) is ignored.",
+  "The VXTH VIX < 20 rule and the synthetic-switch and futures comparators were added after seeing earlier results; they are labelled post hoc or comparator. The VIX-call sleeve has only 2006-2026 data, and its positive variants rest on the single 2020 event.",
+  "The hedged-leverage and futures-switch comparators overlap r2_gap1 (Section 1256 futures for timing and leverage). Their numbers here use my own simpler futures model (basis 0.2%/yr ES, 0.1%/yr ZN, IEF/VFITX/FGOVX as the Treasury proxy) and may differ slightly from gap1's.",
+  "The lab's boot_p uses the first start (2000-01) only. For these strategies the start-averaged p differs a lot: it is worse for trend-keyed hedges (0.20 vs 0.77) and better for constant leverage (0.28 vs 0.07). Both are reported.",
+  "The shared machine was heavily loaded. Batch runs held one lab CPU slot per worker (at most 4) for a chunk of configs instead of one per config; results and cache are identical to run_many."
+ ]
+}

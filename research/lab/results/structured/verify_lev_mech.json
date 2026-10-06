@@ -1,0 +1,667 @@
+{
+ "key": "lev_mech",
+ "summary": "The leveraged-trend numbers are mechanically trustworthy. Nothing I tested flatters them by more than about 1 pp/yr of CA excess.\n\n- **Synthetic vs real ETFs.** On the same 2009-07+ windows the post-hoc SMA175/3% rule scores CA +9.02 / full +7.70 on real UPRO/IEF and +8.86 / +7.59 on SYN_SPY3XC/IEF. After-tax CAGR from 2009-07 is 20.83% real and 20.71% synthetic. The synthetic slightly understates the real fund.\n- **No look-ahead benefit.** The signal reads today's close and trades at today's close, which is the site convention. Deciding on yesterday's close or executing a day late slightly improves every candidate on 2000-2026 (post175: +10.01 to +10.22). That rules out a same-close look-ahead edge.\n- **Costs and taxes.** 35+35 bps per side still leaves CA +8.60. Wash sales cost 0.03-0.10 pp/yr. Yearly distribution tax, including a modeled payout for the synthetic fund, costs 0.2-0.65 pp/yr. The engine fully charges about 4.8 pp/yr of strategy tax drag vs SPY's 1.15. Most realized gains are long-term; whipsaw short-term losses offset the short-term gains.\n\nTwo input defects, neither of which flatters the strategy:\n1. **Fixed 0.6% swap spread.** It is too cheap when T-bills are above 2% (+0.55 pp/yr vs UPRO) and too expensive at zero rates. Conservative rate-dependent and pre-2009 LIBOR rebuilds cost post175 only 0.1-0.23 CA score. A flat 1.5% spread still leaves +8.38.\n2. **Noisy pre-2010 SPY closes.** The site's SPY closes before 2010 carry mean-reverting noise vs the S&P 500 (daily tracking error 2.8-6.4%/yr). This hurts same-close trend rules. Rebuilding the signal and the 3x fund on ^SP500TR improves post175 to CA +10.10 / +7.75, p 0.022.\n\nThe real limits are not mechanical: post-hoc selection (deflated Sharpe in CA 0.003-0.015 across candidates), about -60% drawdowns, a small 2020-26 edge, and 1987-style gap risk.\n\n**Verdicts:**\n- **post175: conditional.** Mechanically sound; the risk is selection and drawdown.\n- **real175 (UPRO/IEF): conditional.** Investable, but only a 2009+ sample.\n- **pre200: fail on the CA confidence bar.** Boot p 0.10-0.12; real UPRO since 2009 has p 0.178; the 2020-26 sub-period is -0.29.\n- **lowvol: conditional.** Mechanically robust, but round 1 found the neighbourhood fragile and drawdown is -65%.\n- **sso_ema (2x): conditional.** Real, but it is leverage, not skill, and rests on about 4 switches.\n\nWrite-up: /Users/siddhartha/dev/StockTest/research/lab/results/verify_lev_mech.md. Code: /Users/siddhartha/dev/StockTest/research/lab/families/verify_lev_mech.py. Scripts and outputs: /Users/siddhartha/dev/StockTest/research/lab/scratch/verify_lev_mech/.",
+ "results_md": "# verify_lev_mech: leveraged trend (3x/2x S&P plus a trend filter), mechanics and realism\n\nThe full report, with Appendices A (battery tables) and B (all about 110 variant runs), is at /Users/siddhartha/dev/StockTest/research/lab/results/verify_lev_mech.md.\n\n## Verdict\n\n**The mechanics hold up.** Nothing flatters these results by more than about 1 pp/yr of CA excess.\n\n**Synthetic vs real on the same windows (2009-07+ starts):**\n\n| post175 rule | CA score / full / p |\n|---|---|\n| real UPRO/IEF | +9.02 / +7.70 / 0.048 |\n| SPXL/IEF | +8.86 / +7.71 |\n| SYN_SPY3XC/IEF | +8.86 / +7.59 / 0.046 |\n| SYN/VFITX | +8.67 / +7.39 |\n\nAfter-tax CAGR from 2009-07 is 20.83% real and 20.71% synthetic.\n\n**Look-ahead.** `leverage.regime` decides on today's close and fills at today's close. That is the site convention; in practice it means a market-on-close order around 3:50 pm. Both lag tests improve the result on 2000-2026, so there is no same-close edge:\n\n| test | CA score / full / p |\n|---|---|\n| signal on yesterday's close (`conds[].lag=1`) | +10.01 / +7.13 |\n| execution 1 day late (`weights_x` `lag:1`) | +10.04 / +7.55 / 0.022 |\n\nThe exception is the 1986+ history. Round 1 found that lag 1 takes the full Black Monday hit (-58 pp in 1987). That is a gap risk, not a mechanics bug.\n\n**Costs (CA score at 0 / 15 / 35 bps per side for commission and slippage each):**\n\n| candidate | 0 bps | 15 bps | 35 bps |\n|---|---|---|---|\n| post175 | +9.83 | +9.30 | +8.60 |\n| real175 | +9.22 | +8.64 | +7.88 |\n| pre200 | +6.31 | +5.57 | +4.59 |\n| lowvol | +5.31 | +4.80 | +4.11 |\n| sso_ema | +6.37 | +6.28 | +6.15 |\n\n**Switching and taxes (CA).**\n- post175 switches 1.13 times a year (at most 3 in a year), holds 3x on 72% of days, and has 1 round trip of 30 days or less.\n  - Realized gains: $0.90M short-term gains, -$0.84M short-term losses, $4.24M long-term gains. Net short-term gains are small; whipsaw exits realize short-term losses.\n  - Tax paid averages 4.1% of equity a year. Strategy tax drag is 4.76 pp/yr vs SPY's 1.15, all charged by the engine.\n- Wash sales, which the engine does not model, measured by a FIFO replay that matches the engine to the dollar:\n  - post175: -0.03 to -0.07 pp/yr\n  - pre200: up to -0.08\n  - real175: up to -0.10\n  - lowvol and sso_ema: about 0\n- Distribution taxes charged yearly (post175 CA, from 2000). `realism.py` charges no distributions on SYN funds, so I added models:\n\n  | accounting | CA full excess |\n  |---|---|\n  | engine | +7.10 |\n  | realism.py | +6.91 |\n  | + SYN fund pays UPRO's distributions (model A) | +6.79 |\n  | + SPXL-style capital-gain distributions (model B, stress) | +6.45 |\n\n  Real UPRO/IEF from 2010: +6.70 -> +6.77.\n\n## Defects found (none flatters the strategy)\n\n**1. Fixed 0.6% swap spread in SYN_*C.** Tracking vs the real funds, syn minus real in pp/yr:\n\n| pair | full overlap | T-bills <= 0.5% | T-bills > 2% |\n|---|---|---|---|\n| SYN_SPY3XC vs UPRO | +0.05 | -0.22 | +0.55 |\n| SYN_SPY3XC vs SPXL | +0.36 | | |\n| SYN_SPY2XC vs SSO | +0.02 | | +0.29 |\n| SYN_QQQ2XC vs QLD | +0.08 | | |\n| SYN_QQQ3XC vs TQQQ | -0.14 | | +0.60 |\n\nThe UPRO gap was +1.09 in 2024. The synthetic is too cheap when rates are high and too expensive at zero rates, which matters most for the synthetic-only 2000-08 period. Conservative rebuilds, post175 CA score / full:\n\n| rebuild | CA score / full / p |\n|---|---|\n| rate-dependent spread (R) | +9.55 / +6.88 |\n| R plus pre-2009 LIBOR premium (RT) | +9.42 / +6.74 |\n| flat 1.0% | +9.08 / +6.57 |\n| flat 1.5% | +8.38 / +5.92 / 0.048 |\n\n**2. The site's SPY closes before 2010 are noisy against ^SP500TR.**\n- Daily tracking error: 6.4% (2000-02), 2.8% (2003-07), 5.6% (2008-09).\n- The lag-1 autocorrelation is -0.47, so the errors are transient and mean-revert. VFINX tracks the index within 0.1-0.2%.\n- SYN_SPY3XC inherits the noise x3 and the SMA signal reads it. This hurts same-close trend rules and flatters the lag tests.\n- Index-based rebuild, CA score / full / p:\n\n  | rule | index-based | index + RT cost |\n  |---|---|---|\n  | post175 | +10.10 / +7.75 / 0.022 | +9.87 / +7.39 |\n  | pre200 | +6.31 / +5.13 / 0.088 | |\n  | lowvol | +5.71 / +4.66 / 0.028 | |\n\n**3. Battery realism ignores `requires`.** Its from-2000/2005 rows for real175 and sso_ema are invalid.\n\n**4. Battery offsets are uninformative for daily-check signals.** The offset only moves the monthly cash top-up.\n\n**5. Wash sales are not enforced** (small; see above).\n\n## Non-mechanical limits\n\n| candidate | deflated Sharpe (CA, 12,000 trials) |\n|---|---|\n| post175 | 0.013 |\n| real175 | 0.007 |\n| pre200 | 0.003 |\n| lowvol | 0.015 |\n| sso_ema | 0.015 |\n\n- **Drawdown.** post175 reaches about -60% vs SPY's -55%; real175 since 2009 reaches -61% vs SPY's -34%.\n- **Recent sub-period (2020-26, CA).**\n\n  | post175 | real175 | pre200 | lowvol | sso_ema |\n  |---|---|---|---|---|\n  | +2.09 | +1.85 | -0.29 | +5.72 | +2.27 |\n\n- **Off-state asset.** Using T-bills instead of VFITX drops post175 to +8.46 / +5.83 (p 0.050).\n\n## Verdicts\n\n| candidate | verdict |\n|---|---|\n| post175 | conditional |\n| real175 | conditional |\n| pre200 | fail (CA bar) |\n| lowvol | conditional |\n| sso_ema | conditional |\n",
+ "verdicts": [
+  {
+   "candidate": "Daily trend 3x S&P / intermediate Treasuries, SMA175 with 3% band (POST HOC, best rule found)",
+   "verdict": "conditional",
+   "reasons": [
+    "Mechanically sound: on identical 2009-07+ windows the synthetic version (SYN_SPY3XC/IEF CA +8.86/+7.59) reproduces real UPRO/IEF (+9.02/+7.70) and SPXL/IEF (+8.86/+7.71); after-tax CAGR from 2009-07 is 20.71% synthetic vs 20.83% real.",
+    "No same-close look-ahead edge: a one-day signal lag (CA +10.01/+7.13) and a one-day execution lag (+10.04/+7.55, p 0.022) are both slightly better than same-close on 2000-2026.",
+    "Survives conservative synthetic costs (rate-dependent plus LIBOR premium: +9.42/+6.74; flat 1.5% spread: +8.38/+5.92), 35+35 bps trading costs (+8.60), wash sales (-0.03 to -0.07 pp/yr) and yearly distribution tax including the synthetic fund's payouts (+7.10 -> +6.79, stress +6.45).",
+    "Index-based rebuild without the SPY data noise improves it: CA +10.10/+7.75, p 0.022 (+9.87/+7.39 with conservative costs).",
+    "Low churn: 1.13 switches per year, 3x on 72% of days, one round trip of 30 days or less; realized gains mostly long-term (ST $0.90M, ST losses -$0.84M, LT $4.24M).",
+    "Condition 1, selection: post-hoc pick after about 750 configs; deflated Sharpe in CA 0.013 given 12,000 trials, so the excess is not statistically isolated.",
+    "Condition 2, risk: drawdown about -60% vs SPY -55%, roughly 1.8x SPY's equity volatility; excess is mostly leveraged beta (average about 2.2x).",
+    "Condition 3: 2020-26 CA excess only +2.09 pp/yr; 1987 gap risk (round 1: lag-1 long protocol p 0.21, -58 pp in 1987)."
+   ],
+   "bugs_found": [
+    "Data: the site's SPY closes before 2010 carry transient mean-reverting noise vs ^SP500TR (daily tracking error 6.4%/2.8%/5.6% in 2000-02/2003-07/2008-09, lag-1 autocorrelation -0.47); SYN_SPY3XC inherits it x3 and the SPY signal reads it. Effect is conservative (-0.45 CA score here) and it flatters lag-1 tests.",
+    "The fixed 0.6% swap spread in SYN_*C is miscalibrated by rate level: too cheap with T-bills above 2% (+0.55 pp/yr vs UPRO, +1.09 in 2024), too expensive at zero rates (-0.22). Impact on this rule: -0.10 to -0.23 CA score.",
+    "realism.py charges no distributions on SYN_* funds; modeled UPRO-like or SPXL-like payouts cost a further -0.12 to -0.46 pp of CA excess.",
+    "The engine does not enforce wash sales; measured -0.03 to -0.07 pp/yr.",
+    "The verify.battery offset test is uninformative for daily-check signals: the offset only moves the monthly cash top-up."
+   ],
+   "key_numbers": {
+    "CA": {
+     "score": 0.0965,
+     "full_excess": 0.071,
+     "ex5_mean": 0.0902,
+     "ex10_mean": 0.0997,
+     "ex10_beat": 1,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.034,
+     "max_dd": -0.6,
+     "bench_max_dd": -0.552,
+     "dsr": 0.013
+    },
+    "FED": {
+     "score": 0.1126,
+     "full_excess": 0.0857,
+     "boot_p": 0.016,
+     "dsr": 0.021
+    },
+    "NONE": {
+     "score": 0.1367,
+     "full_excess": 0.1071,
+     "boot_p": 0.01
+    },
+    "offsets_CA": {
+     "score_mean": 0.0967,
+     "score_min": 0.0965,
+     "score_max": 0.0968,
+     "note": "daily-check signal: offsets only move the monthly top-up"
+    },
+    "lag1_exec_CA": {
+     "score": 0.1004,
+     "full_excess": 0.0755,
+     "boot_p": 0.022
+    },
+    "lag1_signal_CA": {
+     "score": 0.1001,
+     "full_excess": 0.0713,
+     "boot_p": 0.036
+    },
+    "costs_CA_score": {
+     "0bps": 0.0983,
+     "15bps": 0.093,
+     "35bps": 0.086
+    },
+    "synthetic_cost_sensitivity_CA_score_full": {
+     "rate_dependent_R": [
+      0.0955,
+      0.0688
+     ],
+     "R_plus_pre2009_LIBOR_RT": [
+      0.0942,
+      0.0674
+     ],
+     "flat_1.0pct": [
+      0.0908,
+      0.0657
+     ],
+     "flat_1.5pct": [
+      0.0838,
+      0.0592
+     ]
+    },
+    "index_based_CA": {
+     "score": 0.101,
+     "full_excess": 0.0775,
+     "boot_p": 0.022
+    },
+    "index_based_RT_cost_CA": {
+     "score": 0.0987,
+     "full_excess": 0.0739,
+     "boot_p": 0.028
+    },
+    "realism_CA_full_excess_from_2000": {
+     "engine": 0.071,
+     "realism_py": 0.0691,
+     "plus_SYN_dist_modelA": 0.0679,
+     "plus_SYN_dist_modelB_stress": 0.0645
+    },
+    "wash_sale_cost_pp_per_yr": "0.03-0.07",
+    "switches_per_year": 1.13,
+    "share_of_days_in_3x": 0.724,
+    "tax_drag_pp_per_yr": {
+     "strategy": 4.76,
+     "spy": 1.15
+    },
+    "subperiods_CA": {
+     "2000-2010": 0.0716,
+     "2010-2020": 0.0961,
+     "2020-2026": 0.0209
+    },
+    "same_windows_2009plus_CA": {
+     "real_UPRO_IEF": [
+      0.0902,
+      0.077
+     ],
+     "SYN_IEF": [
+      0.0886,
+      0.0759
+     ],
+     "SYN_VFITX": [
+      0.0867,
+      0.0739
+     ],
+     "SPXL_IEF": [
+      0.0886,
+      0.0771
+     ]
+    },
+    "off_asset_CA": {
+     "VFISX": [
+      0.0897,
+      0.0644
+     ],
+     "SYN_TBILL": [
+      0.0846,
+      0.0583
+     ]
+    },
+    "long_protocol_round1": {
+     "CA_score": 0.0828,
+     "CA_boot_p": 0.022,
+     "lag1_CA_score": 0.0683,
+     "lag1_CA_boot_p": 0.209,
+     "lag1_excess_1987": -0.58
+    }
+   },
+   "best_variant_cfg": {
+    "kind": "weights",
+    "params": {
+     "check": "D",
+     "conds": [
+      {
+       "band": 0.03,
+       "n": 175,
+       "ticker": "SPY",
+       "type": "sma"
+      }
+     ],
+     "confirm": 1,
+     "drift": 0,
+     "map": {
+      "0": {
+       "VFITX": 1
+      },
+      "1": {
+       "SYN_SPY3XC": 1
+      }
+     }
+    },
+    "rebalance": "M",
+    "requires": [
+     "VFITX"
+    ],
+    "signal": "leverage.regime"
+   },
+   "best_variant_numbers": {
+    "note": "No config fix needed; the original is the best runnable research form. Investable form is UPRO/IEF (real175). The index-based rebuild (+10.10/+7.75, p 0.022) needs the scratch VLM_* series and is not runnable by plain sweep.run.",
+    "CA": {
+     "score": 0.0965,
+     "full_excess": 0.071,
+     "ex10_beat": 1,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.034,
+     "max_dd": -0.6,
+     "bench_max_dd": -0.552
+    }
+   }
+  },
+  {
+   "candidate": "Real-ETF version of the post-hoc rule: UPRO / IEF, daily SMA175 3% band (2009-07 onward only)",
+   "verdict": "conditional",
+   "reasons": [
+    "Investable and mechanically clean: real UPRO/IEF prices, actual UPRO/IEF distributions (realism +6.70 -> +6.77 from 2010), 35+35 bps costs still +7.88 CA score.",
+    "The synthetic reproduces it within 0.1-0.35 pp, so the 2000+ synthetic history is a fair extension.",
+    "Execution lag 1: CA +8.95/+8.04, p 0.032. Wash-sale cost -0.07 to -0.10 pp/yr.",
+    "Condition: 2009-2026 is a bull-market-only sample. SPY's own drawdown was -34% here vs the strategy's -61%. The edge is fading: from a 2015 start +4.09, 2020-26 sub-period +1.85.",
+    "Deflated Sharpe in CA 0.007; inherits the post-hoc selection of the 175/3% parameters.",
+    "Tax drag 7.89 pp/yr vs SPY 1.98 (taxes fully charged by the engine)."
+   ],
+   "bugs_found": [
+    "verify.battery realism rows 'from 2000/2005' are invalid for this config: realism.record ignores requires, so the strategy sat in cash or IEF until UPRO launched. Use the 2010 and 2015 rows."
+   ],
+   "key_numbers": {
+    "CA": {
+     "score": 0.0902,
+     "full_excess": 0.077,
+     "ex5_mean": 0.0988,
+     "ex10_mean": 0.0924,
+     "ex10_beat": 1,
+     "ex15_beat": 1,
+     "ex20_beat": null,
+     "boot_p": 0.048,
+     "max_dd": -0.61,
+     "bench_max_dd_same_period": -0.337,
+     "bench_max_dd_lab_field": -0.552,
+     "dsr": 0.007
+    },
+    "FED": {
+     "score": 0.108,
+     "full_excess": 0.0989,
+     "boot_p": 0.026
+    },
+    "NONE": {
+     "score": 0.1361,
+     "full_excess": 0.1362,
+     "boot_p": 0.006
+    },
+    "offsets_CA": {
+     "score_mean": 0.0906,
+     "score_min": 0.0902
+    },
+    "lag1_exec_CA": {
+     "score": 0.0895,
+     "full_excess": 0.0804,
+     "boot_p": 0.032
+    },
+    "costs_CA_score": {
+     "0bps": 0.0922,
+     "15bps": 0.0864,
+     "35bps": 0.0788
+    },
+    "realism_CA": {
+     "from_2010": [
+      0.067,
+      0.0677
+     ],
+     "from_2015": [
+      0.0409,
+      0.0409
+     ]
+    },
+    "subperiods_CA": {
+     "2010-2020": 0.1032,
+     "2020-2026": 0.0185
+    },
+    "tax_drag_pp_per_yr": {
+     "strategy": 7.89,
+     "spy": 1.98
+    },
+    "wash_sale_cost_pp_per_yr": "0.07-0.10",
+    "after_tax_cagr_from_2009_07": {
+     "real": 0.2083,
+     "synthetic_IEF": 0.2071
+    }
+   },
+   "best_variant_cfg": {
+    "kind": "weights",
+    "params": {
+     "check": "D",
+     "conds": [
+      {
+       "band": 0.03,
+       "n": 175,
+       "ticker": "SPY",
+       "type": "sma"
+      }
+     ],
+     "confirm": 1,
+     "drift": 0,
+     "map": {
+      "0": {
+       "IEF": 1
+      },
+      "1": {
+       "UPRO": 1
+      }
+     }
+    },
+    "rebalance": "M",
+    "requires": [
+     "IEF",
+     "UPRO"
+    ],
+    "signal": "leverage.regime"
+   },
+   "best_variant_numbers": {
+    "CA": {
+     "score": 0.0902,
+     "full_excess": 0.077,
+     "ex10_beat": 1,
+     "ex15_beat": 1,
+     "ex20_beat": null,
+     "boot_p": 0.048,
+     "max_dd": -0.61,
+     "bench_max_dd_same_period": -0.337
+    }
+   }
+  },
+  {
+   "candidate": "Daily-200 3x S&P / intermediate Treasuries, 2% band (pre-registered finalist)",
+   "verdict": "fail",
+   "reasons": [
+    "Mechanically fine (taxes, costs, wash sales -0.03 to -0.08 pp/yr, distributions -0.15 to -0.6 pp), but it does not clear the CA confidence bar: battery boot_p 0.100 (round 1 0.117).",
+    "Conservative synthetic costs push p further out: rate-dependent cost 0.116, plus LIBOR premium 0.124, flat 1.5% 0.158.",
+    "Real UPRO/IEF 2009+: CA +4.50/+4.71, p 0.178. 2020-26 sub-period -0.29 pp/yr; CA excess from a 2015 start only +0.21.",
+    "Deflated Sharpe in CA 0.003.",
+    "Lag-1 and index-based variants look better (p 0.036-0.088). That reflects whipsaw reversal and the SPY data noise, not a fix, and is not pre-registered."
+   ],
+   "bugs_found": [
+    "Same input defects as the post-hoc rule: pre-2010 SPY noise (index-based rebuild CA +6.31/+5.13, p 0.088) and the rate-dependent swap-spread miscalibration (-0.10 to -0.22 CA score)."
+   ],
+   "key_numbers": {
+    "CA": {
+     "score": 0.0607,
+     "full_excess": 0.0484,
+     "ex5_mean": 0.0574,
+     "ex10_mean": 0.0619,
+     "ex10_beat": 1,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.1,
+     "max_dd": -0.59,
+     "bench_max_dd": -0.552,
+     "dsr": 0.003
+    },
+    "FED": {
+     "score": 0.0727,
+     "full_excess": 0.061,
+     "boot_p": 0.074
+    },
+    "NONE": {
+     "score": 0.0936,
+     "full_excess": 0.0815,
+     "boot_p": 0.038
+    },
+    "lag1_exec_CA": {
+     "score": 0.0742,
+     "full_excess": 0.0662,
+     "boot_p": 0.036
+    },
+    "lag1_signal_CA": {
+     "score": 0.0738,
+     "full_excess": 0.0618,
+     "boot_p": 0.05
+    },
+    "costs_CA_score": {
+     "0bps": 0.0631,
+     "15bps": 0.0557,
+     "35bps": 0.0459
+    },
+    "index_based_CA": {
+     "score": 0.0631,
+     "full_excess": 0.0513,
+     "boot_p": 0.088
+    },
+    "conservative_cost_CA": {
+     "RT": [
+      0.0585,
+      0.0448,
+      0.124
+     ],
+     "flat_1.5pct": [
+      0.0484,
+      0.0367,
+      0.158
+     ]
+    },
+    "real_UPRO_IEF_2009plus_CA": {
+     "score": 0.045,
+     "full_excess": 0.0471,
+     "boot_p": 0.178
+    },
+    "subperiods_CA": {
+     "2000-2010": 0.0652,
+     "2010-2020": 0.0633,
+     "2020-2026": -0.0029
+    },
+    "realism_CA_from_2000": [
+     0.0484,
+     0.0469
+    ],
+    "switches_per_year": 1.51,
+    "tax_drag_pp_per_yr": {
+     "strategy": 4.47,
+     "spy": 1.15
+    }
+   }
+  },
+  {
+   "candidate": "Low-vol 3x: 3x S&P while SPY 60-day realised vol < 15% (exit >16.5%, re-enter <13.5%), else 1x SPY",
+   "verdict": "conditional",
+   "reasons": [
+    "Mechanically robust: CA +5.14/+4.68, p 0.020. Execution lag 1 +5.37/+5.09 (p 0.008); signal lag 1 +5.37/+4.96.",
+    "35+35 bps costs still +4.11. A flat 1.5% synthetic spread still +4.16/+3.77 (p 0.048).",
+    "Index-based rebuild +5.71/+4.66 (p 0.028). Realism (distribution tax incl. SYN payouts): +4.68 -> +4.82 / +4.73 / +4.67. Wash sales about 0.",
+    "Condition: drawdown -65% vs SPY -55%, because it never holds less than 1x equity. Net short-term gains are material (+$0.39M vs $1.70M LT from 2000).",
+    "Round 1 found weak robustness, which is outside mechanics: only 1/10 neighbours pass in CA, the 1986+ CA p is 0.116, and it lost 19 pp vs the index in 1987. Deflated Sharpe in CA 0.015."
+   ],
+   "bugs_found": [
+    "Same input defects (pre-2010 SPY noise; fixed 0.6% spread). Both are small here: index-based +0.57 CA score; conservative costs -0.10 to -0.21."
+   ],
+   "key_numbers": {
+    "CA": {
+     "score": 0.0514,
+     "full_excess": 0.0468,
+     "ex5_mean": 0.0511,
+     "ex10_mean": 0.0515,
+     "ex10_beat": 1,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.02,
+     "max_dd": -0.65,
+     "bench_max_dd": -0.552,
+     "dsr": 0.015
+    },
+    "FED": {
+     "score": 0.0631,
+     "full_excess": 0.0597,
+     "boot_p": 0.008
+    },
+    "NONE": {
+     "score": 0.0824,
+     "full_excess": 0.0804,
+     "boot_p": 0.002
+    },
+    "lag1_exec_CA": {
+     "score": 0.0537,
+     "full_excess": 0.0509,
+     "boot_p": 0.008
+    },
+    "lag1_signal_CA": {
+     "score": 0.0537,
+     "full_excess": 0.0496,
+     "boot_p": 0.01
+    },
+    "costs_CA_score": {
+     "0bps": 0.0531,
+     "15bps": 0.048,
+     "35bps": 0.0411
+    },
+    "index_based_CA": {
+     "score": 0.0571,
+     "full_excess": 0.0466,
+     "boot_p": 0.028
+    },
+    "conservative_cost_CA": {
+     "RT": [
+      0.0493,
+      0.044,
+      0.03
+     ],
+     "flat_1.5pct": [
+      0.0416,
+      0.0377,
+      0.048
+     ]
+    },
+    "realism_CA_from_2000": {
+     "engine": 0.0468,
+     "realism_py": 0.0482,
+     "modelA": 0.0473,
+     "modelB": 0.0467
+    },
+    "subperiods_CA": {
+     "2000-2010": 0.0257,
+     "2010-2020": 0.0662,
+     "2020-2026": 0.0572
+    },
+    "switches_per_year": 0.87,
+    "tax_drag_pp_per_yr": {
+     "strategy": 4.51,
+     "spy": 1.15
+    },
+    "long_protocol_round1": {
+     "CA_boot_p": 0.116
+    }
+   },
+   "best_variant_cfg": {
+    "kind": "weights",
+    "params": {
+     "check": "D",
+     "conds": [
+      {
+       "band": 0.1,
+       "max": 0.15,
+       "n": 60,
+       "ticker": "SPY",
+       "type": "vol"
+      }
+     ],
+     "confirm": 1,
+     "drift": 0,
+     "map": {
+      "0": {
+       "SPY": 1
+      },
+      "1": {
+       "SYN_SPY3XC": 1
+      }
+     }
+    },
+    "rebalance": "M",
+    "signal": "leverage.regime"
+   },
+   "best_variant_numbers": {
+    "CA": {
+     "score": 0.0514,
+     "full_excess": 0.0468,
+     "ex10_beat": 1,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.02,
+     "max_dd": -0.65,
+     "bench_max_dd": -0.552
+    }
+   }
+  },
+  {
+   "candidate": "LEVERAGED: SSO|emax100/200 b0.01|D|sig=SPY|->IEF>VFITX (2x S&P while slow EMA trend is up)",
+   "verdict": "conditional",
+   "reasons": [
+    "Mechanically very clean: real SSO since 2006, 0.2 switches per year (4 since 2006), zero short-term gains, no wash sales. Costs barely matter (35+35 bps: +6.15).",
+    "Synthetic SYN_SPY2XC reproduces real SSO on the same windows (+6.24/+5.92 vs +6.34/+5.94). The 2000+ synthetic is +6.17/+5.59 (p 0.020), +6.03/+5.37 (p 0.026) with conservative costs.",
+    "Lags are harmless: signal lag 1 +6.05/+5.63, execution lag 1 +6.04/+5.70 (p 0.046). Distribution tax +5.94 -> +5.70 from 2006.",
+    "Condition: the excess is leveraged beta. Sharpe equals SPY's (round 1), drawdown -59% vs -55%, and the result rests on about 2 exit/re-entry decisions (2008, 2022).",
+    "2020-26 CA +2.27 pp/yr; deflated Sharpe in CA 0.015; 1986+ synthetic holdout weak (round 1: ho10 +1.80, 60% beat, CA p 0.102)."
+   ],
+   "bugs_found": [
+    "verify.battery realism rows 'from 2000/2005' are invalid (before SSO launched)."
+   ],
+   "key_numbers": {
+    "CA": {
+     "score": 0.0634,
+     "full_excess": 0.0594,
+     "ex5_mean": 0.0596,
+     "ex10_mean": 0.0669,
+     "ex10_beat": 1,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.026,
+     "max_dd": -0.59,
+     "bench_max_dd": -0.552,
+     "dsr": 0.015,
+     "first_start": "2006-07-01"
+    },
+    "FED": {
+     "score": 0.0692,
+     "full_excess": 0.0662,
+     "boot_p": 0.024
+    },
+    "NONE": {
+     "score": 0.0756,
+     "full_excess": 0.0733,
+     "boot_p": 0.018
+    },
+    "offsets_CA": {
+     "score_min": 0.0634,
+     "score_max": 0.0635
+    },
+    "lag1_exec_CA": {
+     "score": 0.0604,
+     "full_excess": 0.057,
+     "boot_p": 0.046
+    },
+    "lag1_signal_CA": {
+     "score": 0.0605,
+     "full_excess": 0.0563,
+     "boot_p": 0.046
+    },
+    "costs_CA_score": {
+     "0bps": 0.0637,
+     "15bps": 0.0628,
+     "35bps": 0.0615
+    },
+    "synthetic_2000_CA": {
+     "SYN_SPY2XC": [
+      0.0617,
+      0.0559,
+      0.02
+     ],
+     "conservative_RT": [
+      0.0603,
+      0.0537,
+      0.026
+     ]
+    },
+    "realism_CA": {
+     "from_2006": [
+      0.0594,
+      0.057
+     ],
+     "from_2010": [
+      0.0581,
+      0.0586
+     ]
+    },
+    "subperiods_CA": {
+     "2010-2020": 0.0906,
+     "2020-2026": 0.0227
+    },
+    "switches_per_year": 0.2,
+    "tax_drag_pp_per_yr": {
+     "strategy": 2.96,
+     "spy": 1.57
+    }
+   },
+   "best_variant_cfg": {
+    "kind": "weights",
+    "signal": "trend_timing.timing",
+    "params": {
+     "risk": "SSO",
+     "safe": [
+      "IEF",
+      "VFITX"
+     ],
+     "rule": "cross",
+     "fast": 100,
+     "slow": 200,
+     "ma": "ema",
+     "band": 0.01,
+     "sig": "SPY"
+    },
+    "rebalance": "M",
+    "requires": [
+     "SSO"
+    ]
+   },
+   "best_variant_numbers": {
+    "CA": {
+     "score": 0.0634,
+     "full_excess": 0.0594,
+     "ex10_beat": 1,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.026,
+     "max_dd": -0.59,
+     "bench_max_dd": -0.552
+    }
+   }
+  }
+ ],
+ "open_questions": [
+  "Should the lab rebuild pre-2010 SPY-derived synthetics (SYN_SPY2XC/3XC) and SPY-based signals on ^SP500TR? The site's 2000-2009 SPY closes have 2.8-6.4%/yr of mean-reverting noise vs the index. This affects every SPY-signal strategy, not just this family.",
+  "Historical swap financing for 2000-2008, when swaps were priced off LIBOR, is approximated here with a TED-spread premium from memory (0.2-1.5%/yr). Actual 2x/3x fund financing costs before 2009 cannot be verified from lab data.",
+  "Is the same-close exit on 1987-10-16 that the 1986+ history depends on achievable with a 3:50 pm market-on-close decision? This needs intraday data. With a one-day lag the long-protocol CA p is 0.21.",
+  "Fund choice for implementation: SPXL paid large capital-gain distributions (13% in 2009, 3.7% in 2017) while UPRO paid none. Should a recommendation name UPRO specifically? The SPXL-style stress test costs about 0.65 pp of CA excess.",
+  "All five candidates have a CA deflated Sharpe of 0.015 or less given 12,000 trials. Should the 'good confidence' bar weigh deflated statistics more heavily than boot_p for leveraged strategies whose excess is mostly beta?"
+ ]
+}

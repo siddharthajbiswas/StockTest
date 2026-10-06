@@ -1,0 +1,365 @@
+{
+ "key": "combos",
+ "results_md": "/Users/siddhartha/dev/StockTest/research/lab/results/r2_combos.md",
+ "headline": "No cross-family combination beats SPY after CA tax with good confidence, and none beats its best component on the pre-registered robustness test (Q2). Combining buys risk control, not confidence. The most robust form found is A3: 75% never-sold SPY plus a 25% 3x SMA200/3% trend sleeve, skimmed at exits. Its after-tax excess is positive in 2000-26, 1986-26 and 1930-85, and its drawdowns are at or below SPY's. But its significance is no better than the 3x sleeve's: 1930-85 p 0.13, DSR 0.009, and on 1986+ the edge depends on the same-close exit before Black Monday. It stays CONDITIONAL.",
+ "recommendation": {
+  "label": "CONDITIONAL, fails the good-confidence bar. A3: 75% SPY bought once and never sold + 25% sleeve holding a 3x S&P fund while SPY > its 200-day SMA (3% hysteresis band, checked daily, traded at the close), else intermediate Treasuries; at each sleeve exit the sleeve's value above 25% of the account is moved into the SPY core (skim). Taxes are paid from the sleeve.",
+  "cfg": {
+   "kind": "r2_combos.sleeves",
+   "sleeves": [
+    {
+     "name": "core",
+     "w": 0.75,
+     "role": "core",
+     "cfg": {
+      "kind": "buyhold",
+      "weights": {
+       "SPY": 1
+      }
+     }
+    },
+    {
+     "name": "lev",
+     "w": 0.25,
+     "role": "lev",
+     "cfg": {
+      "kind": "weights",
+      "signal": "verify_lev_robust.trend",
+      "params": {
+       "sig": "SPY",
+       "n": 200,
+       "band": 0.03,
+       "check": "D",
+       "risk": {
+        "SYN_SPY3XC": 1
+       },
+       "safe": [
+        "VFITX"
+       ],
+       "lag": 0,
+       "ma": "sma",
+       "mdrift": 0.05
+      },
+      "rebalance": "M",
+      "requires": [
+       "VFITX"
+      ]
+     }
+    }
+   ],
+   "skim": true,
+   "tax": "realized",
+   "requires": [
+    "VFITX"
+   ]
+  },
+  "cfg_long_r": {
+   "kind": "r2_combos.sleeves",
+   "sleeves": [
+    {
+     "name": "core",
+     "w": 0.75,
+     "role": "core",
+     "cfg": {
+      "kind": "buyhold",
+      "weights": {
+       "VFINXR": 1
+      }
+     }
+    },
+    {
+     "name": "lev",
+     "w": 0.25,
+     "role": "lev",
+     "cfg": {
+      "kind": "weights",
+      "signal": "verify_lev_robust.trend",
+      "params": {
+       "sig": "VFINXR",
+       "n": 200,
+       "band": 0.03,
+       "check": "D",
+       "risk": {
+        "R2C_VFINXR3XC": 1
+       },
+       "safe": [
+        "VFITX",
+        "VUSTX",
+        "SYN_TBILL"
+       ],
+       "lag": 0,
+       "ma": "sma",
+       "mdrift": 0.05
+      },
+      "rebalance": "M"
+     }
+    }
+   ],
+   "skim": true,
+   "tax": "realized"
+  },
+  "regime_target": "CA",
+  "numbers": {
+   "CA": {
+    "protocol": "full 2000-2026",
+    "score": 0.0208,
+    "full_excess": 0.0168,
+    "ex10_beat": 1,
+    "ex15_beat": 1,
+    "ex20_beat": 1,
+    "ex5_min": -0.0123,
+    "ex10_min": 0.002,
+    "boot_p": 0.06,
+    "boot_p_mean_7_starts": 0.074,
+    "max_dd": -0.4726,
+    "bench_max_dd": -0.5519,
+    "after_tax_ir": 0.29,
+    "dsr_12360": 0.009,
+    "costs_35bps_score_p": [
+     0.0181,
+     0.082
+    ],
+    "realism_excess_from_2000": [
+     0.0168,
+     0.0164
+    ]
+   },
+   "FED": {
+    "protocol": "full 2000-2026",
+    "score": 0.0254,
+    "full_excess": 0.0218,
+    "ex10_beat": 1,
+    "ex15_beat": 1,
+    "ex20_beat": 1,
+    "boot_p": 0.034,
+    "boot_p_mean_7_starts": 0.046,
+    "max_dd": -0.4609,
+    "bench_max_dd": -0.5519,
+    "dsr_12360": 0.016
+   },
+   "long_r": {
+    "CA": {
+     "score": 0.022,
+     "full_excess": 0.0158,
+     "ex10_beat": 1,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "ho5_mean": 0.029,
+     "ho5_beat": 0.946,
+     "ho10_mean": 0.0267,
+     "ho10_beat": 1,
+     "boot_p": 0.046,
+     "max_dd": -0.4712,
+     "bench_max_dd": -0.5525,
+     "dsr": 0.013
+    },
+    "CA_signal_lag1": {
+     "score": 0.0216,
+     "full_excess": 0.0118,
+     "ho10_mean": 0.0188,
+     "ho10_beat": 0.82,
+     "boot_p": 0.117,
+     "max_dd": -0.51
+    },
+    "FED": {
+     "score": 0.0263,
+     "full_excess": 0.0222,
+     "ho10_mean": 0.0323,
+     "ho10_beat": 1,
+     "boot_p": 0.018,
+     "max_dd": -0.4605
+    }
+   },
+   "holdout_1930_1985": {
+    "source": "simulator validated equal to the engine; NOT a clean holdout for this sleeve because SMA200/3% 3x was picked in verification for passing all four histories",
+    "CA": {
+     "score": 0.0208,
+     "full_excess": 0.0118,
+     "ex10_beat": 0.913,
+     "ex15_beat": 0.976,
+     "ex10_min": -0.0153,
+     "boot_p": 0.132,
+     "max_dd": -0.748,
+     "bench_max_dd": -0.808
+    },
+    "CA_signal_lag1": {
+     "score": 0.0179,
+     "boot_p": 0.198
+    },
+    "FED": {
+     "score": 0.0252,
+     "boot_p": 0.075
+    },
+    "structure_grid_median_CA_75pct_core_3x": {
+     "score": 0.0185,
+     "boot_p": 0.173,
+     "share_passing_items_1_3": 0.13
+    }
+   },
+   "splice_1930_2026_CA": {
+    "score": 0.0213,
+    "full_excess": 0.0131,
+    "ex10_beat": 0.954,
+    "boot_p": 0.034,
+    "max_dd": -0.748
+   },
+   "bootstrap_1930_2026_CA_20y": {
+    "p_trail_spy": 0.21,
+    "median_excess": 0.012,
+    "p05_excess": -0.013,
+    "p_dd_gt_60": 0.159,
+    "spy_p_dd_gt_60": 0.199,
+    "p_dd_gt_80": 0.009
+   }
+  },
+  "risks": [
+   "Parameters are post hoc: the 3x SMA200/3% sleeve is the verifier's 1-of-486 pick that passed all four histories, so its 1930-85 result is in-sample for the sleeve. Over the whole parameter plane the 75% core + 3x structure has median score +1.4/+1.8/+1.9/+1.6 pp and median p 0.15/0.14/0.17/0.10 on 2000-26/1986-26/1930-85/1930-2026, and items 1-3 pass for only 13-41% of parameters.",
+   "Choosing trend parameters within the structure is noise out of sample: walk-forward OOS is about the average parameter's, and PBO is 0.68 on 1930-85 and 0.62 on 1930-2026.",
+   "Execution: with a one-day signal lag, 1986-2026 p rises from 0.046 to 0.117 and max DD from -47% to -51%. The 1987 escape depends on exiting at the 1987-10-16 close; a 1987-style gap while invested costs about 1.5x the market move.",
+   "The excess is front-loaded (bears of 2000-02 and 2008). Engine excess from a 2015 start is +0.11 pp/yr; 2020-2026 is -0.07 pp/yr.",
+   "The deflated Sharpe at 12,360 trials is 0.009 (CA).",
+   "The bootstrapped chance of trailing SPY over 20 years after tax is 21%. 1930-85 drawdown -75% (SPY -81%).",
+   "Leveraged-fund distributions are not modelled; verify_lev_mech measured -0.1 to -0.45 pp for an all-in 3x rule, so roughly a quarter of that applies here. Pre-2009 3x legs are synthetic (they track UPRO since 2009). FED omits the 3.8% NIIT."
+  ],
+  "conditions": [
+   "Use real funds: UPRO or SPXL for the synthetic 3x leg, and IEF rather than VFITX because of Vanguard's 30-day round-trip rule.",
+   "Check SPY vs its 200-day SMA every day and trade with market-on-close orders the same day.",
+   "Never sell the SPY core. Pay the yearly tax bill from the sleeve. At each exit, move the sleeve's value above 25% of the account into SPY (no gain is realized beyond the exit itself).",
+   "Expect about +1.5 to +2 pp/yr after CA tax, not the headline; accept 5-year stretches behind SPY and a roughly 1-in-5 chance of trailing over 20 years.",
+   "Optional: a loss-harvesting core (SPY->IWB->VTI at -15%) added about +0.3 pp/yr in 2000-26 (X1). This was exploratory, only one bear market drove it, and it has no 1986+ test."
+  ],
+  "confidence": "low",
+  "confidence_note": "Moderate as an expected-value bet: positive excess in every history and for every parameter of the structure. Low for the stated goal of beating SPY with good confidence: it fails PROTOCOL items 4-5 in the long histories and is not robust to a one-day lag on 1986+."
+ },
+ "alternatives": [
+  {
+   "name": "A1",
+   "design": "50% SPY never sold + 50% 2x SMA175/3% sleeve (the verified conditional L2), skim",
+   "CA_full": {
+    "score": 0.0258,
+    "full_excess": 0.0199,
+    "ex10_beat": 1,
+    "ex15_beat": 1,
+    "boot_p": 0.079,
+    "boot_p_mean_7_starts": 0.127,
+    "max_dd": -0.3755
+   },
+   "FED_full": {
+    "score": 0.0317,
+    "boot_p": 0.042
+   },
+   "long_r_CA": {
+    "score": 0.0244,
+    "ho10_mean": 0.0176,
+    "boot_p": 0.088,
+    "lag1_boot_p": 0.274
+   },
+   "pre_1930_1985_CA": {
+    "score": 0.0159,
+    "boot_p": 0.295,
+    "max_dd": -0.68
+   },
+   "bootstrap_20y": {
+    "p_trail_spy": 0.33,
+    "p_dd_gt_60": 0.069
+   },
+   "why_not": "Lowest crash risk of any design (bootstrapped P(DD>60%) 7% vs SPY 20%), but no significance in the clean holdout (p 0.30) or with lag 1. 2x sleeves are insignificant across the whole parameter plane (median p 0.22-0.29)."
+  },
+  {
+   "name": "A2",
+   "design": "50% SPY never sold + 50% 3x SMA200/3% sleeve, skim",
+   "CA_full": {
+    "score": 0.0401,
+    "full_excess": 0.0329,
+    "boot_p": 0.052,
+    "boot_p_mean_7_starts": 0.074,
+    "max_dd": -0.4138
+   },
+   "long_r_CA": {
+    "score": 0.0422,
+    "boot_p": 0.038,
+    "lag1_boot_p": 0.108
+   },
+   "pre_1930_1985_CA": {
+    "score": 0.0399,
+    "boot_p": 0.122,
+    "max_dd": -0.768
+   },
+   "bootstrap_20y": {
+    "p_trail_spy": 0.2,
+    "p_dd_gt_60": 0.282
+   },
+   "why_not": "Same significance as A3 with more leverage: 1.59x average exposure and a higher chance of a >60% drawdown than SPY (28% vs 20%)."
+  },
+  {
+   "name": "B2",
+   "design": "50% KX1 tax-managed rotation + 50% 2x SMA175/3% sleeve, skim",
+   "CA_full": {
+    "score": 0.0306,
+    "full_excess": 0.0238,
+    "boot_p": 0.056,
+    "boot_p_mean_7_starts": 0.074,
+    "max_dd": -0.3886
+   },
+   "FED_full": {
+    "score": 0.0369,
+    "boot_p": 0.026
+   },
+   "long_r_CA": {
+    "score": 0.0298,
+    "boot_p": 0.087,
+    "lag1_boot_p": 0.435
+   },
+   "why_not": "Without QQQ/XLK the multi-start p rises to 0.20. On 30 random menus it is no more significant than the 2x sleeve alone (mean p 0.073 vs 0.062). The rotation sleeve is flat before 2000, and 5-year windows from 2019 beat SPY 18% of the time."
+  },
+  {
+   "name": "D2te",
+   "design": "inverse-tracking-error mix of KX1/VG/SEAS/EMA/L2, drifting sleeves",
+   "CA_full": {
+    "score": 0.0133,
+    "full_excess": 0.0165,
+    "boot_p": 0.032,
+    "boot_p_mean_7_starts": 0.06,
+    "max_dd": -0.4353
+   },
+   "why_not": "Small excess. With QQQ/XLK removed, multi-start p rises to 0.23. No 5-year window since 2019 beats SPY, and there is no 1986+ version."
+  },
+  {
+   "name": "X1 (exploratory)",
+   "design": "75% loss-harvesting SPY core (SPY->IWB->VTI...) + 25% 3x SMA200/3% sleeve, skim",
+   "CA_full": {
+    "score": 0.0237,
+    "full_excess": 0.0212,
+    "boot_p": 0.046,
+    "boot_p_mean_7_starts": 0.068,
+    "max_dd": -0.4514
+   },
+   "why_not": "Added after pre-registration. It improves on A3 by about +0.3 pp, but the gain comes from two harvests in 2001-02, and it has no long-history test."
+  }
+ ],
+ "findings": [
+  "No combination clears the PROTOCOL good-confidence bar in CA or FED. None beats its best component on all five pre-registered robustness criteria: beat rates, worst windows, multi-start p, holdouts and drawdown.",
+  "A new kind, r2_combos.sleeves, runs any lab strategies as sleeves of one taxable account: own capital, own gain budget, one joint tax return, clone tickers for per-sleeve lots, optional skim at trend exits. It reproduces standalone runs exactly (L2, KX1, SPY).",
+  "A lot-level simulator of the SPY-core + trend-sleeve designs reproduces the engine to 0.013 pp (2000-26) and 0.07 pp (1986-26) on every window. This made 1930-85, 1930-2026, a 216-point parameter plane and bootstraps possible.",
+  "SPY core + leveraged-trend sleeve is the most robust structure. Excess is positive in every history and for the median parameter. Drawdowns are at or below SPY's (A3 -47% vs -55%; 1930-85 -75% vs -81%). Worst windows are far smaller (1930-85 worst 10y -1.5 vs -11.8 pp for the 3x sleeve). It beats constant leverage at the same average exposure.",
+  "Combining does not raise confidence. Mixing with SPY scales excess and tracking error together, so after-tax IR stays the sleeve's (0.29-0.30 vs 0.28), holdout p is unchanged, and the never-sold core does not improve after-tax retention (CA/NONE 0.62-0.66 vs 0.64-0.68).",
+  "Across the core+sleeve parameter plane, 3x sleeves pass items 1-3 for 28-31% (2000-26), 31-35% (1986-26), 13-15% (1930-85) and 41-43% (1930-2026) of parameters, with median p 0.10-0.17. 2x sleeves almost never pass (0-6%). Parameter selection within a structure is noise: walk-forward OOS is about the average parameter, PBO 0.59-0.75 in the 1930+ histories.",
+  "The within-family control E1, an ensemble of 8 SMA-band 2x rules, scores +1.34 pp (p 0.39) vs +4.94 for the post-hoc SMA175/3%. The leveraged-trend edge in CA depends on the wide band chosen after the fact, and the 1930-85 holdout does not favour wide bands.",
+  "A one-day signal lag removes the 1986-2026 significance of every A/B design (A3 p 0.046 -> 0.117, A1 0.088 -> 0.274, B2 0.087 -> 0.435). Combining does not remove the dependence on the 1987-10-16 same-close exit.",
+  "Rotation + leverage (B) and equal-risk best-of-family mixes (D) improve IR over the 2x sleeve only through QQQ/XLK. Without them, multi-start p rises to 0.20-0.34. On 30 random menus B2 is no more significant than the sleeve alone. The rotation sleeve is flat or negative before 2000 (PRE20 analog).",
+  "Replacing the trend rule's Treasury off-leg with SPY or a momentum rotation (C) keeps at least 1x equity in bear markets. Drawdowns become -61% to -68% (1930-85: -83% to -85%) and p is no better.",
+  "Wash sales cost at most 0.02 pp/yr (cross-sleeve matches are negligible). Annual distribution tax moves CA excess by -0.09 to +0.07 pp. Costs up to 35 bps barely move A2/A3. The excess is front-loaded: starts from 2015 earn about +0.1 to +0.2 pp/yr.",
+  "Exploratory: a loss-harvesting SPY core next to the sleeve adds +0.2-0.3 pp/yr in CA, because harvested core losses offset the sleeve's gains in the joint return. The gain came from one bear market (2001-02 harvests)."
+ ],
+ "n_configs_tested": 340,
+ "concerns": [
+  "The recommended A3 sleeve (3x SMA200/3%) was selected in round-1 verification for passing all four histories, so A2/A3/C2 results on 1930-85 / 1930-2026 are not out of sample for the sleeve. The parameter-plane grid is the honest substitute.",
+  "The pre-registered Q2 criteria (b) worst windows and (d) holdout means are scale-dependent and structurally hard for a partial SPY mix to win. I report them as registered and add a scale-free comparison.",
+  "Equal-risk weights for group D use full-sample 2000-2026 volatilities, a disclosed mild hindsight on risk. D1/D2/D2te have no 1986+ version: the VG/SEAS components lack clean analogs.",
+  "The 1930-85 world is a simulator on ^GSPC plus approximate dividends with T-bill financing, as in the verifier's PRE. Leveraged legs are cost-calibrated synthetics everywhere before 2009.",
+  "Lab gap: the r2_combos.sleeves cache key does not hash the modules of the sleeves' own kinds or signals (verify_lev_robust, tax_rotation, tax_structures, seasonal, factor_style, trend_timing). None changed during these runs, but edits there would leave stale cached records.",
+  "realism.py charges no distributions on clone tickers or SYN_* funds. I mapped clones to their originals in-process for the battery; leveraged-fund payouts remain unmodelled.",
+  "The FED regime omits the 3.8% NIIT, so FED numbers are slightly flattering.",
+  "The machine was heavily loaded (load ~25-32), but all runs completed with 0 errors. Every engine number is the cached lab record; simulator numbers were validated against the engine."
+ ]
+}

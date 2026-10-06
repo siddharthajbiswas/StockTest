@@ -1,0 +1,1075 @@
+{
+ "family": "tax_structures",
+ "module_path": "/Users/siddhartha/dev/StockTest/research/lab/families/tax_structures.py",
+ "results_md": "/Users/siddhartha/dev/StockTest/research/lab/results/tax_structures.md",
+ "n_configs_tested": 475,
+ "headline": "No pure tax structure beats buying and holding SPY after CA (or FED) tax with good confidence, and in this engine none can. SPY buy-and-hold already defers 100% of its gain and pays the long-term rate once, so every structure's measured tax-efficiency gap is <= 0: exactly 0.0000 for loss harvesting (33 no-swap-back SPY-core configs, mean -0.000014), and the largest positive gap anywhere is +0.0001. What remains is pre-tax tracking/tilt noise. The best pure structure (9 sector SPDRs, equal weight, rebalanced only through losses; site manual mode, tax-managed, budget 0) scores +0.0023 in CA on the full protocol (full +0.0060, 10-yr beat 0.49, boot_p 0.30), all of it earned in windows starting 2000-2004. Tax management only helps defensively: losses-only rebalancing beat tax-blind rebalancing on 30/30 random menus by +0.45 pp/yr, and the incumbent's rule lifts random-pick rotation from -2.96 to -0.22 pp/yr. The incumbent's actual edge is momentum (+0.86 pp/yr over random picks under the same rule). Harvested losses are worth something only outside the engine: about +0.2 pp/yr (CA, mean over start years) if they offset other gains, or via the $3k ordinary offset on a $100k account; about 0 on $1M.",
+ "findings": [
+  "ENGINE IDENTITY: the engine pools losses, has no $3k offset and taxes everything at the final liquidation, so a strategy's total tax >= t_LT x max(total gain, 0). SPY buy-and-hold attains the bound. Every window's CA excess = mapped (pre-tax excess of the same trades from the ZERO regime, taxed as if perfectly deferred) + gap, with gap <= 0 (an.py::decompose). Across 511 decomposed records, no harvesting or tax-aware structure has a gap > +0.00004. The only larger positive gaps (largest +0.0001 score / +0.0012 full) are tax-blind band rules whose CA and ZERO paths diverge. So the after-tax alpha of tax management alone, holding market-like exposure, is 0.00 pp/yr in the engine.",
+  "(a) SPY core + tax-loss harvesting into different-index twins (SPY->IWB->VTI->VV->SCHX->IWV->SCHB and 5 other chains; thresholds 3-20%; daily/weekly/monthly checks; 4 swap-back rules): 102 configs. CA screen scores -0.0036..+0.0015 (mean -0.0004, 34% positive, lowest boot_p 0.127, none passes). Gap -0.000014 without swap-back. The excess is pre-tax tracking of whichever substitute the portfolio ends in; buy-and-hold VTI/VV/VTSMX alone score +0.0014/+0.0014/+0.0013 on screen. Full protocol, CA: 10% daily +0.0002 (full +0.0010, boot_p 0.33); best 15% monthly +0.0015 (boot_p 0.21; harvested twice, then held VTI). FED is identical to +-0.0001.",
+  "(d) Swap back to SPY after the 31-day wash window only adds trades. 'loss' rule: gap -0.00001, score -0.0002. 'any' (realizes ST gains): gap -0.00017, score -0.0015. 'lt': gap -0.00056, score -0.0010. Higher thresholds trade less and score slightly better (3%: +0.0003, turnover 0.135; 20%: +0.0013, turnover 0.022), all noise around zero.",
+  "HARVESTING QUANTIFIED (OUTSIDE-ENGINE ARITHMETIC; harvest_value.py replays the exact engine trades and re-settles taxes into a side account in SPY). SPY 10% daily harvests net losses of 18% of start capital per window to 2026 (21% over 10-year windows), almost all in windows starting 2000-2009. In the engine they only offset the final liquidation: -0.0007/+0.0005 (mean of 24 starts to 2026 / 17 ten-year windows). If each year's loss offsets other LT gains: +0.0022/+0.0038 (upper bound). Other ST gains: +0.0049/+0.0086. $3k/yr ordinary offset at 44.3%: $100k account +0.0020/+0.0035, $1M account -0.0004/+0.0009. Stepped-up basis/donation: +0.0033/+0.0079. FED: B +0.0009/+0.0025. Sector-level harvesting harvests 23-27% and is worth about +0.45 pp/yr in the outside-gains scenario.",
+  "(b) Sector direct indexing (11 SPDR sectors at an NNLS SPY replica or equal weight, harvesting into iShares IY* / Vanguard V* twins): 33 configs, CA screen -0.0004..+0.0022, none passes. Gap 0 for drift and losses-only. The replica tracks SPY with ~4.4%/yr TE and lags after 2018 (no XLC in the drift portfolio; capped sector funds). Full: best 5% weekly harvest +0.0019 score but full -0.0022, boot_p 0.67. Yearly re-fit within a 1% budget + 10% harvest: FED boot_p 0.090 but 15-yr beat 0.70, score +0.0011.",
+  "(c)/(e) Static allocations x 15 execution rules (22-ETF menu EW with/without EEM+RSP required, 9 sectors EW, SPY/MDY/IJR 80/12/8, SPY/EFA/EEM 60/30/10). The gap depends only on the rule: drift 0; losses-only (tax rule budget 0) 0.000-0.001; budget 0.5% -0.03..-0.06; budget 1% -0.05..-0.10; 1% + 10% harvest -0.02..-0.03 (the only place harvesting has in-engine value: offsetting gains the strategy realizes anyway); budget 5% and tax-blind quarterly -0.05..-0.22 pp/yr. The rule moves results 0.1-0.3 pp/yr; the allocation moves them ~2 pp/yr. Long history: 21-fund long menu tax-blind Q gap -0.29, Fidelity sector proxy -0.32; losses-only 0.00.",
+  "(f) Incumbent rule on RANDOM rankings vs momentum (22 ETFs, top 5, Q; screen, 20 seeds). Site TaxManagedCombo 1%: random CA score -0.0022 (sd 0.0021, 15% of seeds positive; ZERO -0.0010); momentum +0.0064 (z = 4.1, above all 20 seeds). Same random picks with the site's standard rule: -0.0296 (gap -0.0233). Full protocol: random + 1% rule (8 seeds) mean -0.0028, all negative; random + standard -0.0303/-0.0287. Pure structure is worth +2.7 pp/yr against tax-blind rotation (gap -2.33 -> -0.12; turnover ~305% -> ~15%/yr) and -0.2..-0.3 pp/yr against SPY. The incumbent's +0.0066 is momentum's pre-tax edge (mapped +0.0077) passed through a nearly tax-free structure (gap -0.0011).",
+  "The incumbent with a 0% budget instead of 1% (signal-based, a structure knob; tax_rotation's territory): full CA score +0.0064, full +0.0146, 10/15-yr beat 0.79/0.81, boot_p 0.047, gap -0.0001 (vs -0.0011 at 1%); FED +0.0070, boot_p 0.048. It narrowly fails criterion 2 (15-yr 0.81 < 0.85), as does the 1% incumbent (0.70/0.83). All 7 timing offsets are positive (+0.0047..+0.0079). The cost response is non-monotonic (+0.0070/+0.0038/+0.0051 at 0/15/35 bps). Sub-periods +0.80/-0.47/+0.33 pp/yr.",
+  "BEST PURE STRUCTURE: 9 Select Sector SPDRs EW, rebalanced quarterly only through losses (site manual mode, tax-managed, budget 0). Full CA: +0.0023 score, +0.0060 full, 10/15/20-yr beat 0.49/0.55/0.59, boot_p 0.30. With 10% harvesting into twins: +0.0026, boot_p 0.29, but +0.0001 at 35 bps costs. Its gap is 0.0000; it is an equal-weight-sector tilt. Robust to timing (7 offsets +0.0022..+0.0028, all positive), costs (site version) and stricter dividend-tax accounting (unchanged). But: sub-periods CA +3.13/-0.59/-1.75 pp/yr (2000-10/2010-20/2020-26); windows from 2004-10 lose (-0.0038); dropping XLK flips it to -0.0014; iShares and Vanguard sector families lose (-0.0006 / -0.0026); deflated Sharpe 0.009.",
+  "HINDSIGHT (30 random 15-25-ETF menus from BROAD_EQUITY_POOL_2003, EW, windows from ~2004). Mean CA score: drift -0.0134, tax-blind Q -0.0180, losses-only -0.0135, 1% budget -0.0162; 0/30 menus positive under any rule. Losses-only beat tax-blind Q on 30/30 menus (+0.0045); vs drift -0.0001. The incumbent menu itself, EW losses-only with windows from 2004: -0.0046.",
+  "LONG HISTORY (protocol long 1986-2023, benchmark VFINX). VFINX<->VTSMX harvesting: score +0.0005, holdout 0.0000. Fidelity Select sector proxy of the 9-sector EW losses-only structure (actively managed survivors): CA +0.0149, full +0.0112, 10/15-yr beat 0.75/0.89, boot_p 0.052, ho5 +0.0078, ho10 +0.0060 (beat 0.79). It passes criteria 1-3 in CA and FED, unlike the real SPDR ETFs, so this is conflicting evidence on different instruments. 21-fund long menu EW losses-only: +0.0057, boot_p 0.34, ho10 -0.0059.",
+  "DIAGNOSTICS: pure-structure screen grid (216 configs). CA: walk-forward 10/5 OOS -0.0117 (in-sample +0.0095, beat 0.00), 5/3 +0.0018; PBO 0.606; DSR 0.193. NONE: WF -0.0133, PBO 0.936. Full-protocol pure finalists (19), CA: WF -0.0093, PBO 0.779. Choosing the best trailing structure reverses out of sample, as expected when differences are tilt/tracking noise. Criterion 4 fails.",
+  "NONE (IRA) check: harvesting never fires without tax lots, so every harvesting config is exactly SPY (excess 0). Tax-aware rebalancing equals tax-blind rebalancing. In ZERO (same decisions, 0% rates) the harvesting configs show only their tracking: e.g. 15% monthly +0.0018 full-protocol score."
+ ],
+ "candidates": [
+  {
+   "label": "9 sector SPDRs equal weight, rebalanced quarterly only through losses (site manual mode, tax-managed, gain budget 0): best site-expressible pure structure",
+   "cfg": {
+    "kind": "combo",
+    "tickers": [
+     "XLB",
+     "XLE",
+     "XLF",
+     "XLI",
+     "XLK",
+     "XLP",
+     "XLU",
+     "XLV",
+     "XLY"
+    ],
+    "timer": "buy_hold",
+    "timer_params": {},
+    "rebalance": "Q",
+    "trade_rule": "tax_managed",
+    "gain_budget": 0,
+    "wash_days": 31
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.002256,
+     "full_excess": 0.00599,
+     "ex5_mean": 0.003791,
+     "ex10_mean": 0.001876,
+     "ex10_beat": 0.492537,
+     "ex10_min": -0.017551,
+     "ex15_beat": 0.553191,
+     "ex20_beat": 0.592593,
+     "boot_p": 0.299,
+     "max_dd": -0.516367,
+     "bench_max_dd": -0.551894,
+     "trades": 84,
+     "turnover": 0.002317
+    },
+    "FED": {
+     "score": 0.00259,
+     "full_excess": 0.006166,
+     "ex5_mean": 0.004193,
+     "ex10_mean": 0.00227,
+     "ex10_beat": 0.492537,
+     "ex10_min": -0.018742,
+     "ex15_beat": 0.553191,
+     "ex20_beat": 0.592593,
+     "boot_p": 0.295,
+     "max_dd": -0.516367,
+     "bench_max_dd": -0.551894,
+     "trades": 84,
+     "turnover": 0.002317
+    },
+    "NONE": {
+     "score": 0.00302,
+     "full_excess": 0.007574,
+     "ex5_mean": 0.004319,
+     "ex10_mean": 0.002382,
+     "ex10_beat": 0.507463,
+     "ex10_min": -0.02058,
+     "ex15_beat": 0.531915,
+     "ex20_beat": 0.703704,
+     "boot_p": 0.237,
+     "max_dd": -0.528562,
+     "bench_max_dd": -0.551894,
+     "trades": 962,
+     "turnover": 0.094299
+    }
+   },
+   "long_protocol": {
+    "proxy": "9 Fidelity Select sector funds (FSPTX FIDSX FSENX FSPHX FSUTX FDFAX FSRPX FSDPX FSDAX), EW, tax rule budget 0, quarterly; ACTIVE funds, survivors",
+    "CA": {
+     "score": 0.014924,
+     "full_excess": 0.011209,
+     "ho5_mean": 0.00777,
+     "ho5_beat": 0.617647,
+     "ho10_mean": 0.00597
+    },
+    "FED": {
+     "score": 0.016311,
+     "full_excess": 0.011286,
+     "ho5_mean": 0.008783,
+     "ho5_beat": 0.617647,
+     "ho10_mean": 0.006287
+    },
+    "NONE": {
+     "score": 0.01939,
+     "full_excess": 0.013421,
+     "ho5_mean": 0.008944,
+     "ho5_beat": 0.647059,
+     "ho10_mean": 0.003369
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "medium",
+   "robustness_notes": "Fails criteria 2 and 3 (10/15-yr beat 0.49/0.55, boot_p 0.30). Gap 0.0000: the excess is the equal-weight-sector tilt, not tax. Robust to rebalance timing (7 offsets: CA score +0.0022..+0.0025, all positive), costs (+0.0021 at 35 bps/side) and stricter distribution-tax accounting (unchanged). But sub-periods CA 2000-10 +3.13 pp/yr, 2010-20 -0.59, 2020-26 -1.75. Windows starting from 2004-10 lose (-0.0038 screen). Dropping XLK flips it negative (-0.0014). The same structure on iShares IY* (-0.0006) and Vanguard V* (-0.0026) sector funds loses. Deflated Sharpe 0.009 (n_trials 470). Neighbours (M/S/A cadence, 5-20% harvest) +0.0025..+0.0034, boot_p 0.27-0.45. The long proxy passes criteria 1-3 in CA/FED from 1986, but on active funds: conflicting evidence, not confirmation."
+  },
+  {
+   "label": "Same 9-sector EW losses-only structure + 10% daily harvesting into iShares/Vanguard sector twins (research kind): highest pure-structure CA score",
+   "cfg": {
+    "kind": "tax_structures.slots",
+    "slots": [
+     [
+      "XLB",
+      "IYM",
+      "VAW"
+     ],
+     [
+      "XLE",
+      "IYE",
+      "VDE"
+     ],
+     [
+      "XLF",
+      "IYF",
+      "VFH"
+     ],
+     [
+      "XLI",
+      "IYJ",
+      "VIS"
+     ],
+     [
+      "XLK",
+      "IYW",
+      "VGT"
+     ],
+     [
+      "XLP",
+      "IYK",
+      "VDC"
+     ],
+     [
+      "XLU",
+      "IDU",
+      "VPU"
+     ],
+     [
+      "XLV",
+      "IYH",
+      "VHT"
+     ],
+     [
+      "XLY",
+      "IYC",
+      "VCR"
+     ]
+    ],
+    "rebalance": "Q",
+    "reb_rule": "tax",
+    "gain_budget": 0,
+    "harvest": 0.1,
+    "harvest_freq": "D"
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.002639,
+     "full_excess": 0.005115,
+     "ex5_mean": 0.00439,
+     "ex10_mean": 0.002009,
+     "ex10_beat": 0.492537,
+     "ex10_min": -0.017385,
+     "ex15_beat": 0.574468,
+     "ex20_beat": 0.777778,
+     "boot_p": 0.288,
+     "max_dd": -0.528207,
+     "bench_max_dd": -0.551894,
+     "trades": 161,
+     "turnover": 0.04481
+    },
+    "FED": {
+     "score": 0.002999,
+     "full_excess": 0.005267,
+     "ex5_mean": 0.004855,
+     "ex10_mean": 0.002403,
+     "ex10_beat": 0.492537,
+     "ex10_min": -0.018564,
+     "ex15_beat": 0.574468,
+     "ex20_beat": 0.777778,
+     "boot_p": 0.267,
+     "max_dd": -0.528207,
+     "bench_max_dd": -0.551894,
+     "trades": 161,
+     "turnover": 0.04481
+    },
+    "NONE": {
+     "score": 0.00302,
+     "full_excess": 0.007572,
+     "ex5_mean": 0.004319,
+     "ex10_mean": 0.002382,
+     "ex10_beat": 0.507463,
+     "ex10_min": -0.020585,
+     "ex15_beat": 0.531915,
+     "ex20_beat": 0.703704,
+     "boot_p": 0.237,
+     "max_dd": -0.52856,
+     "bench_max_dd": -0.551894,
+     "trades": 963,
+     "turnover": 0.094275
+    }
+   },
+   "long_protocol": {
+    "proxy": "same Fidelity Select sector proxy as above (no harvest twins exist pre-2000)",
+    "CA": {
+     "score": 0.014924,
+     "full_excess": 0.011209,
+     "ho5_mean": 0.00777,
+     "ho5_beat": 0.617647,
+     "ho10_mean": 0.00597
+    },
+    "FED": {
+     "score": 0.016311,
+     "full_excess": 0.011286,
+     "ho5_mean": 0.008783,
+     "ho5_beat": 0.617647,
+     "ho10_mean": 0.006287
+    },
+    "NONE": {
+     "score": 0.01939,
+     "full_excess": 0.013421,
+     "ho5_mean": 0.008944,
+     "ho5_beat": 0.647059,
+     "ho10_mean": 0.003369
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "medium",
+   "robustness_notes": "Fails criteria 2 and 3. Gap 0.0000: harvesting adds nothing in the engine, and the +0.0003 over the no-harvest version is tracking noise. Timing offsets (7): +0.0022..+0.0028, boot_p 0.14-0.29. Cost-sensitive: CA score +0.0029/+0.0020/+0.0001 at 0/15/35 bps per side. Sub-periods CA +2.66/-0.80/-1.44 pp/yr. Deflated Sharpe 0.008. Same regime, XLK and index-family caveats as the site version."
+  },
+  {
+   "label": "SPY core + tax-loss harvesting at 15% (monthly checks) into IWB/VTI/VV/SCHX/IWV/SCHB: best of 102 SPY-harvesting configs",
+   "cfg": {
+    "kind": "tax_structures.slots",
+    "slots": [
+     [
+      "SPY",
+      "IWB",
+      "VTI",
+      "VV",
+      "SCHX",
+      "IWV",
+      "SCHB"
+     ]
+    ],
+    "harvest": 0.15,
+    "harvest_freq": "M"
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.001489,
+     "full_excess": 0.001973,
+     "ex5_mean": 0.001648,
+     "ex10_mean": 0.001599,
+     "ex10_beat": 0.462687,
+     "ex10_min": -0.001091,
+     "ex15_beat": 0.595745,
+     "ex20_beat": 0.518519,
+     "boot_p": 0.214,
+     "max_dd": -0.554537,
+     "bench_max_dd": -0.551894,
+     "trades": 5,
+     "turnover": 0.022457
+    },
+    "FED": {
+     "score": 0.001625,
+     "full_excess": 0.002033,
+     "ex5_mean": 0.001806,
+     "ex10_mean": 0.00174,
+     "ex10_beat": 0.462687,
+     "ex10_min": -0.001207,
+     "ex15_beat": 0.595745,
+     "ex20_beat": 0.518519,
+     "boot_p": 0.208,
+     "max_dd": -0.554537,
+     "bench_max_dd": -0.551894,
+     "trades": 5,
+     "turnover": 0.022457
+    },
+    "NONE": {
+     "score": 0,
+     "full_excess": 0,
+     "ex5_mean": 0,
+     "ex10_mean": 0,
+     "ex10_beat": 0,
+     "ex10_min": 0,
+     "ex15_beat": 0,
+     "ex20_beat": 0,
+     "boot_p": 0.842,
+     "max_dd": -0.551894,
+     "bench_max_dd": -0.551894,
+     "trades": 1,
+     "turnover": 0
+    }
+   },
+   "long_protocol": {
+    "proxy": "VFINX core harvesting at 10% daily into VTSMX (from 1992)",
+    "CA": {
+     "score": 0.000516,
+     "full_excess": 0,
+     "ho5_mean": 0,
+     "ho5_beat": 0,
+     "ho10_mean": 0
+    },
+    "FED": {
+     "score": 0.000556,
+     "full_excess": 0,
+     "ho5_mean": 0,
+     "ho5_beat": 0,
+     "ho10_mean": 0
+    },
+    "NONE": {
+     "score": 0,
+     "full_excess": 0,
+     "ho5_mean": 0,
+     "ho5_beat": 0,
+     "ho10_mean": 0
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "low",
+   "robustness_notes": "Gap 0.0000: in the engine the harvested losses only offset the final liquidation. The excess is pre-tax tracking of the substitute it ends up in (from 2000: SPY -> IWB 2001-04 -> VTI 2002-08, held). Holding VTI or VV outright scores the same (+0.0014 screen). Selected as the best of 102 configs, all within -0.0036..+0.0015; family walk-forward OOS negative. NONE = SPY exactly (no lots, no harvest). Outside the engine, harvested losses would be worth about +0.2 pp/yr if they offset other LT gains (upper bound), +0.2 via the $3k offset on a $100k account, about 0 on $1M."
+  },
+  {
+   "label": "SPY core + tax-loss harvesting at 10% (daily checks), no swap-back: the representative textbook TLH policy",
+   "cfg": {
+    "kind": "tax_structures.slots",
+    "slots": [
+     [
+      "SPY",
+      "IWB",
+      "VTI",
+      "VV",
+      "SCHX",
+      "IWV",
+      "SCHB"
+     ]
+    ],
+    "harvest": 0.1,
+    "harvest_freq": "D"
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.000207,
+     "full_excess": 0.000988,
+     "ex5_mean": -5e-05,
+     "ex10_mean": 0.000565,
+     "ex10_beat": 0.328358,
+     "ex10_min": -0.003529,
+     "ex15_beat": 0.340426,
+     "ex20_beat": 0.444444,
+     "boot_p": 0.329,
+     "max_dd": -0.554536,
+     "bench_max_dd": -0.551894,
+     "trades": 11,
+     "turnover": 0.056478
+    },
+    "FED": {
+     "score": 0.000232,
+     "full_excess": 0.001019,
+     "ex5_mean": -4.5e-05,
+     "ex10_mean": 0.000602,
+     "ex10_beat": 0.328358,
+     "ex10_min": -0.003841,
+     "ex15_beat": 0.340426,
+     "ex20_beat": 0.444444,
+     "boot_p": 0.346,
+     "max_dd": -0.554536,
+     "bench_max_dd": -0.551894,
+     "trades": 11,
+     "turnover": 0.056478
+    },
+    "NONE": {
+     "score": 0,
+     "full_excess": 0,
+     "ex5_mean": 0,
+     "ex10_mean": 0,
+     "ex10_beat": 0,
+     "ex10_min": 0,
+     "ex15_beat": 0,
+     "ex20_beat": 0,
+     "boot_p": 0.842,
+     "max_dd": -0.551894,
+     "bench_max_dd": -0.551894,
+     "trades": 1,
+     "turnover": 0
+    }
+   },
+   "long_protocol": {
+    "proxy": "VFINX core harvesting at 10% daily into VTSMX (from 1992)",
+    "CA": {
+     "score": 0.000516,
+     "full_excess": 0,
+     "ho5_mean": 0,
+     "ho5_beat": 0,
+     "ho10_mean": 0
+    },
+    "FED": {
+     "score": 0.000556,
+     "full_excess": 0,
+     "ho5_mean": 0,
+     "ho5_beat": 0,
+     "ho10_mean": 0
+    },
+    "NONE": {
+     "score": 0,
+     "full_excess": 0,
+     "ho5_mean": 0,
+     "ho5_beat": 0,
+     "ho10_mean": 0
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "low",
+   "robustness_notes": "Gap 0.0000; 11 trades; score about 0. Harvested net losses average 18% of starting capital per window to 2026, almost all in windows starting 2000-2009; 10-year windows starting 2010 and 2012-2016 harvested nothing. OUTSIDE-ENGINE ARITHMETIC (mean of 24 yearly starts to 2026 / 17 ten-year windows, CA): engine -0.0007/+0.0005; losses absorb other LT gains +0.0022/+0.0038; other ST gains +0.0049/+0.0086; $3k/yr offset on $100k +0.0020/+0.0035, on $1M -0.0004/+0.0009; stepped-up basis +0.0033/+0.0079. FED outside-gains value +0.0009/+0.0025."
+  },
+  {
+   "label": "SPY replica from 11 SPDR sectors (NNLS fit to SPY, then drift) + 5% weekly harvesting into iShares/Vanguard sector twins: sector direct indexing",
+   "cfg": {
+    "kind": "tax_structures.slots",
+    "slots": [
+     [
+      "XLB",
+      "IYM",
+      "VAW"
+     ],
+     [
+      "XLE",
+      "IYE",
+      "VDE"
+     ],
+     [
+      "XLF",
+      "IYF",
+      "VFH"
+     ],
+     [
+      "XLI",
+      "IYJ",
+      "VIS"
+     ],
+     [
+      "XLK",
+      "IYW",
+      "VGT"
+     ],
+     [
+      "XLP",
+      "IYK",
+      "VDC"
+     ],
+     [
+      "XLU",
+      "IDU",
+      "VPU"
+     ],
+     [
+      "XLV",
+      "IYH",
+      "VHT"
+     ],
+     [
+      "XLY",
+      "IYC",
+      "VCR"
+     ],
+     [
+      "XLRE",
+      "IYR",
+      "VNQ"
+     ],
+     [
+      "XLC",
+      "VOX"
+     ]
+    ],
+    "weights": "fit",
+    "harvest": 0.05,
+    "harvest_freq": "W"
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.001931,
+     "full_excess": -0.002196,
+     "ex5_mean": 0.000608,
+     "ex10_mean": 0.002435,
+     "ex10_beat": 0.80597,
+     "ex10_min": -0.023331,
+     "ex15_beat": 0.808511,
+     "ex20_beat": 0.888889,
+     "boot_p": 0.668,
+     "max_dd": -0.55879,
+     "bench_max_dd": -0.551894,
+     "trades": 115,
+     "turnover": 0.074809
+    },
+    "FED": {
+     "score": 0.002081,
+     "full_excess": -0.002267,
+     "ex5_mean": 0.000654,
+     "ex10_mean": 0.002657,
+     "ex10_beat": 0.80597,
+     "ex10_min": -0.024948,
+     "ex15_beat": 0.808511,
+     "ex20_beat": 0.888889,
+     "boot_p": 0.671,
+     "max_dd": -0.55879,
+     "bench_max_dd": -0.551894,
+     "trades": 115,
+     "turnover": 0.074809
+    },
+    "NONE": {
+     "score": 0.001924,
+     "full_excess": -0.002261,
+     "ex5_mean": 0.000839,
+     "ex10_mean": 0.002343,
+     "ex10_beat": 0.716418,
+     "ex10_min": -0.024995,
+     "ex15_beat": 0.787234,
+     "ex20_beat": 0.814815,
+     "boot_p": 0.634,
+     "max_dd": -0.537903,
+     "bench_max_dd": -0.551894,
+     "trades": 9,
+     "turnover": 0
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "low",
+   "robustness_notes": "Gap 0.0000. 10/15/20-yr beat rates are high (0.81/0.81/0.89), but full excess is -0.0022 and boot_p 0.67, so it fails criteria 1 and 3. The replica tracks SPY with ~4.4%/yr TE and lags after 2018: the drift portfolio holds no XLC, and the sector funds are capped. Harvests 23-27% of capital (more than SPY-level), worth about +0.45 pp/yr only outside the engine. Neighbours: no harvest +0.0017, 10% daily +0.0013. No pre-2000 index sector funds exist for a long test."
+  },
+  {
+   "label": "SPY replica from sector SPDRs, re-fit yearly within a 1% gain budget, + 10% daily harvesting: nearest pure-structure miss in FED",
+   "cfg": {
+    "kind": "tax_structures.slots",
+    "slots": [
+     [
+      "XLB",
+      "IYM",
+      "VAW"
+     ],
+     [
+      "XLE",
+      "IYE",
+      "VDE"
+     ],
+     [
+      "XLF",
+      "IYF",
+      "VFH"
+     ],
+     [
+      "XLI",
+      "IYJ",
+      "VIS"
+     ],
+     [
+      "XLK",
+      "IYW",
+      "VGT"
+     ],
+     [
+      "XLP",
+      "IYK",
+      "VDC"
+     ],
+     [
+      "XLU",
+      "IDU",
+      "VPU"
+     ],
+     [
+      "XLV",
+      "IYH",
+      "VHT"
+     ],
+     [
+      "XLY",
+      "IYC",
+      "VCR"
+     ],
+     [
+      "XLRE",
+      "IYR",
+      "VNQ"
+     ],
+     [
+      "XLC",
+      "VOX"
+     ]
+    ],
+    "weights": "fit",
+    "rebalance": "A",
+    "reb_rule": "tax",
+    "gain_budget": 0.01,
+    "refit": true,
+    "harvest": 0.1,
+    "harvest_freq": "D"
+   },
+   "regime_target": "FED",
+   "stats": {
+    "CA": {
+     "score": 0.000942,
+     "full_excess": 0.006009,
+     "ex5_mean": 0.000169,
+     "ex10_mean": 0.000763,
+     "ex10_beat": 0.776119,
+     "ex10_min": -0.010988,
+     "ex15_beat": 0.680851,
+     "ex20_beat": 0.925926,
+     "boot_p": 0.106,
+     "max_dd": -0.557011,
+     "bench_max_dd": -0.551894,
+     "trades": 384,
+     "turnover": 0.083425
+    },
+    "FED": {
+     "score": 0.00107,
+     "full_excess": 0.006186,
+     "ex5_mean": 0.000227,
+     "ex10_mean": 0.000917,
+     "ex10_beat": 0.791045,
+     "ex10_min": -0.011779,
+     "ex15_beat": 0.702128,
+     "ex20_beat": 0.925926,
+     "boot_p": 0.09,
+     "max_dd": -0.557011,
+     "bench_max_dd": -0.551894,
+     "trades": 384,
+     "turnover": 0.083425
+    },
+    "NONE": {
+     "score": -0.000467,
+     "full_excess": 0.001364,
+     "ex5_mean": -0.000458,
+     "ex10_mean": -0.000469,
+     "ex10_beat": 0.38806,
+     "ex10_min": -0.004458,
+     "ex15_beat": 0.297872,
+     "ex20_beat": 0.259259,
+     "boot_p": 0.374,
+     "max_dd": -0.553943,
+     "bench_max_dd": -0.551894,
+     "trades": 262,
+     "turnover": 0.095457
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "low",
+   "robustness_notes": "In FED it passes criteria 1 and 3 (boot_p 0.090) but fails criterion 2 (15-yr beat 0.70). In CA boot_p is 0.106. The score is small (+0.0009/+0.0011 CA/FED); full excess +0.0060 comes from early windows. A lone point: the quarterly version scores +0.0005 and the yearly version without harvesting +0.0002 (screen). Gap -0.0002."
+  },
+  {
+   "label": "The incumbent's 22-ETF menu held equal weight, rebalanced quarterly only through losses: the incumbent's structure without its momentum signal",
+   "cfg": {
+    "kind": "tax_structures.slots",
+    "slots": [
+     [
+      "SPY"
+     ],
+     [
+      "QQQ"
+     ],
+     [
+      "DIA"
+     ],
+     [
+      "MDY"
+     ],
+     [
+      "IWM"
+     ],
+     [
+      "IJR"
+     ],
+     [
+      "EFA"
+     ],
+     [
+      "EEM"
+     ],
+     [
+      "IWD"
+     ],
+     [
+      "IWF"
+     ],
+     [
+      "RSP"
+     ],
+     [
+      "XLB"
+     ],
+     [
+      "XLC"
+     ],
+     [
+      "XLE"
+     ],
+     [
+      "XLF"
+     ],
+     [
+      "XLI"
+     ],
+     [
+      "XLK"
+     ],
+     [
+      "XLP"
+     ],
+     [
+      "XLRE"
+     ],
+     [
+      "XLU"
+     ],
+     [
+      "XLV"
+     ],
+     [
+      "XLY"
+     ]
+    ],
+    "rebalance": "Q",
+    "reb_rule": "tax",
+    "gain_budget": 0
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.000976,
+     "full_excess": 0.005342,
+     "ex5_mean": 0.001566,
+     "ex10_mean": 0.000773,
+     "ex10_beat": 0.492537,
+     "ex10_min": -0.020004,
+     "ex15_beat": 0.489362,
+     "ex20_beat": 0.592593,
+     "boot_p": 0.262,
+     "max_dd": -0.545513,
+     "bench_max_dd": -0.551894,
+     "trades": 284,
+     "turnover": 0.007199
+    },
+    "FED": {
+     "score": 0.001182,
+     "full_excess": 0.0055,
+     "ex5_mean": 0.001693,
+     "ex10_mean": 0.001089,
+     "ex10_beat": 0.492537,
+     "ex10_min": -0.021373,
+     "ex15_beat": 0.489362,
+     "ex20_beat": 0.592593,
+     "boot_p": 0.246,
+     "max_dd": -0.545513,
+     "bench_max_dd": -0.551894,
+     "trades": 284,
+     "turnover": 0.007199
+    },
+    "NONE": {
+     "score": -0.000104,
+     "full_excess": 0.004068,
+     "ex5_mean": 0.000988,
+     "ex10_mean": -0.000482,
+     "ex10_beat": 0.477612,
+     "ex10_min": -0.025983,
+     "ex15_beat": 0.446809,
+     "ex20_beat": 0.592593,
+     "boot_p": 0.314,
+     "max_dd": -0.546941,
+     "bench_max_dd": -0.551894,
+     "trades": 2170,
+     "turnover": 0.08302
+    }
+   },
+   "long_protocol": {
+    "proxy": "tax_rotation's 21-fund long menu (index + Fidelity Select funds), EW, tax rule budget 0, quarterly",
+    "CA": {
+     "score": 0.005747,
+     "full_excess": 0.002827,
+     "ho5_mean": -0.003981,
+     "ho5_beat": 0.459459,
+     "ho10_mean": -0.005926
+    },
+    "FED": {
+     "score": 0.006359,
+     "full_excess": 0.002846,
+     "ho5_mean": -0.004267,
+     "ho5_beat": 0.459459,
+     "ho10_mean": -0.006264
+    },
+    "NONE": {
+     "score": 0.006768,
+     "full_excess": 0.001435,
+     "ho5_mean": -0.009468,
+     "ho5_beat": 0.432432,
+     "ho10_mean": -0.012148
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "medium",
+   "robustness_notes": "Gap 0.0000. The +0.0010 score exists only because windows start in 2000-2002: requiring EEM+RSP (windows from 2004) gives -0.0046 (screen). 30 random 15-25-fund menus under the same rule average -0.0135, 0/30 positive. Long proxy holdout negative (ho10 -0.0059). Site-expressible twin: manual mode with the 22 tickers, tax-managed, budget 0 (+0.0009 full CA)."
+  },
+  {
+   "label": "NOT a pure structure: the incumbent (12-1 momentum, top 5, quarterly, 22 ETFs) with the site rule's gain budget at 0 instead of 1%. Reported because the budget is a structural knob",
+   "cfg": {
+    "kind": "combo",
+    "picker": "momentum",
+    "picker_params": {
+     "lookback": 252,
+     "skip": 21
+    },
+    "timer": "buy_hold",
+    "timer_params": {},
+    "top_n": 5,
+    "rebalance": "Q",
+    "menu": [
+     "SPY",
+     "QQQ",
+     "DIA",
+     "MDY",
+     "IWM",
+     "IJR",
+     "EFA",
+     "EEM",
+     "IWD",
+     "IWF",
+     "RSP",
+     "XLB",
+     "XLC",
+     "XLE",
+     "XLF",
+     "XLI",
+     "XLK",
+     "XLP",
+     "XLRE",
+     "XLU",
+     "XLV",
+     "XLY"
+    ],
+    "trade_rule": "tax_managed",
+    "gain_budget": 0,
+    "wash_days": 31
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.00644,
+     "full_excess": 0.014582,
+     "ex5_mean": 0.004107,
+     "ex10_mean": 0.006183,
+     "ex10_beat": 0.791045,
+     "ex10_min": -0.018818,
+     "ex15_beat": 0.808511,
+     "ex20_beat": 0.962963,
+     "boot_p": 0.047,
+     "max_dd": -0.570245,
+     "bench_max_dd": -0.551894,
+     "trades": 128,
+     "turnover": 0.076182
+    },
+    "FED": {
+     "score": 0.006954,
+     "full_excess": 0.014977,
+     "ex5_mean": 0.004585,
+     "ex10_mean": 0.006708,
+     "ex10_beat": 0.791045,
+     "ex10_min": -0.020398,
+     "ex15_beat": 0.808511,
+     "ex20_beat": 0.962963,
+     "boot_p": 0.048,
+     "max_dd": -0.570245,
+     "bench_max_dd": -0.551894,
+     "trades": 128,
+     "turnover": 0.076182
+    },
+    "NONE": {
+     "score": 0.001443,
+     "full_excess": 0.005456,
+     "ex5_mean": 0.00646,
+     "ex10_mean": -0.000326,
+     "ex10_beat": 0.402985,
+     "ex10_min": -0.027407,
+     "ex15_beat": 0.425532,
+     "ex20_beat": 0.777778,
+     "boot_p": 0.341,
+     "max_dd": -0.517592,
+     "bench_max_dd": -0.551894,
+     "trades": 713,
+     "turnover": 1.451528
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "high",
+   "robustness_notes": "Signal-based (momentum). Uses the incumbent's hindsight-exposed menu: QQQ/XLK; tax_rotation found the incumbent negative without both. Versus the 1% incumbent: gap -0.0001 vs -0.0011, 10-yr beat 0.79 vs 0.70, 15-yr 0.81 vs 0.83, so it still fails criterion 2 (15-yr < 0.85). Battery: 7 timing offsets all positive (CA +0.0047..+0.0079, full -0.0042..+0.0167); costs non-monotonic (+0.0070/+0.0038/+0.0051 at 0/15/35 bps); stricter dividend-tax accounting slightly helps (from 2000 +1.46 -> +1.51 pp); sub-periods CA +0.80/-0.47/+0.33 pp/yr; DSR 0.049 (this family's n only; the momentum search was larger). Belongs to the tax_rotation family's domain."
+  }
+ ],
+ "diagnostics": {
+  "CA": {
+   "set": "screened pure-structure grid (groups A1+A2+B+C, 216 configs, protocol screen)",
+   "n_configs": 216,
+   "walk_forward": {
+    "oos_mean": -0.011695,
+    "oos_beat": 0,
+    "is_mean": 0.009518,
+    "avg_config_oos_mean": -0.007043,
+    "mean_oos_rank_pct": 0.2368
+   },
+   "walk_forward_5_3": {
+    "oos_mean": 0.001779,
+    "oos_beat": 0.5,
+    "is_mean": 0.01476,
+    "avg_config_oos_mean": -0.001179,
+    "mean_oos_rank_pct": 0.4989
+   },
+   "pbo": {
+    "pbo": 0.606,
+    "n_configs": 216,
+    "n_splits": 5000,
+    "is_best_mean": 0.00672,
+    "oos_of_is_best_mean": -0.00439,
+    "oos_of_is_best_p_pos": 0.2862
+   },
+   "dsr_best": {
+    "sr_annual": 0.245,
+    "dsr": 0.1925,
+    "psr": 0.8969
+   },
+   "best_by_monthly_mean": "sect11 w=fit reb=Q:tax0.01 refit h0.1D"
+  },
+  "NONE": {
+   "set": "same 216 configs (harvesting groups are degenerate in NONE: no lots, so every harvesting config is SPY)",
+   "n_configs": 216,
+   "walk_forward": {
+    "oos_mean": -0.013283,
+    "oos_beat": 0,
+    "is_mean": 0.011573,
+    "avg_config_oos_mean": -0.007934,
+    "mean_oos_rank_pct": 0.2593
+   },
+   "walk_forward_5_3": {
+    "oos_mean": 0.003351,
+    "oos_beat": 0.5,
+    "is_mean": 0.016442,
+    "avg_config_oos_mean": -0.001272
+   },
+   "pbo": {
+    "pbo": 0.9358,
+    "n_configs": 216,
+    "oos_of_is_best_mean": -0.007534,
+    "oos_of_is_best_p_pos": 0.0006
+   },
+   "dsr_best": {
+    "dsr": 0.0268,
+    "psr": 0.5032
+   }
+  },
+  "other_sets": {
+   "all_screened_incl_F_controls_CA": {
+    "n_configs": 279,
+    "wf_oos_mean": -0.022324,
+    "wf_oos_beat": 0.3333,
+    "wf_is_mean": 0.019397,
+    "wf53_oos_mean": -0.021215,
+    "pbo": 0.3938,
+    "dsr": 0.0616
+   },
+   "all_screened_incl_F_controls_NONE": {
+    "n_configs": 279,
+    "wf_oos_mean": -0.01482,
+    "wf_oos_beat": 0.3333,
+    "wf53_oos_mean": 0.010004,
+    "pbo": 0.919,
+    "dsr": 0.0348
+   },
+   "harvesting_A_only_CA": {
+    "n_configs": 102,
+    "wf_oos_mean": -0.001429,
+    "wf_oos_beat": 0,
+    "wf_is_mean": 0.003142,
+    "wf53_oos_mean": 0.004908,
+    "pbo": 0.636,
+    "dsr": 0.276
+   },
+   "C_only_CA": {
+    "n_configs": 81,
+    "wf_oos_mean": -0.011203,
+    "wf53_oos_mean": 0.003443,
+    "pbo": 0.559,
+    "dsr": 0.08
+   },
+   "full_protocol_19_pure_finalists_CA": {
+    "wf_oos_mean": -0.0093,
+    "wf_oos_beat": 0.08,
+    "wf_is_mean": 0.0123,
+    "wf53_oos_mean": -0.0005,
+    "pbo": 0.779,
+    "dsr": 0.435
+   },
+   "full_protocol_19_pure_finalists_FED": {
+    "wf_oos_mean": -0.0104,
+    "pbo": 0.782,
+    "dsr": 0.456
+   },
+   "full_protocol_19_pure_finalists_NONE": {
+    "wf_oos_mean": -0.0105,
+    "pbo": 0.554,
+    "dsr": 0.228
+   },
+   "note": "Screen walk-forward 10/5 has only 2-3 decision dates (yearly starts); the full-protocol version is better sampled and agrees: selection reverses out of sample. Criterion 4 fails for this family."
+  }
+ },
+ "hindsight_checks": "PROTOCOL 5.3 checks:\n(a) Random menus. 30 menus of 15-25 ETFs drawn from common.BROAD_EQUITY_POOL_2003 (same generator as tax_rotation), held equal weight under 4 rules; every fund required at the window start (~2004+). Mean CA screen score: drift -0.0134, tax-blind quarterly -0.0180, losses-only -0.0135, 1% budget -0.0162. 0/30 menus positive under any rule; 0 pass criteria 1-3. Losses-only beat tax-blind on 30/30 menus (+0.0045). The structure stops leaks; it does not create an edge.\n(b) Remove the star, for the best structure (9 sector SPDRs EW, losses-only; base screen CA +0.0027). Dropping XLK flips it to -0.0014. Dropping XLY leaves +0.0005. Dropping the other 7 sectors one at a time gives +0.0020..+0.0056.\n(c) Same structure on other index families: iShares IY* (from 2000-07) -0.0006; Vanguard V* (from 2004-10) -0.0026. The SPDRs restricted to the same 2004-10+ windows give -0.0038.\n(d) SPY-core harvesting: 6 substitute chains (large-cap only, total market, SPY<->IWB, SPY<->VTI, a mutual-fund chain, mixed). All within -0.0036..+0.0015 with gap 0. Results equal the tracking of whichever substitute is held; buy-and-hold VTI/VV/VTSMX/IWB/IWV alone: +0.0014/+0.0014/+0.0013/+0.0007/-0.0003.\n(e) The incumbent's menu (22 ETFs incl. QQQ/XLK) under the pure structure: +0.0010 with 2000 starts, -0.0046 when windows start from 2004 (EEM+RSP required).\n(f) Random rankings under the incumbent's rule (20 seeds screen, 8 full): all 8 full-protocol seeds negative (mean -0.0028). Momentum ranks above all 20 screen seeds (z = 4.1).\n(g) Long proxies with pre-2000 holdout. VFINX<->VTSMX harvesting: holdout 0.0000. Fidelity Select sector EW: positive holdout (ho10 +0.0060) on active funds. 21-fund long menu: holdout negative (ho10 -0.0059).",
+ "concerns": [
+  "The engine cannot credit tax-loss harvesting. With no $3k ordinary offset, no outside gains, pooled losses and a full terminal liquidation, harvested losses only offset the extra gain their own lower basis creates. Real-world TLH value (deferral against other gains, the $3k offset, step-up/donation) is invisible on the site. It is quantified only as OUTSIDE-ENGINE ARITHMETIC (harvest_value.py). The 'outside gains' scenario is an upper bound: it assumes enough other gains in every loss year, including 2001-02 and 2008, when other holdings were probably losing too.",
+  "The best pure structure's edge (9 sector SPDRs EW) is an equal-weight sector tilt that won in 2000-2004-starting windows. It loses from late 2004 (-0.0038), without XLK (-0.0014), and on iShares/Vanguard sector families. Its long-history proxy passes criteria 1-3, but only on actively managed Fidelity Select survivors with narrower sector definitions. Treat the long result as conflicting evidence, not confirmation.",
+  "Module flaw, not fixed to preserve the cache: my 'band' rebalancing rule (reb_rule standard + band) skips in-band slots for buys as well as sells. Sale proceeds can sit in cash (avg cash 1-8% for the 10 band configs in group C, versus ~0% elsewhere). Those rows (and their small positive gap) are unreliable; nothing else uses bands.",
+  "The mapped/gap decomposition pairs each CA/FED record with its ZERO twin (same rule, 0% rates). For rules whose trades depend on portfolio value (tax-blind bands, budgets, cash cover), the CA and ZERO paths diverge slightly, so gap carries small path noise (largest positive +0.0001 score / +0.0012 full window on a band rule).",
+  "Bootstrap p-values depend on the number of resamples. report.table/metrics.summary use 1,000 (used throughout); verify.battery uses 500. Example: the 0%-budget incumbent has boot_p 0.047 (1,000) vs 0.042 (battery). The incumbent's CA boot_p is 0.025 here vs 0.026 in the lead's verify file.",
+  "Total-return prices defer dividends for everyone. The realism replay shows this does not change the sector-EW result (+0.60 -> +0.60 pp from 2000), but real accounts also face wash-sale risk from dividend reinvestment and purchases in other accounts. The engine cannot see that; the 31-day guard covers only this account.",
+  "FIFO-only lot relief makes harvesting position-level (no specific-lot identification). This understates harvestable losses for multi-lot positions, though in-engine value would stay zero.",
+  "The 0%-budget incumbent variant (F_mom_tm0) is signal-based and belongs to the tax_rotation family. Its battery's DSR uses only this family's trial count (470), which understates the multiple-testing penalty of the momentum search."
+ ],
+ "untested_ideas": [
+  "Core-satellite in ONE account: an SPY core harvesting into VTI/IWB alongside a momentum satellite that realizes gains. This is the only in-engine channel where harvested losses have value (offsetting gains realized in the same account before the end). tax_rotation's TRStrategy (core + harvest + substitutes) could run it; not tested here.",
+  "Harvest-to-rebalance: route harvest proceeds to the most underweight slots instead of the same-exposure twin, i.e. rebalance a static allocation using losses as the only source of cash.",
+  "A correct band rebalancer (redistribute proceeds to all underweight slots when any slot breaches its band), to measure the tax gap of band rebalancing cleanly.",
+  "Specific-lot (HIFO) harvesting and partial-position harvesting; impossible with the engine's FIFO lots.",
+  "Sector replica with point-in-time S&P sector weights (instead of the NNLS fit) and yearly re-fits that add XLRE/XLC through a gain budget, to cut the ~4.4%/yr tracking error after 2016-2018.",
+  "Stock-level direct indexing (harvest dispersion is larger for single stocks). Belongs to the stocks family and is biased by survivorship; in-engine value would still be zero without outside gains.",
+  "Modelling outside cash flows (contributions/withdrawals): contributions let a taxable investor rebalance and harvest without realizing gains. The engine has no cash flows.",
+  "Asset location across a taxable + IRA pair, and gain harvesting in low-bracket years (flat rates in the engine)."
+ ],
+ "lab_bugs": [
+  "No lab bug found in the lab core. Two limitations worth knowing:",
+  "verify.battery silently skips the rebalance-offset and lag checks for registered custom kinds (verify._x_cfg only handles 'weights' and 'combo'). A family with its own kind gets no timing-luck check unless it implements offsets itself; I added an offset_days parameter to tax_structures.slots and ran offsets as group X.",
+  "Engine behaviour (site, not lab): the January tax settlement can drive cash negative, effectively an interest-free loan of the tax bill, for strategies that realize gains without selling to raise cash. The site's manual-mode standard combo on the 22-ETF menu reached -$4,533 cash in CA. Small, but it flatters strategies that realize gains and stay fully invested. tax_structures.slots sells to cover (cover_cash=True).",
+  "Engine simplification (documented in backtester/tax.py): pooled losses offset short-term gains first. That is more generous than IRS netting when long-term losses meet short-term gains while long-term gains exist. It does not create any positive gap in this family's results.",
+  "Site behaviour: manual-mode 'standard' Combo rebalances to equal weight whenever a menu fund first becomes tradable (membership change), so it is not a pure buy-and-hold for menus with late launches (XLRE 2015, XLC 2018, EEM/RSP 2003)."
+ ]
+}

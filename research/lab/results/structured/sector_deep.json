@@ -1,0 +1,1096 @@
+{
+ "family": "sector_deep",
+ "module_path": "/Users/siddhartha/dev/StockTest/research/lab/families/sector_deep.py",
+ "n_configs_tested": 1170,
+ "headline": "No sector-rotation strategy in this family beats SPY after California tax with good confidence: nothing passes the PROTOCOL section 3 bar in CA or FED, and every CA \"edge\" is shared by random picks under the same tax-managed execution. The pre-2000 holdout of the incumbent's exact rule on a pre-registered pre-ETF copy of its menu (PRE20) is weakly supportive. On the long protocol it beat VFINX by +0.59 pp (5-year windows) and +0.52 pp (10-year windows). It beat equal-weight and random tax-managed controls in every yearly-start pre-2000 window. Its excess over VFINX falls to between -1.1 and +2.6 pp once fund distributions are taxed yearly, and it wins by the same freeze-into-early-winners mechanism the incumbent uses after 2010. The rule does not transfer across sector universes: on the full protocol in CA it scores -0.72 to +0.15 pp on the five sector-ETF menus (SPDR 9/11, iShares, Vanguard, industry ETFs) and beats on average only 2.5 of 5 site-RandomPicker TaxManagedCombo controls on 8 other menus, though it beats 10 of 10 on its own 22-ETF menu. Pre-tax, fine-grained Fidelity Select industry momentum was strong before 2000 (+5 to +9 pp/yr), roughly halved afterwards, is fragile to costs and parameters, and is absent on coarse sector ETFs. That makes it irrelevant for a taxable account.",
+ "findings": [
+  "CA, standard execution: sector momentum loses after tax. On the Fidelity/Vanguard 32-fund menu (FSEL32, long_screen 1986-2023 vs VFINX) the median CA score is -0.80 pp (132 configs) and -2.7 pp before 2000. Mean reversion (-4.9), seasonality (-4.5), low-vol (-1.8), low-beta (-1.5; pre-2000 5-year windows -7.9), 52-week high (-2.0) and random monthly picks (-3.4) are all worse.",
+  "CA, tax-managed execution lifts every rule, not just momentum: tax-managed momentum median +1.28 pp (144 configs), tax-managed random picks +1.11 pp (35), equal-weight tax-managed menu +1.47 pp. With identical execution, momentum's percentile within the random-seed distribution is 0.52-0.80 on score. It is 0.80-0.88 on pre-2000 5-year windows, but only 0.40 on pre-2000 10-year windows and 0.10-0.28 after 2000, where momentum trails random picks by about 1 pp/yr.",
+  "On the full protocol (2000-2026 vs SPY, CA), every Fidelity-menu finalist (score +0.83 to +1.89 pp) sits inside the range of 5 random tax-managed pickers on the same menu (+0.37 to +1.82 pp, boot_p 0.045-0.64). The no-selection equal-weight tax-managed control has the best bootstrap: full +1.91 pp, boot_p 0.069. All finalists fail ex10_beat >= 0.75 and ex15_beat >= 0.85.",
+  "Incumbent's idea before 2000 (new, pre-registered PRE20 menu: each of the incumbent's 22 ETFs mapped by category to a fund that existed by 1986-96). The exact site rule (12-1, top 5, Q, TaxManagedCombo 1%) in CA scores: long protocol ho5 +0.59 pp (65% of 37 windows above VFINX), ho10 +0.52 pp (59% of 17); long_screen ho5 +1.09 (8/10), ho10 +1.23 (5/5). It beat the median of 10 random tax-managed pickers and the equal-weight tax-managed menu in all 10 five-year and 5 ten-year yearly-start holdout windows. The equal-weight control was negative (long ho10 -1.07 pp, 0% of windows). The 1986-99 monthly path from the 1986 start was flat (+0.03 pp, p 0.51).",
+  "Mechanism of the pre-2000 PRE20 result: from a 1986 start the rule froze by about 1990 into health care (FSPHX, 23-32% of the portfolio for 40 years), staples (FDFAX), Dodge & Cox and international, and traded only 2-10 times a year after that. That is the same 'never sell a winner above cost' regime bet the incumbent makes on XLK/QQQ/IWF after 2010. On the sector-only analog FSEL11 the pre-2000 edge is modest (long ho5 +0.42, ho10 +0.72 pp; 60th-90th percentile of random pickers). On the fine-grained FSEL32 it is about the same as the equal-weight control.",
+  "Universe robustness on the incumbent's own protocol (full, CA, exact site class) versus the site RandomPicker with the same TaxManagedCombo. Score and beats-out-of-5 random seeds: SPDR9 -0.06 (2/5), SPDR11 -0.10 (3/5), ISH10 -0.72 (2/5), VAN10 -0.56 (5/5), IND16 +0.15 (2/5), FSEL32 +1.13 (4/5), PRE20 +0.14 (2/5), FSEL11 +0.07 (0/5); average 2.5 of 5. On its own INC22 menu the incumbent (+0.66) beats 10 of 10 random pickers (median -0.23, max +0.06), so 12-1 selection mattered there in 2000-2026, but the effect does not transfer to other sector universes.",
+  "Realism: Fidelity Select funds distribute about 4-5%/yr (mostly capital gains, often short-term) against about 1.5% for SPY. The engine compounds distributions untaxed until sale. Taxing them yearly (lab realism replay) removes 0.2-0.6 pp/yr (all taxed as qualified, the lab's rule) or 0.5-1.2 pp/yr (half taxed as ordinary) from every Fidelity-menu result after 2000, and 0-1.4 / 0.4-2.7 pp in pre-2000 windows. After this, the incumbent's rule on PRE20 is +0.34/-0.11 pp for 2000-2026 and -0.37/-1.14 pp for 1986-2000. The best CA config (C1) is +0.32/-0.21 pp for 2000-2026.",
+  "Pre-tax (NONE, diagnostic): Fidelity industry momentum was strong before 2000. Blend 63/126/252 top 3 M scored ho5 +7.0 pp on long_screen. Across signal lags of 0-10 trading days the six main rules keep scores of +3.6 to +7.4 pp and ho5 of +3.5 to +11.6 pp, so it is not a stale-NAV artifact. Leave-one-out (17 of 32 funds) keeps it at +4.4 to +6.4 pp, and FSEL28 (no Vanguard funds) is about the same.",
+  "Pre-tax decay after 2000: the median momentum config's post-2000 monthly excess (+2.0 pp) is about the equal-weight menu's (+2.2 pp). Spearman of pre- vs post-2000 5-year excess across 473 configs is only 0.22. On ETF menus after 2000 (screen, NONE), momentum helps only on fine industry menus (FSEL32 +0.4 to +4.0 pp, IND16 up to +2.4 pp) and not on coarse sector ETFs (SPDR9 -1.5 to +1.0, ISH10 -2.6 to 0.0, VAN10 -2.3 to +0.1). On 20 random 10-ETF menus from BROAD_EQUITY_POOL_2003, momentum minus equal weight is -0.02 pp (45% positive).",
+  "Pre-tax finalists are fragile. N1 (FSEL32 blend3 top 3 M) meets criteria 1-3 in NONE on full (score +2.42, ex10_beat 0.93, ex15_beat 1.00, boot_p 0.049), but only 1 of its 4 immediate neighbours does. It also collapses at 30 bp/side commission (long score +2.75, boot_p 0.19) and turns negative at 75 bp, which matters given Select funds' historical loads and fees. N3 (L189 top 5 Q) is cost-robust (+2.71 pp at 75 bp) but misses ex10_beat (0.746), and only 1 of its 3 neighbours passes.",
+  "Overfitting diagnostics. On the CA long_screen grid (909 configs) the best config by monthly mean is a random tax-managed control (seed 14). Walk-forward is +3.4 pp on 10/5 (6 decisions, one of them +14.5 pp) but -4.3 pp on 5/3 (oos_beat 0.25). PBO is 0.42 and the best config's deflated Sharpe is 0.043. The NONE long_screen grid gives walk-forward +5.9 pp (10/5) / -0.3 pp (5/3), PBO 0.35, DSR 0.068.",
+  "Compute note: the earlier session finished stage 1 (1,148 runs) and part of stage 2. This session added stage-2 B4, the ETF cross-check, random ETF menus, the pre-ETF incumbent analog (PRE20/FSEL11), finalists on full and long with cost stress, the per-menu RandomPicker controls (stages 8 and 8b), a full-protocol neighbourhood check (stage 9) and a corrected realism replay. In total 1,170 configs and 1,962 engine runs. The family module was never edited, so all earlier caches stayed valid."
+ ],
+ "candidates": [
+  {
+   "label": "C2: FSEL32 blend(63,126,252) momentum top5 quarterly, tax-managed 1%/yr gain budget (Fidelity Select + Vanguard sector funds)",
+   "cfg": {
+    "kind": "weights",
+    "signal": "sector_deep.rotate",
+    "rebalance": "Q",
+    "execution": "tax",
+    "params": {
+     "menu": [
+      "FSPTX",
+      "FSELX",
+      "FSCSX",
+      "FBIOX",
+      "FSPHX",
+      "FSENX",
+      "FSUTX",
+      "FSRBX",
+      "FSLBX",
+      "FSPCX",
+      "FSCPX",
+      "FDFAX",
+      "FSRPX",
+      "FSDAX",
+      "FSCHX",
+      "FSAGX",
+      "FSRFX",
+      "FSHOX",
+      "FIDSX",
+      "FSTCX",
+      "FDCPX",
+      "FSAVX",
+      "FSDPX",
+      "FSLSX",
+      "FBMPX",
+      "FSHCX",
+      "FSVLX",
+      "FDLSX",
+      "VGENX",
+      "VGHCX",
+      "VGPMX",
+      "VGSIX"
+     ],
+     "bench": "VFINX",
+     "score": "mom",
+     "lookback": [
+      63,
+      126,
+      252
+     ],
+     "skip": 0,
+     "top_n": 5
+    },
+    "gain_budget": 0.01
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.0083,
+     "full_excess": 0.0205,
+     "ex5_mean": 0.0061,
+     "ex10_mean": 0.008,
+     "ex10_beat": 0.6716,
+     "ex10_min": -0.0498,
+     "ex15_beat": 0.766,
+     "ex20_beat": 0.8889,
+     "boot_p": 0.098,
+     "max_dd": -0.5383,
+     "bench_max_dd": -0.5519,
+     "trades": 723,
+     "turnover": 0.1277
+    },
+    "FED": {
+     "score": 0.0095,
+     "full_excess": 0.0218,
+     "ex5_mean": 0.0073,
+     "ex10_mean": 0.0093,
+     "ex10_beat": 0.6866,
+     "ex10_min": -0.053,
+     "ex15_beat": 0.766,
+     "ex20_beat": 0.8889,
+     "boot_p": 0.098,
+     "max_dd": -0.5383,
+     "bench_max_dd": -0.5519,
+     "trades": 728,
+     "turnover": 0.1298
+    },
+    "NONE": {
+     "score": 0.0205,
+     "full_excess": 0.0338,
+     "ex5_mean": 0.0213,
+     "ex10_mean": 0.0198,
+     "ex10_beat": 0.7761,
+     "ex10_min": -0.039,
+     "ex15_beat": 0.7872,
+     "ex20_beat": 1,
+     "boot_p": 0.048,
+     "max_dd": -0.5622,
+     "bench_max_dd": -0.5519,
+     "trades": 856,
+     "turnover": 2.528
+    }
+   },
+   "long_protocol": {
+    "note": "protocol long not run; long_screen (yearly starts 1986-2023, VFINX) shown",
+    "CA": {
+     "score": 0.0164,
+     "full_excess": 0.0106,
+     "ho5_mean": 0.0258,
+     "ho5_beat": 0.7,
+     "ho10_mean": 0.0084
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "medium",
+   "robustness_notes": "Fails the CA bar: ex10_beat 0.67 < 0.75 and ex15_beat 0.77 < 0.85 (boot_p 0.098 passes). It is inside the range of 5 random tax-managed pickers on the same menu on full (random score +0.37 to +1.82 pp, boot_p 0.045-0.64). The no-selection equal-weight tax-managed control (FSEL32 EW, annual) has full +1.91 pp and boot_p 0.069, so selection adds nothing measurable. Neighbour L252 s0 top5 Q TAX scores +1.20 with full -0.02 and boot_p 0.49. The engine leaves fund distributions untaxed until sale (this menu distributes about 4.5%/yr vs SPY's 1.5%), so taxing them yearly costs about 0.5 (lab rule) to 1.0 pp/yr (half taxed as ordinary). The menu holds only surviving Fidelity Selects (survivorship), and Select funds historically had loads and short-term fees."
+  },
+  {
+   "label": "C1: FSEL32 12-1 momentum top3 monthly, tax-managed 2%/yr gain budget, no short-term gains (best CA config on long_screen)",
+   "cfg": {
+    "kind": "weights",
+    "signal": "sector_deep.rotate",
+    "rebalance": "M",
+    "execution": "tax",
+    "params": {
+     "menu": [
+      "FSPTX",
+      "FSELX",
+      "FSCSX",
+      "FBIOX",
+      "FSPHX",
+      "FSENX",
+      "FSUTX",
+      "FSRBX",
+      "FSLBX",
+      "FSPCX",
+      "FSCPX",
+      "FDFAX",
+      "FSRPX",
+      "FSDAX",
+      "FSCHX",
+      "FSAGX",
+      "FSRFX",
+      "FSHOX",
+      "FIDSX",
+      "FSTCX",
+      "FDCPX",
+      "FSAVX",
+      "FSDPX",
+      "FSLSX",
+      "FBMPX",
+      "FSHCX",
+      "FSVLX",
+      "FDLSX",
+      "VGENX",
+      "VGHCX",
+      "VGPMX",
+      "VGSIX"
+     ],
+     "bench": "VFINX",
+     "score": "mom",
+     "lookback": 252,
+     "skip": 21,
+     "top_n": 3
+    },
+    "gain_budget": 0.02,
+    "st_gains": false
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.0189,
+     "full_excess": 0.0084,
+     "ex5_mean": 0.0276,
+     "ex10_mean": 0.0209,
+     "ex10_beat": 0.6716,
+     "ex10_min": -0.0207,
+     "ex15_beat": 0.7021,
+     "ex20_beat": 0.8519,
+     "boot_p": 0.39,
+     "max_dd": -0.6595,
+     "bench_max_dd": -0.5519,
+     "trades": 548,
+     "turnover": 0.1552
+    },
+    "FED": {
+     "score": 0.0212,
+     "full_excess": 0.0119,
+     "ex5_mean": 0.0309,
+     "ex10_mean": 0.0233,
+     "ex10_beat": 0.7015,
+     "ex10_min": -0.0217,
+     "ex15_beat": 0.6809,
+     "ex20_beat": 0.8889,
+     "boot_p": 0.364,
+     "max_dd": -0.6595,
+     "bench_max_dd": -0.5519,
+     "trades": 529,
+     "turnover": 0.1598
+    },
+    "NONE": {
+     "score": 0.0026,
+     "full_excess": 0.0319,
+     "ex5_mean": 0.0091,
+     "ex10_mean": -0.0014,
+     "ex10_beat": 0.3433,
+     "ex10_min": -0.0444,
+     "ex15_beat": 0.3404,
+     "ex20_beat": 0.4074,
+     "boot_p": 0.167,
+     "max_dd": -0.6329,
+     "bench_max_dd": -0.5519,
+     "trades": 1230,
+     "turnover": 3.5532
+    }
+   },
+   "long_protocol": {
+    "CA": {
+     "score": 0.024,
+     "full_excess": 0.0191,
+     "ho5_mean": 0.0153,
+     "ho5_beat": 0.6486,
+     "ho10_mean": 0.0057
+    },
+    "NONE": {
+     "score": 0.0312,
+     "full_excess": 0.038,
+     "ho5_mean": 0.0213,
+     "ho5_beat": 0.6757,
+     "ho10_mean": 0.0156
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "medium",
+   "robustness_notes": "Best of 784 CA configs on the FSEL long_screen grid (+2.47 pp), but at the edge of the 15 random pickers with identical execution (max +2.37). Its nearest neighbour (L252 s0, same execution) has full +0.25 pp and boot_p 0.44, so this is a lone spike. On full in CA: ex10_beat 0.67, ex15_beat 0.70, boot_p 0.39, max drawdown -66% vs SPY's -55%. Fails. Realism (distributions taxed yearly), engine / lab rule / half ordinary: 1986->2026 +1.91 / +1.03 / +0.39 pp; 2000->2026 +0.84 / +0.32 / -0.21 pp. Long protocol (CA): ho10 +0.57 pp, above VFINX in only 41% of 10-year windows."
+  },
+  {
+   "label": "Incumbent's exact site rule (Combo 12-1 momentum, top5, Q, TaxManagedCombo 1%) on PRE20, the pre-ETF analog of its 22-ETF menu (key pre-2000 holdout test)",
+   "cfg": {
+    "kind": "combo",
+    "picker": "momentum",
+    "picker_params": {
+     "lookback": 252,
+     "skip": 21
+    },
+    "timer": "buy_hold",
+    "timer_params": {},
+    "top_n": 5,
+    "rebalance": "Q",
+    "menu": [
+     "VFINX",
+     "PRGFX",
+     "DODGX",
+     "VEXMX",
+     "NAESX",
+     "PRITX",
+     "VEIEX",
+     "VWNDX",
+     "VWUSX",
+     "FSDPX",
+     "FSTCX",
+     "FSENX",
+     "FIDSX",
+     "FSDAX",
+     "FSPTX",
+     "FDFAX",
+     "VGSIX",
+     "FSUTX",
+     "FSPHX",
+     "FSRPX"
+    ],
+    "trade_rule": "tax_managed",
+    "gain_budget": 0.01,
+    "wash_days": 31
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.0014,
+     "full_excess": 0.0088,
+     "ex5_mean": -0.0008,
+     "ex10_mean": 0.0019,
+     "ex10_beat": 0.4179,
+     "ex10_min": -0.0378,
+     "ex15_beat": 0.5745,
+     "ex20_beat": 0.8519,
+     "boot_p": 0.235,
+     "max_dd": -0.6146,
+     "bench_max_dd": -0.5519,
+     "trades": 296,
+     "turnover": 0.1054
+    },
+    "FED": {
+     "score": 0.0018,
+     "full_excess": 0.0091,
+     "ex5_mean": -0.0007,
+     "ex10_mean": 0.0024,
+     "ex10_beat": 0.4328,
+     "ex10_min": -0.0409,
+     "ex15_beat": 0.5745,
+     "ex20_beat": 0.8519,
+     "boot_p": 0.242,
+     "max_dd": -0.6146,
+     "bench_max_dd": -0.5519,
+     "trades": 296,
+     "turnover": 0.1058
+    },
+    "NONE": {
+     "score": -0.0038,
+     "full_excess": -0.0026,
+     "ex5_mean": 0.0023,
+     "ex10_mean": -0.0066,
+     "ex10_beat": 0.3433,
+     "ex10_min": -0.0358,
+     "ex15_beat": 0.2766,
+     "ex20_beat": 0.4444,
+     "boot_p": 0.572,
+     "max_dd": -0.6039,
+     "bench_max_dd": -0.5519,
+     "trades": 718,
+     "turnover": 1.4087
+    }
+   },
+   "long_protocol": {
+    "CA": {
+     "score": 0.0064,
+     "full_excess": 0.01,
+     "ho5_mean": 0.0059,
+     "ho5_beat": 0.6486,
+     "ho10_mean": 0.0052
+    },
+    "FED": {
+     "score": 0.0074,
+     "full_excess": 0.012,
+     "ho5_mean": 0.0072,
+     "ho5_beat": 0.6486,
+     "ho10_mean": 0.0063
+    },
+    "NONE": {
+     "score": 0.0094,
+     "full_excess": 0.0097,
+     "ho5_mean": 0.029,
+     "ho5_beat": 0.7568,
+     "ho10_mean": 0.0266
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "medium",
+   "robustness_notes": "Menu pre-registered before any run (ETF -> fund by category: SPY VFINX, QQQ PRGFX, DIA DODGX, MDY VEXMX, IWM/IJR NAESX, EFA PRITX, EEM VEIEX, IWD VWNDX, IWF VWUSX, sectors -> Fidelity Selects, XLRE -> VGSIX). Pre-2000 holdout, CA: long ho5 +0.59 pp (65% of 37 windows), ho10 +0.52 pp (59% of 17); long_screen ho5 +1.09 (8/10), ho10 +1.23 (5/5). It beat the median of 10 random tax-managed pickers and the equal-weight tax-managed menu in every yearly-start pre-2000 window (EW long ho10 -1.07 pp). But the 1986-99 monthly path was flat (+0.03 pp, p 0.51). With distributions taxed yearly (lab rule / half ordinary): 1986-96 +1.35/+0.65, 1990-2000 +2.59/+1.82, 1995-2000 +0.62/-0.47, 1986-2000 -0.37/-1.14 pp. Mechanism: froze into FSPHX (health care, 23-32% for 40 years), FDFAX, DODGX, PRITX. Over 2000-2026 on full it scores +0.14 pp and beats only 2 of 5 site-RandomPicker controls (median +0.29). Contains actively managed funds and only funds that still exist (survivorship). Fails the bar."
+  },
+  {
+   "label": "Incumbent's exact site rule on FSEL32 (28 Fidelity Selects + 4 Vanguard sector funds)",
+   "cfg": {
+    "kind": "combo",
+    "picker": "momentum",
+    "picker_params": {
+     "lookback": 252,
+     "skip": 21
+    },
+    "timer": "buy_hold",
+    "timer_params": {},
+    "top_n": 5,
+    "rebalance": "Q",
+    "menu": [
+     "FSPTX",
+     "FSELX",
+     "FSCSX",
+     "FBIOX",
+     "FSPHX",
+     "FSENX",
+     "FSUTX",
+     "FSRBX",
+     "FSLBX",
+     "FSPCX",
+     "FSCPX",
+     "FDFAX",
+     "FSRPX",
+     "FSDAX",
+     "FSCHX",
+     "FSAGX",
+     "FSRFX",
+     "FSHOX",
+     "FIDSX",
+     "FSTCX",
+     "FDCPX",
+     "FSAVX",
+     "FSDPX",
+     "FSLSX",
+     "FBMPX",
+     "FSHCX",
+     "FSVLX",
+     "FDLSX",
+     "VGENX",
+     "VGHCX",
+     "VGPMX",
+     "VGSIX"
+    ],
+    "trade_rule": "tax_managed",
+    "gain_budget": 0.01,
+    "wash_days": 31
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.0113,
+     "full_excess": -0.0048,
+     "ex5_mean": 0.0162,
+     "ex10_mean": 0.015,
+     "ex10_beat": 0.6269,
+     "ex10_min": -0.0326,
+     "ex15_beat": 0.5957,
+     "ex20_beat": 0.5185,
+     "boot_p": 0.578,
+     "max_dd": -0.6583,
+     "bench_max_dd": -0.5519,
+     "trades": 245,
+     "turnover": 0.0869
+    },
+    "FED": {
+     "score": 0.0128,
+     "full_excess": -0.0049,
+     "ex5_mean": 0.0183,
+     "ex10_mean": 0.0169,
+     "ex10_beat": 0.6418,
+     "ex10_min": -0.0351,
+     "ex15_beat": 0.5957,
+     "ex20_beat": 0.5556,
+     "boot_p": 0.573,
+     "max_dd": -0.6583,
+     "bench_max_dd": -0.5519,
+     "trades": 245,
+     "turnover": 0.0873
+    },
+    "NONE": {
+     "score": 0.0023,
+     "full_excess": 0.0161,
+     "ex5_mean": 0.0085,
+     "ex10_mean": -0.001,
+     "ex10_beat": 0.4179,
+     "ex10_min": -0.0441,
+     "ex15_beat": 0.2979,
+     "ex20_beat": 0.5926,
+     "boot_p": 0.283,
+     "max_dd": -0.6081,
+     "bench_max_dd": -0.5519,
+     "trades": 746,
+     "turnover": 1.5496
+    }
+   },
+   "long_protocol": {
+    "CA": {
+     "score": 0.0168,
+     "full_excess": 0.0049,
+     "ho5_mean": 0.0072,
+     "ho5_beat": 0.6216,
+     "ho10_mean": 0.0094
+    },
+    "FED": {
+     "score": 0.0189,
+     "full_excess": 0.005,
+     "ho5_mean": 0.0082,
+     "ho5_beat": 0.6216,
+     "ho10_mean": 0.0105
+    },
+    "NONE": {
+     "score": 0.0203,
+     "full_excess": 0.0257,
+     "ho5_mean": 0.0276,
+     "ho5_beat": 0.7297,
+     "ho10_mean": 0.0228
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "medium",
+   "robustness_notes": "On full in CA: score +1.13 but full -0.48 pp, ex10_beat 0.63, boot_p 0.58. Beats 4 of 5 RandomPicker controls (median +1.03). The pre-2000 holdout (long CA ho5 +0.72, ho10 +0.94 pp) is about the same as the equal-weight tax-managed control on the same menu (+0.81/+0.66). Distribution tax, 2000->2026: -0.48 engine -> -1.10 lab rule -> -1.66 pp half ordinary. Froze into FSPHX/FDFAX/FDLSX/FSUTX/FBIOX from 1986. Fails."
+  },
+  {
+   "label": "Incumbent's exact site rule on the 9 SPDR sector ETFs (representative ETF sector universe)",
+   "cfg": {
+    "kind": "combo",
+    "picker": "momentum",
+    "picker_params": {
+     "lookback": 252,
+     "skip": 21
+    },
+    "timer": "buy_hold",
+    "timer_params": {},
+    "top_n": 5,
+    "rebalance": "Q",
+    "menu": [
+     "XLB",
+     "XLE",
+     "XLF",
+     "XLI",
+     "XLK",
+     "XLP",
+     "XLU",
+     "XLV",
+     "XLY"
+    ],
+    "trade_rule": "tax_managed",
+    "gain_budget": 0.01,
+    "wash_days": 31,
+    "requires": [
+     "XLB",
+     "XLE",
+     "XLF",
+     "XLI",
+     "XLK",
+     "XLP",
+     "XLU",
+     "XLV",
+     "XLY"
+    ],
+    "require_days": 400
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": -0.0006,
+     "full_excess": 0.0001,
+     "ex5_mean": -0.0002,
+     "ex10_mean": -0.0011,
+     "ex10_beat": 0.5,
+     "ex10_min": -0.0283,
+     "ex15_beat": 0.5435,
+     "ex20_beat": 0.4231,
+     "boot_p": 0.524,
+     "max_dd": -0.5441,
+     "bench_max_dd": -0.5519,
+     "trades": 279,
+     "turnover": 0.089
+    },
+    "FED": {
+     "score": -0.0004,
+     "full_excess": 0.0002,
+     "ex5_mean": -0.0001,
+     "ex10_mean": -0.0009,
+     "ex10_beat": 0.5303,
+     "ex10_min": -0.0303,
+     "ex15_beat": 0.5435,
+     "ex20_beat": 0.3846,
+     "boot_p": 0.526,
+     "max_dd": -0.5441,
+     "bench_max_dd": -0.5519,
+     "trades": 278,
+     "turnover": 0.0898
+    },
+    "NONE": {
+     "score": -0.004,
+     "full_excess": -0.0019,
+     "ex5_mean": -0.0014,
+     "ex10_mean": -0.0053,
+     "ex10_beat": 0.3788,
+     "ex10_min": -0.0377,
+     "ex15_beat": 0.3261,
+     "ex20_beat": 0.5,
+     "boot_p": 0.543,
+     "max_dd": -0.4887,
+     "bench_max_dd": -0.5519,
+     "trades": 638,
+     "turnover": 0.9451
+    }
+   },
+   "long_protocol": {
+    "note": "no long-history proxy for these ETFs; the pre-ETF sector-only analog is FSEL11 (separate candidate)"
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "low",
+   "robustness_notes": "Same exact rule as the incumbent on a pure sector menu: CA score -0.06 pp, full +0.01 pp, boot_p 0.52. Beats 2 of 5 site-RandomPicker controls with identical TaxManagedCombo (random median -0.05). Other menus: SPDR11 -0.10 (3/5), iShares IY* -0.72 (2/5), Vanguard V* -0.56 (5/5), industry ETFs +0.15 (2/5). The incumbent's CA edge does not transfer to sector universes. ETF dividends are close to SPY's, so the distribution-tax issue is small here."
+  },
+  {
+   "label": "Incumbent's exact site rule on FSEL11 (11 Fidelity/Vanguard sector funds mapped one-to-one to SPDR sectors; pre-ETF sector-only analog)",
+   "cfg": {
+    "kind": "combo",
+    "picker": "momentum",
+    "picker_params": {
+     "lookback": 252,
+     "skip": 21
+    },
+    "timer": "buy_hold",
+    "timer_params": {},
+    "top_n": 5,
+    "rebalance": "Q",
+    "menu": [
+     "FSDPX",
+     "FSTCX",
+     "FSENX",
+     "FIDSX",
+     "FSDAX",
+     "FSPTX",
+     "FDFAX",
+     "VGSIX",
+     "FSUTX",
+     "FSPHX",
+     "FSRPX"
+    ],
+    "trade_rule": "tax_managed",
+    "gain_budget": 0.01,
+    "wash_days": 31
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.0007,
+     "full_excess": 0.0164,
+     "ex5_mean": -0.0028,
+     "ex10_mean": 0.0009,
+     "ex10_beat": 0.4925,
+     "ex10_min": -0.0444,
+     "ex15_beat": 0.5957,
+     "ex20_beat": 0.6296,
+     "boot_p": 0.084,
+     "max_dd": -0.6129,
+     "bench_max_dd": -0.5519,
+     "trades": 265,
+     "turnover": 0.0741
+    },
+    "FED": {
+     "score": 0.001,
+     "full_excess": 0.0169,
+     "ex5_mean": -0.0031,
+     "ex10_mean": 0.0014,
+     "ex10_beat": 0.4925,
+     "ex10_min": -0.0471,
+     "ex15_beat": 0.5957,
+     "ex20_beat": 0.7407,
+     "boot_p": 0.085,
+     "max_dd": -0.6129,
+     "bench_max_dd": -0.5519,
+     "trades": 266,
+     "turnover": 0.0777
+    },
+    "NONE": {
+     "score": -0.0102,
+     "full_excess": -0.0016,
+     "ex5_mean": -0.0061,
+     "ex10_mean": -0.0124,
+     "ex10_beat": 0.2687,
+     "ex10_min": -0.0397,
+     "ex15_beat": 0.2553,
+     "ex20_beat": 0.1481,
+     "boot_p": 0.565,
+     "max_dd": -0.5952,
+     "bench_max_dd": -0.5519,
+     "trades": 675,
+     "turnover": 1.1109
+    }
+   },
+   "long_protocol": {
+    "CA": {
+     "score": 0.0075,
+     "full_excess": 0.0091,
+     "ho5_mean": 0.0042,
+     "ho5_beat": 0.5405,
+     "ho10_mean": 0.0072
+    },
+    "NONE": {
+     "score": 0.0125,
+     "full_excess": 0.0069,
+     "ho5_mean": 0.0333,
+     "ho5_beat": 0.7568,
+     "ho10_mean": 0.0302
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "medium",
+   "robustness_notes": "Pre-2000 (long, CA): ho5 +0.42 pp (54% of windows), ho10 +0.72 pp (76%); 60th-90th percentile of random tax-managed pickers, and beat equal weight in only 5 of 10 yearly 5-year windows. Over 2000-2026 on full: score +0.07 pp, beating 0 of 5 RandomPicker controls (median +0.42); the full +1.64 pp and boot_p 0.084 come from the single 2000 start. Distribution tax, 2000->2026: +1.64 -> +1.07 (lab rule) -> +0.58 pp (half ordinary). XLI -> FSDAX and XLY -> FSRPX were pre-registered judgment calls. Fails."
+  },
+  {
+   "label": "N1 (NONE diagnostic): FSEL32 blend(63,126,252) momentum top3 monthly, standard execution",
+   "cfg": {
+    "kind": "weights",
+    "signal": "sector_deep.rotate",
+    "rebalance": "M",
+    "execution": "standard",
+    "params": {
+     "menu": [
+      "FSPTX",
+      "FSELX",
+      "FSCSX",
+      "FBIOX",
+      "FSPHX",
+      "FSENX",
+      "FSUTX",
+      "FSRBX",
+      "FSLBX",
+      "FSPCX",
+      "FSCPX",
+      "FDFAX",
+      "FSRPX",
+      "FSDAX",
+      "FSCHX",
+      "FSAGX",
+      "FSRFX",
+      "FSHOX",
+      "FIDSX",
+      "FSTCX",
+      "FDCPX",
+      "FSAVX",
+      "FSDPX",
+      "FSLSX",
+      "FBMPX",
+      "FSHCX",
+      "FSVLX",
+      "FDLSX",
+      "VGENX",
+      "VGHCX",
+      "VGPMX",
+      "VGSIX"
+     ],
+     "bench": "VFINX",
+     "score": "mom",
+     "lookback": [
+      63,
+      126,
+      252
+     ],
+     "skip": 0,
+     "top_n": 3
+    }
+   },
+   "regime_target": "NONE",
+   "stats": {
+    "CA": {
+     "score": -0.0133,
+     "full_excess": -0.0019,
+     "ex5_mean": -0.0106,
+     "ex10_mean": -0.0138,
+     "ex10_beat": 0.194,
+     "ex10_min": -0.0436,
+     "ex15_beat": 0.1277,
+     "ex20_beat": 0.1111,
+     "boot_p": 0.549,
+     "max_dd": -0.5922,
+     "bench_max_dd": -0.5519,
+     "trades": 1357,
+     "turnover": 4.9412
+    },
+    "FED": {
+     "score": -0.0068,
+     "full_excess": 0.0084,
+     "ex5_mean": -0.0043,
+     "ex10_mean": -0.0076,
+     "ex10_beat": 0.2537,
+     "ex10_min": -0.0366,
+     "ex15_beat": 0.2128,
+     "ex20_beat": 0.1481,
+     "boot_p": 0.352,
+     "max_dd": -0.5815,
+     "bench_max_dd": -0.5519,
+     "trades": 1357,
+     "turnover": 4.9067
+    },
+    "NONE": {
+     "score": 0.0242,
+     "full_excess": 0.0431,
+     "ex5_mean": 0.0278,
+     "ex10_mean": 0.0225,
+     "ex10_beat": 0.9254,
+     "ex10_min": -0.0143,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.049,
+     "max_dd": -0.5544,
+     "bench_max_dd": -0.5519,
+     "trades": 1357,
+     "turnover": 4.8226
+    }
+   },
+   "long_protocol": {
+    "CA": {
+     "score": 0.0064,
+     "full_excess": -0.0095,
+     "ho5_mean": -0.0011,
+     "ho5_beat": 0.5405,
+     "ho10_mean": -0.0119
+    },
+    "NONE": {
+     "score": 0.0558,
+     "full_excess": 0.0525,
+     "ho5_mean": 0.0645,
+     "ho5_beat": 0.8108,
+     "ho10_mean": 0.0573
+    },
+    "NONE_cost_stress_long": {
+     "30bp_per_side": {
+      "score": 0.0275,
+      "boot_p": 0.188,
+      "ex10_beat": 0.67
+     },
+     "75bp_per_side": {
+      "score": -0.0216,
+      "boot_p": 0.844
+     }
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "medium",
+   "robustness_notes": "Meets criteria 1-3 in NONE on full (and on long: ho10 +5.73 pp, 100% of windows; boot_p 0.015). Robust to a 0-10 day signal lag; leave-one-out (17 of 32 funds) keeps +4.4 to +6.4 pp; the family's NONE walk-forward is positive on 10/5 (+5.9) but slightly negative on 5/3 (-0.3), and PBO is 0.35. Fails criterion 5: only 1 of its 4 immediate neighbours passes on full (top5 M passes; top2 M, top3 Q and the 4-lookback blend miss the beat rates). Collapses at 30 bp/side costs (long score +2.75, boot_p 0.19) and turns negative at 75 bp; Fidelity Select loads, short-term fees and frequent-trading limits make realistic costs at least that high. Survivorship-biased menu. After 2000, pre-tax momentum does not exist on coarse sector ETFs or on 20 random ETF menus (momentum minus equal weight -0.02 pp). Loses in CA (-1.33). Diagnostic only; the user's regime is CA."
+  },
+  {
+   "label": "N3 (NONE diagnostic): FSEL32 9-month momentum top5 quarterly, standard execution (lower turnover)",
+   "cfg": {
+    "kind": "weights",
+    "signal": "sector_deep.rotate",
+    "rebalance": "Q",
+    "execution": "standard",
+    "params": {
+     "menu": [
+      "FSPTX",
+      "FSELX",
+      "FSCSX",
+      "FBIOX",
+      "FSPHX",
+      "FSENX",
+      "FSUTX",
+      "FSRBX",
+      "FSLBX",
+      "FSPCX",
+      "FSCPX",
+      "FDFAX",
+      "FSRPX",
+      "FSDAX",
+      "FSCHX",
+      "FSAGX",
+      "FSRFX",
+      "FSHOX",
+      "FIDSX",
+      "FSTCX",
+      "FDCPX",
+      "FSAVX",
+      "FSDPX",
+      "FSLSX",
+      "FBMPX",
+      "FSHCX",
+      "FSVLX",
+      "FDLSX",
+      "VGENX",
+      "VGHCX",
+      "VGPMX",
+      "VGSIX"
+     ],
+     "bench": "VFINX",
+     "score": "mom",
+     "lookback": 189,
+     "skip": 0,
+     "top_n": 5
+    }
+   },
+   "regime_target": "NONE",
+   "stats": {
+    "CA": {
+     "score": -0.0023,
+     "full_excess": 0.0122,
+     "ex5_mean": 0.0031,
+     "ex10_mean": -0.0042,
+     "ex10_beat": 0.3731,
+     "ex10_min": -0.041,
+     "ex15_beat": 0.234,
+     "ex20_beat": 0.2963,
+     "boot_p": 0.261,
+     "max_dd": -0.5932,
+     "bench_max_dd": -0.5519,
+     "trades": 781,
+     "turnover": 1.94
+    },
+    "FED": {
+     "score": 0.0036,
+     "full_excess": 0.0228,
+     "ex5_mean": 0.009,
+     "ex10_mean": 0.0012,
+     "ex10_beat": 0.403,
+     "ex10_min": -0.036,
+     "ex15_beat": 0.4255,
+     "ex20_beat": 0.7037,
+     "boot_p": 0.138,
+     "max_dd": -0.5864,
+     "bench_max_dd": -0.5519,
+     "trades": 781,
+     "turnover": 1.9376
+    },
+    "NONE": {
+     "score": 0.0259,
+     "full_excess": 0.0506,
+     "ex5_mean": 0.0332,
+     "ex10_mean": 0.0221,
+     "ex10_beat": 0.7463,
+     "ex10_min": -0.0244,
+     "ex15_beat": 0.9149,
+     "ex20_beat": 1,
+     "boot_p": 0.017,
+     "max_dd": -0.5864,
+     "bench_max_dd": -0.5519,
+     "trades": 781,
+     "turnover": 1.9339
+    }
+   },
+   "long_protocol": {
+    "CA": {
+     "score": 0.0182,
+     "full_excess": 0.0031,
+     "ho5_mean": 0.008,
+     "ho5_beat": 0.5946,
+     "ho10_mean": -0.0015
+    },
+    "NONE": {
+     "score": 0.0562,
+     "full_excess": 0.055,
+     "ho5_mean": 0.0551,
+     "ho5_beat": 0.8649,
+     "ho10_mean": 0.0482
+    },
+    "NONE_cost_stress_long": {
+     "30bp_per_side": {
+      "score": 0.0457,
+      "boot_p": 0.012,
+      "ex10_beat": 0.77
+     },
+     "75bp_per_side": {
+      "score": 0.0271,
+      "boot_p": 0.112,
+      "ex10_beat": 0.63
+     }
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "medium",
+   "robustness_notes": "On full in NONE: score +2.59, full +5.06 pp, boot_p 0.017, ex15_beat 0.91, but ex10_beat 0.746 < 0.75 fails criterion 2. Neighbours on full in NONE: L126 top5 Q passes; L189 top5 M (ex10_beat 0.49) and L252 top5 Q (0.51) fail. Much more cost-robust than N1 at turnover 1.9x/yr (long: +4.57 pp at 30 bp/side, +2.71 at 75 bp). Long NONE: ho5 +5.51 (86% of windows), ho10 +4.82 (100%). Survivorship-biased menu. CA -0.23. Diagnostic only."
+  }
+ ],
+ "diagnostics": {
+  "CA": {
+   "grid": "long_screen (FSEL32/FSEL28/PRE20/FSEL11, VFINX, 1986-2023 yearly starts)",
+   "n_configs": 909,
+   "walk_forward": {
+    "oos_mean": 0.0342,
+    "oos_beat": 0.6667,
+    "is_mean": 0.082,
+    "avg_config_oos_mean": 0.0065,
+    "mean_oos_rank_pct": 0.6412,
+    "n_decisions": 6,
+    "decisions": "1998 L252 top1 M lag10 +14.5pp; 2002 L63 top2 M TAX gb0 +3.5; 2006 L189 top2 M -3.2; 2010 L252 top2 M TAX gb0 +5.1; 2014 FSEL11 L252s21 top3 M TAX -3.0; 2018 random top5 Q TAX seed19 +3.5"
+   },
+   "walk_forward_5_3": {
+    "oos_mean": -0.0426,
+    "oos_beat": 0.25,
+    "is_mean": 0.1218,
+    "avg_config_oos_mean": -0.0091,
+    "mean_oos_rank_pct": 0.3302
+   },
+   "pbo": {
+    "pbo": 0.4152,
+    "n_configs": 909,
+    "n_splits": 5000,
+    "is_best_mean": 0.0409,
+    "oos_of_is_best_mean": -0.0161,
+    "oos_of_is_best_p_pos": 0.366
+   },
+   "dsr_best": {
+    "sr_monthly": 0.0954,
+    "sr_annual": 0.3306,
+    "sr0_monthly": 0.1728,
+    "dsr": 0.0431,
+    "psr": 0.9829
+   },
+   "best_by_monthly_mean": "FSEL32 random L1 s0 top3 M TAX gb0.02 noST seed=14 (a random-pick control)"
+  },
+  "NONE": {
+   "grid": "long_screen (same grid, NONE)",
+   "n_configs": 591,
+   "walk_forward": {
+    "oos_mean": 0.0591,
+    "oos_beat": 0.5,
+    "is_mean": 0.1271,
+    "avg_config_oos_mean": 0.0317,
+    "mean_oos_rank_pct": 0.5578,
+    "n_decisions": 6
+   },
+   "walk_forward_5_3": {
+    "oos_mean": -0.0031,
+    "oos_beat": 0.375,
+    "is_mean": 0.1848,
+    "avg_config_oos_mean": 0.0124,
+    "mean_oos_rank_pct": 0.3974
+   },
+   "pbo": {
+    "pbo": 0.3528,
+    "n_configs": 591,
+    "n_splits": 5000,
+    "is_best_mean": 0.0876,
+    "oos_of_is_best_mean": 0.023,
+    "oos_of_is_best_p_pos": 0.7398
+   },
+   "dsr_best": {
+    "sr_monthly": 0.0902,
+    "sr_annual": 0.3126,
+    "sr0_monthly": 0.1573,
+    "dsr": 0.0678,
+    "psr": 0.9777
+   },
+   "best_by_monthly_mean": "FSEL32 mom L252 s0 top1 M"
+  },
+  "CA_screen_etf": {
+   "grid": "screen (s3b ETF sector menus + s5 random ETF menus + partial s3; SPY, 2000-2023 yearly starts)",
+   "n_configs": 205,
+   "walk_forward": {
+    "oos_mean": 0.0066,
+    "oos_beat": 0.6667,
+    "avg_config_oos_mean": -0.031,
+    "mean_oos_rank_pct": 0.9077,
+    "n_decisions": 3
+   },
+   "walk_forward_5_3": {
+    "oos_mean": 0.0026,
+    "oos_beat": 0.5
+   },
+   "pbo": 0.1548,
+   "dsr_best": 0.0887,
+   "best_by_monthly_mean": "IND16 mom L63+126+252 s0 top5 Q TAX gb0.01"
+  },
+  "NONE_screen_etf": {
+   "n_configs": 128,
+   "walk_forward": {
+    "oos_mean": 0.0605,
+    "oos_beat": 1,
+    "avg_config_oos_mean": -0.0249,
+    "mean_oos_rank_pct": 0.9611,
+    "n_decisions": 3
+   },
+   "walk_forward_5_3": {
+    "oos_mean": 0.013,
+    "oos_beat": 0.75
+   },
+   "pbo": 0.4066,
+   "dsr_best": 0.0931,
+   "best_by_monthly_mean": "IND16 mom L126 s0 top2 M"
+  }
+ },
+ "hindsight_checks": "PROTOCOL 5.3 and menu-level controls.\n(1) 20 random 10-ETF menus drawn from common.BROAD_EQUITY_POOL_2003 (screen, SPY). Pre-tax blend momentum minus the equal-weight menu: -0.02 pp mean, 45% positive. So the pre-tax momentum effect does not show up on menus nobody chose. In CA, tax-managed momentum minus a standard-execution equal-weight control is +0.44 pp (80% positive), but that mixes tax deferral with selection.\n(2) Remove-the-star: leave-one-out on FSEL32 (17 of 32 funds done before the cutoff) keeps the NONE score at +4.4 to +6.4 pp; dropping FSPTX (technology) hurts most. In CA, standard-execution leave-one-out ranges -0.3 to +1.1 pp. FSEL28 (without the 4 Vanguard funds) is about the same.\n(3) Every menu was paired with random-pick and equal-weight controls under identical execution: 75 standard and 50 tax-managed random configs on FSEL32, 15 per pre-ETF menu, 5 per ETF menu, and 50 site-RandomPicker TaxManagedCombo runs on full across 9 menus (10 on the incumbent's INC22). Momentum's CA results sit inside those random ranges everywhere except the incumbent's own menu, where it beats 10 of 10.\n(4) The pre-ETF menus PRE20 and FSEL11 were pre-registered category-for-category in s6_pre.py before any run, to avoid picking pre-2000 winners.\n(5) Hindsight-sensitive inputs remain. The Fidelity Select menu contains only funds that survive today (merged or closed Selects are missing), which inflates absolute FSEL results including the equal-weight control (about +2 pp/yr pre-tax vs VFINX). The incumbent's INC22 menu (with QQQ/XLK/IWF) is the menu where selection 'worked' in 2000-2026, which is itself a hindsight concern for the incumbent.",
+ "concerns": [
+  "The harness blocked this subagent from writing research/lab/results/sector_deep.md, so its full content is in results_md. research/lab/results/sector_deep_table.csv (1,962 rows, protocol/stage/cfg_json columns) was written.",
+  "Survivorship: the Fidelity Select menu (FSEL28/32, and the sector funds in PRE20/FSEL11) contains only funds that exist today. Selects that were merged or closed (e.g. Paper & Forest, Industrial Equipment, Developing Communications, Natural Gas, Precious Metals & Minerals) are missing. Absolute FSEL excess vs VFINX/SPY is likely inflated; within-menu comparisons (momentum vs random vs equal weight) are less affected.",
+  "Distribution taxes: the engine treats fund distributions as deferred capital gains. Actively managed sector funds distribute about 4-5%/yr against about 1.5% for SPY, which flatters every mutual-fund strategy in CA/FED by roughly 0.2-1.2 pp/yr. The lab's realism rule taxes them as qualified, which is lenient for funds with large short-term capital-gain distributions. Engine numbers in the candidate stats are not adjusted; adjusted numbers are in the notes and results_md.",
+  "Costs: Fidelity Select funds historically carried sales loads, short-term redemption/exchange fees and frequent-trading restrictions; the lab charges 5+5 bp. Monthly rotation results are optimistic; cost stress shows N1 failing at 30 bp/side.",
+  "PRE20/FSEL11 mapping involved judgment calls (QQQ->PRGFX, DIA->DODGX, XLI->FSDAX, XLY->FSRPX, EFA->PRITX) and includes actively managed funds; VEXMX (1987), VEIEX (1994) and VGSIX (1996) join late, as EEM/XLRE/XLC do for the incumbent.",
+  "Holdout power is limited: 1986-1999 gives 37 overlapping five-year and 17 ten-year windows (long protocol), all from one market history. For the incumbent's rule on PRE20, window means (+0.5 to +1.2 pp) and the single 1986-start monthly path (+0.03 pp) disagree, so the pre-2000 evidence is weak either way.",
+  "Walk-forward diagnostics on the yearly-start grids have only 3-8 decisions (lab quirk, see lab_bugs), so PBO/walk-forward on screened grids are coarse.",
+  "Compute was throttled (4-6 machine-wide slots shared with about 10 families), so parts of the original plan were not run: the rest of the leave-one-out, 20 random 16-fund FSEL sub-menus, and the extra lookback neighbourhood (stage-2 B2/B3). Also not run: realism for the ETF menus (ETF dividends are close to SPY's, so the effect should be small) and rebalance-offset tests for any candidate (none passed, so offsets were not needed).",
+  "The 1980s fund series are stale month-end prints before mid-1985, which affects 1986 signals only. All mutual-fund signals use a 1-day lag (data through the prior close), checked by hand; the site Combo class (used for the incumbent's exact rule) uses today's close, as the site does."
+ ],
+ "untested_ideas": [
+  "Tax-loss harvesting inside sector rotation with different-index substitutes (XLK<->VGT, XLV<->VHT, XLF<->VFH, XLE<->VDE etc., from 2004) using WeightStrategy harvest/substitutes; may belong to the tax_rotation family.",
+  "Industry-level ETF momentum (IND16: SMH/SOXX/IGV/IBB/IY*) with tax-managed execution on the full protocol: the only ETF menu where pre-tax momentum showed something after 2000 (screen NONE up to +2.4 pp) and the CA screen walk-forward's top pick. Not run on full because CA random pickers did equally well on IND16 (+0.51 vs +0.49 to +1.57).",
+  "A survivorship-free industry history (e.g. Ken French 49-industry portfolios, not in the lab) would give a cleaner 1926-1999 holdout for industry momentum and for 'buy momentum leaders then freeze'.",
+  "Remaining stage-2 robustness: 20 random 16-fund Fidelity sub-menus and the remaining 15 leave-one-out funds for the NONE rule; lookback neighbourhood 105-294 days.",
+  "Annual-cadence tax-managed momentum with long-term-only gains (A cadence, gain budget 3-5%, st_gains=False): never tested in tax mode (only M/Q).",
+  "Rebalance-offset and one-day-execution-lag battery (verify.battery) on the PRE20 incumbent rule. Skipped because it fails the bar on other grounds.",
+  "Realism (distribution tax) replay for ETF-menu tax-managed configs and for the random-picker controls on INC22, to price the incumbent's menu-specific edge after yearly dividend tax."
+ ],
+ "lab_bugs": [
+  "research/lab/realism.py: record(cfg, regime, start, end) accepts `end`, but RecordingGate keeps recording (and the engine keeps trading) to the data end. _adjust_path then takes the liquidation value at `end` but the wealth path and the years to the data end, so engine_cagr/real_cagr are wrong for any end before 2026-07-01 (mixed horizons). verify.battery always uses the default end, so its numbers are unaffected. Workaround in scratch (a_real.py: a ClippedRecordingGate that stops after `end`); it reproduces cached window excess exactly (e.g. +1.714 pp vs +1.714 pp).",
+  "research/lab/realism.py: adjusted() hard-codes SPY as the benchmark (no VFINX option), so the stricter tax check cannot be applied to pre-1993 or long-protocol windows without a wrapper.",
+  "research/lab/realism.py: character() classifies every non-bond, non-REIT fund distribution as qualified dividends. For actively managed mutual funds (Fidelity Select etc.) much of each distribution is short-term capital gains taxed at ordinary rates, so the adjustment is lenient; any family using mutual-fund proxies in CA/FED is flattered by about 0.5-1.5 pp/yr even after realism.",
+  "research/lab/metrics.py walk_forward(step_quarters=4) steps over protocol start indices. On yearly-start protocols (screen, long_screen) it re-selects every 4 years: 3 out-of-sample decisions for 10/5 on screen, 6 on long_screen, versus 12 on full. Diagnostics on screened grids are therefore coarse.",
+  "Minor (this family's scratch helper sdh.label): lag=0 configs get the same label as default lag=1 configs; use cfg_json in the CSV to tell them apart."
+ ],
+ "results_md": "# Sector rotation with a pre-ETF holdout (`sector_deep`)\n\nFamily module: `research/lab/families/sector_deep.py`. It has one signal, `sector_deep.rotate`, and was not edited after stage 1, so all cached results stay valid. Scripts, logs and intermediate tables are in `research/lab/scratch/sector_deep/`. The full results table is `research/lab/results/sector_deep_table.csv`: one row per config x regime x protocol, with a `cfg_json` column holding the exact runnable config.\n\nAll excess numbers are after-tax CAGR minus the benchmark's, in percentage points per year (pp), straight from the lab engine (the website's numbers). The benchmark is SPY on `screen`/`full` and VFINX on `long_screen`/`long`. Regimes: CA = 48.1% short-term / 28.1% long-term (primary); FED = 35/15; NONE = no tax (a diagnostic only for this user).\n\n## Verdict\n\n**No sector-rotation strategy in this family beats SPY after California tax with good confidence. Nothing passes the PROTOCOL section 3 bar in CA or FED.**\n\nThe key out-of-sample test of the incumbent's idea is 12-1 momentum, top 5, quarterly, with the TaxManagedCombo 1%/yr gain budget. It came out weakly positive before 2000 on one menu and negative as a claim of transferable selection skill:\n\n1. **Before 2000, on a pre-registered pre-ETF copy of the incumbent's 22-ETF menu (PRE20):**\n   - On the quarterly-start long protocol, the exact rule beat VFINX after CA tax by +0.59 pp in 5-year windows (65% of 37 windows) and +0.52 pp in 10-year windows (59% of 17).\n   - It beat both the equal-weight and the random-pick controls (same execution) in every yearly-start pre-2000 window.\n   - Once fund distributions are taxed every year, the excess over VFINX is -1.1 to +2.6 pp depending on the window.\n   - The mechanism is the incumbent's post-2010 one: it froze early into a few long-run winners. Health care alone was 23-32% of the portfolio for 40 years.\n2. **Across nine sector universes in 2000-2026, on the incumbent's own protocol (`full`, CA):** the identical site rule beats on average 2.5 of 5 site-RandomPicker controls that use the identical TaxManagedCombo. On coarse sector-ETF menus (SPDR 9/11, iShares IY*, Vanguard V*) it scores -0.72 to -0.06 pp. Only on its own 22-ETF menu does it clearly beat random picks (10 of 10).\n3. **Tax-managed execution, not the momentum signal, produces the CA results.** Under tax management almost any sector portfolio comes close to buy-and-hold after tax; what remains is menu composition and luck. On the Fidelity menu, random tax-managed picks match momentum overall. Momentum wins only on pre-2000 5-year windows and trails random picks after 2000.\n4. **Mutual-fund menus are flattered in CA.** Fidelity Select funds distribute about 4-5%/yr, mostly capital gains, and the engine leaves this untaxed until sale. Taxing distributions yearly cuts 0.2-1.2 pp/yr from every Fidelity-menu result after 2000.\n\n**Pre-tax (NONE):**\n- Classic sector momentum on fine-grained Fidelity Select industries was strong and robust before 2000: +5 to +9 pp/yr in 5-year windows, insensitive to a 0-10 day execution lag.\n- It roughly halved after 2000, is absent on coarse sector ETFs since 2000, and is fragile to parameters and to mutual-fund trading costs.\n- It does not survive CA tax under standard execution.\n\n## What was tested (everything counts toward the multiple-testing penalty)\n\n| stage | protocol | configs | runs | CA | FED | NONE |\n|---|---|---|---|---|---|---|\n| s1 | long_screen | 675 | 1148 | 675 | 0 | 473 |\n| s2B1 | long_screen | 42 | 84 | 42 | 0 | 42 |\n| s2B2 | long_screen | 18 | 34 | 17 | 0 | 17 |\n| s2B4 | long_screen | 67 | 82 | 67 | 0 | 15 |\n| s3 (abandoned grid, partial) | screen | 13 | 23 | 13 | 0 | 10 |\n| s3b | screen | 132 | 210 | 132 | 0 | 78 |\n| s5 | screen | 60 | 100 | 60 | 0 | 40 |\n| s6 | long_screen | 108 | 152 | 108 | 0 | 44 |\n| s7 | full | 13 | 29 | 13 | 8 | 8 |\n| s7 | long | 8 | 18 | 8 | 2 | 8 |\n| s7cost | long | 2 | 4 | 0 | 0 | 4 |\n| s8 | full | 47 | 61 | 47 | 7 | 7 |\n| s8b | full | 10 | 10 | 10 | 0 | 0 |\n| s9 | full | 7 | 7 | 0 | 0 | 7 |\n| TOTAL |  | 1170 | 1962 | 1192 | 17 | 753 |\n\nWhat each stage covered:\n\n* **s1** (FSEL32: 28 Fidelity Selects plus Vanguard Energy, Health Care, Precious Metals and REIT):\n  - Momentum: lookbacks 21/63/126/189/252 days, skip 0/21, top 1/2/3/5/8, M/Q/S/A cadence, rank blends, inverse-vol weights.\n  - Other rankings: sector mean reversion, low-vol, low-beta, risk-adjusted, residual (beta-adjusted) momentum, 52-week high, seasonality.\n  - Filters and overlays: relative strength vs VFINX, price/benchmark SMA, absolute momentum to T-bill funds, core-satellite, keep-rank buffer, market trend switch.\n  - Controls: equal weight and random picks.\n  - Tax-managed variants: gain budget 0/1/2/3%, no short-term gains, keep-rank, filters, core, and the site's Combo/TaxManagedCombo.\n* **s2** (s2B1, s2B2, s2B4 in the table): signal lag 0-10 days, bi-monthly cadence, FSEL28, leave-one-out (17 of 32 funds), tax-managed blends and no-short-term-gain variants, 30 more random tax-managed controls.\n* **s3b**: a fixed rule set chosen on FSEL32, applied to SPDR9, iShares IY* (ISH10), Vanguard V* (VAN10), industry ETFs (IND16), the incumbent's INC22 and FSEL32. Each menu gets 5 random and 1 equal-weight control.\n* **s5**: 20 random 10-ETF menus drawn from BROAD_EQUITY_POOL_2003.\n* **s6 (new, pre-registered)**: the incumbent's rule plus controls on PRE20 and FSEL11.\n* **s7**: finalists on `full` (all three regimes), random controls on `full`, the `long` protocol, and cost stress.\n* **s8 and s8b (new)**: the incumbent's exact site rule on every menu, compared with the site's RandomPicker.\n* **s9**: full-protocol parameter neighbourhoods of the NONE finalists.\n* **Realism**: distributions taxed yearly, for 12 configs (in-process runs, not counted above).\n\nNot run because compute was throttled (4-6 machine-wide slots shared by about 10 families): the rest of leave-one-out, random FSEL sub-menus, and the extra lookback neighbourhood.\n\n## Data and honesty caveats specific to this family\n\n* **Survivorship.** The Fidelity Select menu holds only funds that exist today. Merged or closed Selects (Paper & Forest, Industrial Equipment, Developing Communications, Natural Gas, Precious Metals & Minerals, ...) are missing. The equal-weight FSEL menu beat VFINX by about 2 pp/yr pre-tax over 1986-2026, which is a warning sign. Comparisons inside the menu (momentum vs random vs equal weight) are less biased than comparisons against VFINX or SPY.\n* **Loads and fees.** Select funds historically carried loads and short-term trading or exchange fees, and Fidelity restricts frequent round trips. The lab charges 5+5 bp per side, so monthly-rotation results are optimistic.\n* **Distributions.** The engine taxes fund distributions only at sale. Active sector funds distribute 4-5%/yr, mostly capital gains and often short-term, versus about 1.5% for SPY. This is the largest CA realism issue for this family (section 4).\n* **Execution lag.** Mutual-fund signals use data through the prior close (`lag=1`) and fill at today's close. A hand check (sanity.py) confirms it: the 1999-01-04 top 3 was FDCPX/FSPTX/FSPHX, from data through 1998-12-31 with the formation window ending 1998-12-01. The site Combo, used for the incumbent's exact rule, uses today's close, as the site does.\n\n## 1. NONE (diagnostic): sector momentum was real before 2000, then faded\n\nStage-1/2 FSEL grid on long_screen (yearly starts 1986-2023, vs VFINX). `pre_ann`/`post_ann` are the annualized monthly after-tax excess of the 1986-start run before and after 2000-01.\n\n| key | n | score_med | score_best | full_med | ho5_med | ho10_med | pre_ann_med | post_ann_med | turnover_med |\n|---|---|---|---|---|---|---|---|---|---|\n| mom+blend+lag | 10 | +5.75 | +7.13 | +5.73 | +8.29 | +8.29 | +6.41 | +4.28 | 5.69 |\n| mom+lag | 20 | +5.50 | +6.52 | +5.49 | +6.74 | +6.71 | +6.75 | +4.17 | 3.60 |\n| mom+blend | 34 | +4.26 | +6.73 | +3.81 | +4.79 | +4.74 | +4.41 | +3.19 | 3.47 |\n| mom+mkt | 4 | +3.90 | +4.94 | +2.48 | +0.04 | +0.10 | +0.48 | +2.69 | 4.63 |\n| resid | 24 | +3.12 | +4.34 | +2.32 | +2.73 | +2.68 | +2.54 | +2.44 | 3.19 |\n| riskadj | 36 | +2.80 | +5.37 | +1.68 | +1.80 | +1.69 | +1.20 | +2.10 | 3.65 |\n| combo-standard | 4 | +2.66 | +3.32 | +2.85 | +2.23 | +2.21 | +3.33 | +2.07 | 2.34 |\n| mom | 132 | +2.60 | +7.38 | +2.10 | +1.99 | +1.94 | +2.37 | +2.03 | 2.99 |\n| ew | 3 | +2.00 | +2.09 | +1.47 | +0.72 | +0.78 | -0.30 | +2.15 | 0.11 |\n| random | 75 | -0.66 | +5.05 | -1.09 | -1.13 | -1.10 | -2.51 | -0.41 | 10.30 |\n| lowvol | 18 | -0.29 | +0.94 | -0.97 | -2.07 | -2.00 | -3.30 | +0.48 | 1.20 |\n| lowbeta | 18 | -0.71 | +0.95 | -1.61 | -8.18 | -8.10 | -7.41 | +2.15 | 0.80 |\n| season | 6 | -2.46 | +0.47 | -2.23 | -0.64 | -0.65 | +0.27 | -2.92 | 10.06 |\n| rev | 30 | -3.36 | +1.16 | -3.02 | -4.34 | -4.38 | -6.23 | -0.81 | 2.11 |\n\n(`+lag` = non-default signal lag 0/2/3/5/10 days. Other rows: invvol, keep, core, filters and high52 lie between `mom` and `ew`.)\n\n* **Before 2000.** Fine-grained industry momentum worked strongly: the best configs reached ho5/ho10 of +5 to +9 pp, e.g. blend 63/126/252 top 3 monthly at ho5 +7.0 pp. Random monthly picks lost about 2.5 pp and the equal-weight menu was about 0.\n* **Not a stale-NAV artifact.** Across signal lags of 0/1/2/3/5/10 trading days, the six main rules keep scores of +3.6 to +7.4 pp and ho5 of +3.5 to +11.6 pp.\n* **Not one fund.** Leave-one-out (17 of 32 funds) keeps blend3 top 3 M at +4.4 to +6.4 pp; dropping FSPTX (technology) hurts most. FSEL28 is about the same.\n* **After 2000 it roughly halved.** The median momentum config's post-2000 monthly excess (+2.0 pp) is about the equal-weight menu's (+2.2 pp). The Spearman correlation of pre-2000 vs post-2000 5-year excess across 473 configs is only 0.22.\n* **On ETF menus after 2000** (s3b, NONE, scores): momentum helps only on fine industry menus (FSEL32 +0.4 to +4.0 pp, IND16 up to +2.4). It does not help on coarse sector ETFs (SPDR9 -1.5 to +1.0, ISH10 -2.6 to 0.0, VAN10 -2.3 to +0.1). On 20 random ETF menus, momentum minus equal weight is -0.02 pp.\n* **Parameter fragility on full (NONE).** N1 passes criteria 1-3, but only 1 of its 4 neighbours does; N3 misses ex10_beat (0.746):\n\n| key | score | full | ex10_beat | ex15_beat | boot_p | passes_1_3 | turnover |\n|---|---|---|---|---|---|---|---|\n| N1_FSEL32_blend3_top3_M | +2.42 | +4.31 | 0.93 | 1.00 | 0.049 | True | 4.82 |\n| N3_FSEL32_L189_top5_Q | +2.59 | +5.06 | 0.75 | 0.91 | 0.017 | False | 1.93 |\n| N1nb_blend3_top5_M | +2.20 | +4.17 | 0.87 | 0.94 | 0.017 | True | 4.35 |\n| N1nb_blend3_top2_M | +0.91 | +2.65 | 0.57 | 0.51 | 0.188 | False | 5.39 |\n| N1nb_blend3_top3_Q | +0.47 | +2.62 | 0.55 | 0.49 | 0.159 | False | 2.83 |\n| N1nb_blend4_top3_M | +1.07 | +3.98 | 0.60 | 0.57 | 0.073 | False | 6.68 |\n| N3nb_L189_top5_M | +1.16 | +3.88 | 0.49 | 0.53 | 0.071 | False | 3.45 |\n| N3nb_L252_top5_Q | +0.78 | +2.10 | 0.51 | 0.51 | 0.208 | False | 1.75 |\n| N3nb_L126_top5_Q | +2.11 | +3.25 | 0.82 | 0.87 | 0.071 | True | 2.41 |\n\n* **Costs** (long protocol, NONE; commission per side plus 5 bp slippage):\n\n| config | commission/side (bp) | score | full_excess | ho5 | ho10 | ex10_beat | ex15_beat | boot_p | turnover |\n|---|---|---|---|---|---|---|---|---|---|\n| N1_FSEL32_blend3_top3_M | 5 | +5.58 | +5.25 | +6.45 | +5.73 | 0.97 | 1.00 | 0.015 | 4.82 |\n| N1_FSEL32_blend3_top3_M | 30 | +2.75 | +2.40 | +3.56 | +2.83 | 0.67 | 0.66 | 0.188 | 4.85 |\n| N1_FSEL32_blend3_top3_M | 75 | -2.16 | -2.54 | -1.46 | -2.22 | 0.33 | 0.35 | 0.844 | 4.91 |\n| N3_FSEL32_L189_top5_Q | 5 | +5.62 | +5.50 | +5.51 | +4.82 | 0.86 | 0.98 | 0.003 | 1.94 |\n| N3_FSEL32_L189_top5_Q | 30 | +4.57 | +4.42 | +4.43 | +3.73 | 0.77 | 0.83 | 0.012 | 1.93 |\n| N3_FSEL32_L189_top5_Q | 75 | +2.71 | +2.51 | +2.51 | +1.79 | 0.63 | 0.66 | 0.112 | 1.93 |\n\n## 2. CA: standard execution loses; tax-managed execution wins with any picks\n\nSame grid in CA (784 configs, incl. tax-managed):\n\n| key | n | score_med | score_best | full_med | ho5_med | ho10_med | pre_ann_med | post_ann_med | turnover_med |\n|---|---|---|---|---|---|---|---|---|---|\n| mom+blend TAX noST | 8 | +1.79 | +2.08 | +0.03 | +1.75 | +0.41 | +1.10 | -0.28 | 0.11 |\n| mom TAX noST | 14 | +1.59 | +2.47 | +0.13 | +1.15 | -0.27 | +0.59 | -0.15 | 0.11 |\n| mom+blend TAX | 8 | +1.53 | +1.85 | +0.74 | +2.47 | +0.61 | +1.15 | +0.41 | 0.06 |\n| ew TAX | 2 | +1.47 | +1.48 | +0.92 | +0.65 | +0.86 | +0.22 | +1.14 | 0.01 |\n| combo-tax_managed | 4 | +1.37 | +1.71 | +0.60 | +1.16 | +0.22 | +0.87 | +0.53 | 0.04 |\n| random TAX noST | 15 | +1.35 | +2.37 | +0.23 | +0.36 | +0.03 | -1.22 | +0.84 | 0.12 |\n| mom TAX | 144 | +1.28 | +2.31 | +0.21 | +1.35 | +0.38 | +0.45 | +0.18 | 0.05 |\n| random TAX | 35 | +1.11 | +2.40 | +0.45 | +0.25 | +0.55 | -0.69 | +0.97 | 0.05 |\n| mom+core TAX | 8 | +0.66 | +1.15 | -0.09 | +0.65 | -0.14 | +0.47 | -0.29 | 0.05 |\n| mom+blend | 34 | +0.17 | +1.56 | -1.25 | -0.73 | -1.42 | -1.40 | -0.94 | 3.46 |\n| mom | 132 | -0.80 | +2.54 | -2.18 | -2.25 | -2.77 | -2.65 | -1.56 | 2.99 |\n| mom+f | 70 | -0.91 | +2.19 | -2.30 | -2.96 | -3.58 | -3.25 | -1.46 | 3.28 |\n| resid | 24 | -0.96 | +0.58 | -2.48 | -2.21 | -2.82 | -2.89 | -1.76 | 3.21 |\n| riskadj | 36 | -1.14 | +1.30 | -2.99 | -3.05 | -3.72 | -3.91 | -2.01 | 3.64 |\n| lowbeta | 18 | -1.49 | -0.08 | -3.56 | -7.85 | -8.37 | -8.40 | -0.51 | 0.83 |\n| lowvol | 18 | -1.76 | -0.42 | -3.63 | -4.04 | -4.63 | -5.99 | -1.91 | 1.22 |\n| high52 | 6 | -1.98 | -1.52 | -3.84 | -2.31 | -3.01 | -3.55 | -3.61 | 5.46 |\n| random | 75 | -3.38 | -0.21 | -4.87 | -4.87 | -5.56 | -6.49 | -3.61 | 10.31 |\n| season | 6 | -4.48 | -2.71 | -5.42 | -4.50 | -5.21 | -4.71 | -5.03 | 10.01 |\n| rev | 30 | -4.92 | -0.86 | -5.53 | -6.16 | -6.80 | -8.43 | -3.34 | 2.08 |\n\nMomentum vs random picks under identical tax-managed execution (FSEL32). `pctl` is the median percentile of the momentum configs within the random-seed distribution:\n\n| execution | n_mom | n_random | score mom med | score rnd med | score pctl | ho5 mom med | ho5 rnd med | ho5 pctl | ho10 mom med | ho10 rnd med | ho10 pctl | pre_ann mom med | pre_ann rnd med | pre_ann pctl | post_ann mom med | post_ann rnd med | post_ann pctl |\n|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n| top3 Q TAX gb0.01 | 14 | 10 | +1.17 | +0.87 | 0.70 | +1.00 | -0.22 | 0.80 | -0.42 | +0.30 | 0.40 | +0.25 | -1.46 | 0.70 | +0.07 | +1.26 | 0.10 |\n| top5 Q TAX gb0.01 | 14 | 25 | +1.22 | +1.19 | 0.52 | +1.61 | +0.28 | 0.88 | +0.37 | +0.73 | 0.40 | +0.67 | -0.69 | 0.80 | +0.12 | +0.81 | 0.28 |\n| top3 M TAX gb0.02 noST | 7 | 15 | +1.72 | +1.35 | 0.80 | +1.11 | +0.36 | 0.87 | -0.13 | +0.03 | 0.40 | +0.69 | -1.22 | 0.87 | -0.02 | +0.84 | 0.13 |\n\nReading the table:\n- Before 2000, tax-managed momentum beat random picks on 5-year windows, but not on 10-year windows.\n- After 2000 it trailed random picks by about 1 pp/yr.\n- The best CA config (C1: L252 s21, top 3, monthly, 2% budget, no short-term gains, +2.47 pp) sits at the edge of the 15-seed random distribution for the same execution (max +2.37). Its nearest neighbour (L252 s0) has full +0.25 pp and boot_p 0.44.\n\n## 3. The incumbent's idea before 2000 (the key holdout)\n\nPRE20 maps each of the incumbent's ETFs to a fund that existed by 1986-1996, by category. The mapping was pre-registered before any run:\n\n| incumbent ETF | PRE20 fund |\n|---|---|\n| SPY | VFINX |\n| QQQ | PRGFX |\n| DIA | DODGX |\n| MDY | VEXMX (1987) |\n| IWM / IJR | NAESX |\n| EFA | PRITX |\n| EEM | VEIEX (1994) |\n| IWD | VWNDX |\n| IWF | VWUSX |\n| RSP | none |\n| XLB, XLC, XLE, XLF | FSDPX, FSTCX, FSENX, FIDSX |\n| XLI, XLK, XLP | FSDAX, FSPTX, FDFAX |\n| XLRE | VGSIX (1996) |\n| XLU, XLV, XLY | FSUTX, FSPHX, FSRPX |\n\nFSEL11 is the 11 sector funds only.\n\nlong_screen (yearly starts, VFINX). `pre_p` is the bootstrap p of the 1986-99 monthly excess.\n\n| menu | regime | rule | score | full | ho5 | ho5_beat | ho10 | pre_ann | pre_p | post_ann | boot_p |\n|---|---|---|---|---|---|---|---|---|---|---|---|\n| PRE20 | CA | COMBO 12-1 top5 Q tax_managed | +0.77 | +1.00 | +1.09 | 0.80 | +1.23 | +0.03 | 0.51 | +1.37 | 0.094 |\n| PRE20 | CA | COMBO 12-1 top3 Q tax_managed | +0.97 | -0.13 | +1.01 | 0.60 | +1.12 | -1.22 | 0.85 | +0.45 | 0.552 |\n| PRE20 | CA | mom L252 s21 top5 Q TAX | +0.88 | -0.12 | +0.62 | 0.60 | +0.58 | +0.07 | 0.48 | -0.20 | 0.550 |\n| PRE20 | CA | mom L63+126+252 s0 top5 Q TAX | +0.54 | -0.37 | +0.94 | 0.60 | +0.60 | +0.43 | 0.38 | -0.73 | 0.676 |\n| PRE20 | CA | EW Q TAX | +0.28 | -0.44 | -1.11 | 0.40 | -0.88 | -1.20 | 0.89 | +0.03 | 0.716 |\n| PRE20 | CA | COMBO 12-1 top5 Q standard | -1.09 | -2.17 | -0.39 | 0.60 | -0.94 | -1.35 | 0.77 | -2.31 | 0.954 |\n| PRE20 | CA | random top5 Q TAX (median of 10 seeds) | +0.29 | -0.64 | -1.39 | 0.30 | -0.79 | -1.64 | 0.91 | +0.26 | 0.771 |\n| PRE20 | CA | random top3 Q TAX (median of 5 seeds) | -0.04 | -1.36 | -2.21 | 0.30 | -1.95 | -2.24 | 0.94 | -0.25 | 0.880 |\n| PRE20 | NONE | mom L63+126+252 s0 top3 M | +3.32 | +2.38 | +4.83 | 0.80 | +4.81 | +4.35 | 0.08 | +0.93 | 0.076 |\n| PRE20 | NONE | EW Q | +0.54 | -0.08 | -1.31 | 0.40 | -1.25 | -1.74 | 0.91 | +0.81 | 0.518 |\n| FSEL11 | CA | COMBO 12-1 top5 Q tax_managed | +0.85 | +0.91 | +0.51 | 0.50 | +1.08 | +1.57 | 0.11 | +0.43 | 0.136 |\n| FSEL11 | CA | COMBO 12-1 top3 Q tax_managed | +1.13 | +1.36 | +1.83 | 0.80 | +1.56 | +0.69 | 0.35 | +1.50 | 0.088 |\n| FSEL11 | CA | EW Q TAX | +1.06 | +0.39 | +0.43 | 0.50 | +0.59 | -0.04 | 0.55 | +0.55 | 0.278 |\n| FSEL11 | CA | random top5 Q TAX (median of 10 seeds) | +0.60 | +0.36 | +0.04 | 0.50 | +0.38 | +0.53 | 0.35 | +0.22 | 0.341 |\n| FSEL11 | NONE | mom L63+126+252 s0 top3 M | +3.29 | +2.34 | +4.30 | 0.70 | +4.29 | +3.46 | 0.12 | +1.35 | 0.090 |\n| FSEL11 | NONE | EW Q | +1.62 | +0.98 | +0.62 | 0.50 | +0.67 | -0.29 | 0.62 | +1.48 | 0.140 |\n\nLong protocol (quarterly starts 1986-2023, VFINX): 37 five-year and 17 ten-year windows end before 2000.\n\n| key | regime | score | full_excess | ho5_mean | ho5_beat | ho10_mean | ho10_beat | ex10_beat | ex15_beat | boot_p | max_dd |\n|---|---|---|---|---|---|---|---|---|---|---|---|\n| C1_FSEL32_L252s21_top3_M_TAX02noST | CA | +2.40 | +1.91 | +1.53 | 0.65 | +0.57 | 0.41 | 0.73 | 0.84 | 0.093 | -0.61 |\n| N3_FSEL32_L189_top5_Q | CA | +1.82 | +0.31 | +0.80 | 0.59 | -0.15 | 0.35 | 0.58 | 0.65 | 0.446 | -0.59 |\n| C3_FSEL32_incumbent_rule_combo_top5Q_tax | CA | +1.68 | +0.49 | +0.72 | 0.62 | +0.94 | 0.94 | 0.80 | 0.80 | 0.337 | -0.44 |\n| CTRL_FSEL32_EW_TAX_A | CA | +1.48 | +0.90 | +0.81 | 0.57 | +0.66 | 0.82 | 0.74 | 0.86 | 0.144 | -0.56 |\n| FSEL11_incumbent_rule_combo_top5Q_tax | CA | +0.75 | +0.91 | +0.42 | 0.54 | +0.72 | 0.76 | 0.70 | 0.81 | 0.138 | -0.58 |\n| N1_FSEL32_blend3_top3_M | CA | +0.64 | -0.95 | -0.11 | 0.54 | -1.19 | 0.06 | 0.43 | 0.60 | 0.714 | -0.59 |\n| PRE20_incumbent_rule_combo_top5Q_tax | CA | +0.64 | +1.00 | +0.59 | 0.65 | +0.52 | 0.59 | 0.61 | 0.76 | 0.134 | -0.51 |\n| PRE20_EW_TAX_Q | CA | +0.31 | -0.44 | -1.00 | 0.38 | -1.07 | 0.00 | 0.48 | 0.67 | 0.700 | -0.57 |\n| C3_FSEL32_incumbent_rule_combo_top5Q_tax | FED | +1.89 | +0.50 | +0.82 | 0.62 | +1.05 | 0.94 | 0.80 | 0.80 | 0.330 | -0.45 |\n| PRE20_incumbent_rule_combo_top5Q_tax | FED | +0.74 | +1.20 | +0.72 | 0.65 | +0.63 | 0.65 | 0.63 | 0.78 | 0.092 | -0.51 |\n| N3_FSEL32_L189_top5_Q | NONE | +5.62 | +5.50 | +5.51 | 0.86 | +4.82 | 1.00 | 0.86 | 0.98 | 0.003 | -0.59 |\n| N1_FSEL32_blend3_top3_M | NONE | +5.58 | +5.25 | +6.45 | 0.81 | +5.73 | 1.00 | 0.97 | 1.00 | 0.015 | -0.55 |\n| C1_FSEL32_L252s21_top3_M_TAX02noST | NONE | +3.12 | +3.80 | +2.13 | 0.68 | +1.56 | 0.76 | 0.61 | 0.70 | 0.084 | -0.63 |\n| CTRL_FSEL32_EW_TAX_A | NONE | +2.07 | +1.56 | +1.06 | 0.62 | +0.68 | 0.76 | 0.73 | 0.85 | 0.104 | -0.57 |\n| C3_FSEL32_incumbent_rule_combo_top5Q_tax | NONE | +2.03 | +2.57 | +2.76 | 0.73 | +2.28 | 1.00 | 0.69 | 0.69 | 0.108 | -0.61 |\n| FSEL11_incumbent_rule_combo_top5Q_tax | NONE | +1.25 | +0.69 | +3.33 | 0.76 | +3.02 | 1.00 | 0.60 | 0.66 | 0.299 | -0.60 |\n| PRE20_incumbent_rule_combo_top5Q_tax | NONE | +0.94 | +0.97 | +2.90 | 0.76 | +2.66 | 1.00 | 0.63 | 0.67 | 0.234 | -0.60 |\n| PRE20_EW_TAX_Q | NONE | +0.55 | -0.08 | -1.13 | 0.41 | -1.38 | 0.00 | 0.53 | 0.68 | 0.532 | -0.56 |\n\n**The incumbent's exact rule on PRE20, in CA:**\n\n* **Holdout windows.**\n  - Yearly starts: ho5 +1.09 pp (8 of 10 windows above VFINX), ho10 +1.23 pp (5 of 5).\n  - Quarterly starts: ho5 +0.59 pp (65%), ho10 +0.52 pp (59%).\n  - The single 1986-99 monthly path from the 1986 start was flat: +0.03 pp, p 0.51.\n* **Against the controls.** It beat the median of 10 random tax-managed pickers and the equal-weight tax-managed menu in all 10 five-year and all 5 ten-year yearly-start windows. Its margin over the random median was +2 to +7 pp in 5-year windows and +1.5 to +3 pp in 10-year windows.\n* **Mechanism.** From a 1986 start it froze by about 1990 into FSPHX (health care, 23-32% of the portfolio for 40 years), FDFAX (staples), DODGX, PRITX and FSUTX. After that it traded only 2-10 times a year. On FSEL32 it froze into FSPHX/FDFAX/FDLSX/FSUTX/FBIOX. This is the same \"never sell a winner above cost\" regime bet the incumbent makes on XLK/QQQ/IWF after 2010.\n\n**On the other pre-ETF menus:**\n\n* FSEL11 (sectors only): modest (long ho5 +0.42, ho10 +0.72 pp). It sits in the upper part of the random range.\n* FSEL32: about the same as its equal-weight tax-managed control (+0.81 / +0.66 pp).\n\n## 4. Realism: distributions taxed every year (CA)\n\nMethod (`research/lab/realism.py`, plus a VFINX wrapper and a clipped recorder in scratch):\n- It replays the exact daily holdings, charges each year's distribution tax in January, and credits the reinvested basis at the end.\n- \"lab rule\" taxes non-bond distributions at the long-term rate.\n- \"half ordinary\" taxes Fidelity/active-fund distributions at the mean of the ordinary and long-term rates.\n- Distribution yields use the same method for strategy and benchmark.\n\n2000\u21922026 vs SPY:\n\n| key | engine | real (half ordinary) | real (lab rule) | strat dist yield | SPY dist yield |\n|---|---|---|---|---|---|\n| EWT_A (FSEL32 EW tax-managed) | +1.91 | +0.93 | +1.43 | +4.63 | +1.48 |\n| FSEL11_incumbent_rule | +1.64 | +0.58 | +1.07 | +5.04 | +1.48 |\n| FSEL11_EW_TAX_Q | +1.33 | +0.50 | +0.92 | +4.35 | +1.48 |\n| RT_top3Q_seed4 (FSEL32 random) | +1.15 | +0.17 | +0.68 | +4.19 | +1.48 |\n| PRE20_incumbent_rule | +0.88 | -0.11 | +0.34 | +4.85 | +1.48 |\n| C1_L252s21_top3_M_TAX02noST | +0.84 | -0.21 | +0.32 | +4.58 | +1.48 |\n| PRE20_EW_TAX_Q | +0.61 | -0.04 | +0.32 | +3.93 | +1.48 |\n| MT_L252s0_top3_Q_TAX01 | +0.09 | -0.94 | -0.40 | +4.74 | +1.48 |\n| PRE20_RT_top5Q_seed2 | -0.07 | -0.60 | -0.29 | +3.26 | +1.48 |\n| N1_blend3_top3_M_std | -0.19 | -1.13 | -0.66 | +4.31 | +1.48 |\n| INC_FSEL32_combo_top5Q_tax | -0.48 | -1.66 | -1.10 | +4.51 | +1.48 |\n| PRE20_RT_top5Q_seed1 | -1.83 | -2.38 | -2.07 | +3.53 | +1.48 |\n\nPre-2000 windows vs VFINX, with the end-clipped recorder (see lab bugs). Engine / lab rule / half ordinary:\n\n| key | 1986-96 eng | lab | half-ord | 1990-2000 eng | lab | half-ord | 1995-2000 eng | lab | half-ord | 1986-2000 eng | lab | half-ord |\n|---|---|---|---|---|---|---|---|---|---|---|---|---|\n| PRE20_incumbent_rule | +1.63 | +1.35 | +0.65 | +3.07 | +2.59 | +1.82 | +1.21 | +0.62 | -0.47 | +0.03 | -0.37 | -1.14 |\n| PRE20_EW_TAX_Q | -0.63 | -0.66 | -1.08 | -0.44 | -0.60 | -1.15 | -4.37 | -4.55 | -5.24 | -1.37 | -1.47 | -2.00 |\n| PRE20_RT_top5Q_seed1 | -2.02 | -2.03 | -2.42 | +1.94 | +1.57 | +1.00 | -9.12 | -9.17 | -9.75 | -2.78 | -2.81 | -3.29 |\n| PRE20_RT_top5Q_seed2 | -1.84 | -1.98 | -2.58 | +1.81 | +1.43 | +0.71 | -5.29 | -5.26 | -6.17 | -1.66 | -2.06 | -2.82 |\n| FSEL11_incumbent_rule | +1.44 | +1.46 | +0.95 | +3.44 | +2.84 | +1.95 | -1.57 | -1.99 | -3.00 | +1.82 | +1.51 | +0.81 |\n| FSEL11_EW_TAX_Q | +0.86 | +0.93 | +0.50 | +1.06 | +0.81 | +0.12 | -2.55 | -2.86 | -3.74 | -0.04 | -0.07 | -0.65 |\n| INC_FSEL32_combo_top5Q_tax | +1.58 | +1.56 | +1.01 | +2.78 | +2.23 | +1.43 | +5.92 | +5.14 | +4.06 | +0.31 | +0.10 | -0.60 |\n| EWT_A | +1.29 | +1.31 | +0.85 | +1.43 | +1.24 | +0.61 | -3.15 | -3.35 | -4.14 | +0.28 | +0.20 | -0.38 |\n| C1_L252s21_top3_M_TAX02noST | +1.86 | +1.79 | +1.24 | +6.00 | +5.26 | +4.37 | +2.47 | +1.84 | +0.75 | +1.71 | +1.32 | +0.60 |\n| RT_top3Q_seed4 | +0.16 | +0.20 | -0.27 | +7.63 | +7.13 | +6.42 | -7.73 | -7.69 | -8.43 | -0.51 | -0.60 | -1.21 |\n| MT_L252s0_top3_Q_TAX01 | +2.31 | +2.22 | +1.63 | +1.90 | +1.42 | +0.62 | +12.30 | +10.94 | +9.57 | +1.92 | +1.56 | +0.85 |\n| N1_blend3_top3_M_std | -0.41 | -0.37 | -0.77 | +2.83 | +2.61 | +2.06 | +1.11 | +0.85 | +0.14 | -0.90 | -0.93 | -1.40 |\n\nC1 from every start to 2026-07, engine \u2192 lab rule / half ordinary:\n\n| start | engine | lab rule | half ordinary |\n|---|---|---|---|\n| 1986 | +1.91 | +1.03 | +0.39 |\n| 1990 | +2.87 | +1.85 | +1.16 |\n| 1995 | +1.03 | -0.00 | -0.71 |\n| 2000 | +0.84 | +0.32 | -0.21 |\n| 2005 | +1.95 | +1.34 | +0.71 |\n| 2010 | -0.35 | -0.85 | -1.45 |\n| 2015 | +3.74 | +2.62 | +1.78 |\n\nWhat the replay shows:\n- **Cost after 2000:** taxing distributions removes 0.2-0.6 pp/yr (lab rule) or 0.5-1.2 pp/yr (half ordinary).\n- **Cost in pre-2000 windows:** 0-1.4 / 0.4-2.7 pp.\n- **Controls still lose:** the incumbent's rule on PRE20 still beats its equal-weight and random controls in every pre-2000 window.\n- **Edge over VFINX after tax:** -1.14 to +2.59 pp.\n\n## 5. Robustness across sector universes\n\n**s8 / s8b: the incumbent's exact site rule on every menu, `full` protocol, CA.** It is compared with the site RandomPicker under the identical TaxManagedCombo: 5 seeds per menu, 10 on INC22. \"rank\" is how many random seeds the rule beats on score.\n\n| menu | first_start | score | full | ex10_beat | ex15_beat | boot_p | max_dd | NONE score | rand score med | rand min | rand max | rand full med | rank vs 5 rand |\n|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n| INC22 (incumbent) | 2000-01-01 | +0.66 | +1.54 | 0.70 | 0.83 | 0.025 | -0.57 | +0.14 | -0.23 (10 seeds) | -0.67 | +0.06 | +0.09 | 10 of 10 |\n| SPDR9 | 2000-04-01 | -0.06 | +0.01 | 0.50 | 0.54 | 0.524 | -0.54 | -0.40 | -0.05 | -0.38 | +0.03 | -0.10 | 2 |\n| SPDR11 | 2000-04-01 | -0.10 | -0.00 | 0.52 | 0.57 | 0.513 | -0.54 | -0.43 | -0.10 | -0.49 | -0.02 | -0.07 | 3 |\n| ISH10 | 2001-10-01 | -0.72 | -0.17 | 0.20 | 0.23 | 0.615 | -0.51 | -1.60 | -0.70 | -0.89 | -0.50 | -0.06 | 2 |\n| VAN10 | 2006-01-01 | -0.56 | +0.08 | 0.44 | 0.35 | 0.487 | -0.49 | -2.09 | -0.80 | -1.01 | -0.69 | -0.92 | 5 |\n| IND16 | 2002-10-01 | +0.15 | -1.35 | 0.46 | 0.36 | 0.844 | -0.58 | +1.15 | +0.16 | +0.03 | +0.56 | -1.05 | 2 |\n| FSEL32 | 2000-01-01 | +1.13 | -0.48 | 0.63 | 0.60 | 0.578 | -0.66 | +0.23 | +1.03 | +0.97 | +1.27 | +1.70 | 4 |\n| PRE20 | 2000-01-01 | +0.14 | +0.88 | 0.42 | 0.57 | 0.235 | -0.61 | -0.38 | +0.29 | +0.09 | +0.32 | +0.48 | 2 |\n| FSEL11 | 2000-01-01 | +0.07 | +1.64 | 0.49 | 0.60 | 0.084 | -0.61 | -1.02 | +0.42 | +0.31 | +0.76 | +1.95 | 0 |\n\n* **On its own menu**, the incumbent beats all 10 random pickers on score, 9 of 10 on full excess, and 9 of 10 on boot_p. Random-picker medians on INC22: score -0.23, full +0.09, ex10_beat 0.48, boot_p 0.44. So 12-1 selection did add about +0.9 pp of score over random picks there in 2000-2026.\n* **On the 8 other menus** it beats on average 2.5 of 5 random seeds, i.e. no transferable selection effect.\n\n**s3b: fixed rules on ETF menus (screen, SPY), CA score.** Random rows are 5 seeds per menu. First starts: SPDR9 2000, ISH10 2002, VAN10 2006, IND16 2003, INC22 2000, FSEL32 2000.\n\n| rule | SPDR9 | ISH10 | VAN10 | IND16 | INC22 | FSEL32 |\n|---|---|---|---|---|---|---|\n| mom L252 s21 top5 Q TAX gb0.01 | +0.22 | -0.63 | -0.73 | +0.49 | +0.74 | +0.80 |\n| mom L63+126+252 s0 top5 Q TAX gb0.01 | +0.43 | -0.36 | -0.51 | +0.68 | +0.42 | +0.80 |\n| mom L252 s21 top3 M TAX gb0.02 noST | +0.70 | -0.66 | -1.15 | +1.57 | +0.62 | +2.05 |\n| EW Q TAX | +0.13 | -0.76 | -0.83 | +0.30 | -0.02 | +0.88 |\n| mom L63+126+252 s0 top3 M (standard) | -2.75 | -3.05 | -4.01 | -2.95 | -3.19 | -1.26 |\n| mom L189 s0 top5 Q (standard) | -0.12 | -1.14 | -1.53 | -0.13 | -1.33 | -0.08 |\n| EW Q (standard) | +0.06 | -0.91 | -0.98 | -0.09 | -0.16 | +0.62 |\n| random top5 Q TAX (mean of 5) | +0.36 | -0.91 | -0.31 | +0.51 | +0.23 | +1.01 |\n| random top5 Q TAX (max of 5) | +1.01 | -0.03 | +0.08 | +1.16 | +0.61 | +2.03 |\n| random top3 M standard (mean of 5) | -3.44 | -4.16 | -4.76 | -4.45 | -4.08 | -3.88 |\n\n**Same menus, NONE score:**\n\n| rule | SPDR9 | ISH10 | VAN10 | IND16 | INC22 | FSEL32 |\n|---|---|---|---|---|---|---|\n| mom L63+126+252 s0 top3 M | -1.49 | -1.42 | -2.33 | -0.18 | -1.47 | +2.46 |\n| mom L189 s0 top5 Q | +1.03 | -0.01 | -0.26 | +1.98 | +0.33 | +2.74 |\n| mom L252 s0 top3 M | -1.20 | -2.57 | -1.96 | +0.78 | +0.19 | +1.40 |\n| mom L252 s21 top3 M | +0.01 | -2.02 | -0.64 | +2.34 | +0.71 | +0.38 |\n| mom L126 s0 top2 M | -0.52 | -0.64 | -0.88 | +2.36 | -1.58 | +3.95 |\n| EW Q | +0.36 | -0.79 | -0.85 | +0.24 | +0.06 | +1.15 |\n| random top3 M (mean of 5) | -1.45 | -2.15 | -2.64 | -2.44 | -2.55 | -2.17 |\n\n**s5 hindsight check.** Blend 63/126/252 momentum on 20 random 10-ETF menus from the pre-registered 2003 pool (screen, SPY), each with a standard-execution equal-weight control:\n\n| rule | n | mean score | median | share > 0 | min | max |\n|---|---|---|---|---|---|---|\n| mom NONE (top3 M) | 20 | -1.98 | -1.88 | 0.10 | -5.53 | +2.13 |\n| EW NONE | 20 | -1.95 | -1.82 | 0.05 | -4.73 | +0.84 |\n| mom TAX CA (top5 Q gb0.01) | 20 | -1.40 | -1.36 | 0.05 | -4.45 | +1.39 |\n| EW CA (standard) | 20 | -1.85 | -1.73 | 0.05 | -4.10 | +0.40 |\n| mom minus EW (NONE, paired) | 20 | -0.02 | -0.15 | 0.45 | -2.27 | +2.17 |\n| mom TAX minus EW (CA, paired; mixes tax deferral with selection) | 20 | +0.44 | +0.62 | 0.80 | -1.02 | +1.72 |\n\n## 6. Finalists on the `full` protocol (2000-2026 quarterly starts, SPY)\n\n| key | regime | score | full_excess | ex10_mean | ex10_beat | ex10_min | ex15_beat | ex20_beat | boot_p | max_dd | bench_max_dd | turnover |\n|---|---|---|---|---|---|---|---|---|---|---|---|---|\n| C1_FSEL32_L252s21_top3_M_TAX02noST | CA | +1.89 | +0.84 | +2.09 | 0.67 | -2.07 | 0.70 | 0.85 | 0.390 | -0.66 | -0.55 | 0.16 |\n| RT_FSEL32_top5Q_seed4 | CA | +1.82 | +1.19 | +1.60 | 0.73 | -3.32 | 0.85 | 1.00 | 0.212 | -0.63 | -0.55 | 0.12 |\n| C4_FSEL32_L252s0_top5_Q_TAX01 | CA | +1.20 | -0.02 | +1.49 | 0.72 | -1.80 | 0.74 | 0.89 | 0.494 | -0.66 | -0.55 | 0.10 |\n| C3_FSEL32_incumbent_rule_combo_top5Q_tax | CA | +1.13 | -0.48 | +1.50 | 0.63 | -3.26 | 0.60 | 0.52 | 0.578 | -0.66 | -0.55 | 0.09 |\n| RT_FSEL32_top5Q_seed1 | CA | +0.97 | +0.50 | +0.90 | 0.66 | -3.08 | 0.85 | 0.96 | 0.359 | -0.57 | -0.55 | 0.19 |\n| C2_FSEL32_blend3_top5_Q_TAX01 | CA | +0.83 | +2.05 | +0.80 | 0.67 | -4.98 | 0.77 | 0.89 | 0.098 | -0.54 | -0.55 | 0.13 |\n| CTRL_FSEL32_EW_TAX_A | CA | +0.79 | +1.91 | +0.71 | 0.57 | -1.96 | 0.68 | 0.85 | 0.069 | -0.58 | -0.55 | 0.01 |\n| CTRL_FSEL32_EW_A | CA | +0.68 | +1.69 | +0.59 | 0.55 | -2.05 | 0.51 | 0.67 | 0.085 | -0.58 | -0.55 | 0.06 |\n| RT_FSEL32_top5Q_seed2 | CA | +0.54 | -0.57 | +0.46 | 0.54 | -3.70 | 0.70 | 0.52 | 0.644 | -0.62 | -0.55 | 0.17 |\n| RT_FSEL32_top5Q_seed5 | CA | +0.49 | +0.89 | +0.88 | 0.64 | -3.03 | 0.38 | 0.30 | 0.329 | -0.52 | -0.55 | 0.15 |\n| RT_FSEL32_top5Q_seed3 | CA | +0.37 | +2.29 | +0.27 | 0.51 | -3.50 | 0.47 | 0.70 | 0.045 | -0.61 | -0.55 | 0.17 |\n| N3_FSEL32_L189_top5_Q | CA | -0.23 | +1.22 | -0.42 | 0.37 | -4.10 | 0.23 | 0.30 | 0.261 | -0.59 | -0.55 | 1.94 |\n| N1_FSEL32_blend3_top3_M | CA | -1.33 | -0.19 | -1.38 | 0.19 | -4.36 | 0.13 | 0.11 | 0.549 | -0.59 | -0.55 | 4.94 |\n| C1_FSEL32_L252s21_top3_M_TAX02noST | FED | +2.12 | +1.19 | +2.33 | 0.70 | -2.17 | 0.68 | 0.89 | 0.364 | -0.66 | -0.55 | 0.16 |\n| C4_FSEL32_L252s0_top5_Q_TAX01 | FED | +1.36 | +0.01 | +1.68 | 0.72 | -1.94 | 0.74 | 0.89 | 0.484 | -0.66 | -0.55 | 0.10 |\n| C3_FSEL32_incumbent_rule_combo_top5Q_tax | FED | +1.28 | -0.49 | +1.69 | 0.64 | -3.51 | 0.60 | 0.56 | 0.573 | -0.66 | -0.55 | 0.09 |\n| C2_FSEL32_blend3_top5_Q_TAX01 | FED | +0.95 | +2.18 | +0.93 | 0.69 | -5.30 | 0.77 | 0.89 | 0.098 | -0.54 | -0.55 | 0.13 |\n| CTRL_FSEL32_EW_TAX_A | FED | +0.91 | +2.13 | +0.83 | 0.57 | -2.09 | 0.70 | 0.93 | 0.071 | -0.58 | -0.55 | 0.01 |\n| N3_FSEL32_L189_top5_Q | FED | +0.36 | +2.28 | +0.12 | 0.40 | -3.60 | 0.43 | 0.70 | 0.138 | -0.59 | -0.55 | 1.94 |\n| N1_FSEL32_blend3_top3_M | FED | -0.68 | +0.84 | -0.76 | 0.25 | -3.66 | 0.21 | 0.15 | 0.352 | -0.58 | -0.55 | 4.91 |\n| N3_FSEL32_L189_top5_Q | NONE | +2.59 | +5.06 | +2.21 | 0.746 | -2.44 | 0.91 | 1.00 | 0.017 | -0.59 | -0.55 | 1.93 |\n| N1_FSEL32_blend3_top3_M | NONE | +2.42 | +4.31 | +2.25 | 0.93 | -1.43 | 1.00 | 1.00 | 0.049 | -0.55 | -0.55 | 4.82 |\n| C2_FSEL32_blend3_top5_Q_TAX01 | NONE | +2.05 | +3.38 | +1.98 | 0.78 | -3.90 | 0.79 | 1.00 | 0.048 | -0.56 | -0.55 | 2.53 |\n| CTRL_FSEL32_EW_A | NONE | +1.06 | +2.35 | +0.96 | 0.57 | -2.24 | 0.66 | 0.81 | 0.055 | -0.57 | -0.55 | 0.06 |\n| C4_FSEL32_L252s0_top5_Q_TAX01 | NONE | +0.78 | +2.10 | +0.52 | 0.51 | -4.07 | 0.51 | 0.78 | 0.208 | -0.57 | -0.55 | 1.75 |\n| C1_FSEL32_L252s21_top3_M_TAX02noST | NONE | +0.26 | +3.19 | -0.14 | 0.34 | -4.44 | 0.34 | 0.41 | 0.167 | -0.63 | -0.55 | 3.55 |\n| C3_FSEL32_incumbent_rule_combo_top5Q_tax | NONE | +0.23 | +1.61 | -0.10 | 0.42 | -4.41 | 0.30 | 0.59 | 0.283 | -0.61 | -0.55 | 1.55 |\n\nReading the table:\n- `RT_*` are random tax-managed top 5 Q controls (CA only).\n- In CA, the momentum finalists (score +0.83 to +1.89 pp) lie inside the range of the five random controls (+0.37 to +1.82 pp; boot_p 0.045-0.64).\n- The no-selection equal-weight control has the best bootstrap: +1.91 pp full, p 0.069.\n- Every CA/FED finalist fails ex10_beat >= 0.75 and ex15_beat >= 0.85. These are engine numbers, before the 0.5-1 pp/yr distribution-tax haircut.\n\n## 7. Overfitting diagnostics (`report.diagnostics`)\n\n| grid | n_configs | wf10/5 oos_mean | wf10/5 oos_beat | wf10/5 n decisions | wf10/5 avg-config oos | wf5/3 oos_mean | wf5/3 oos_beat | PBO | DSR best | best by monthly mean |\n|---|---|---|---|---|---|---|---|---|---|---|\n| CA_long_screen | 909 | +3.42 | 0.67 | 6 | +0.65 | -4.26 | 0.25 | 0.415 | 0.043 | FSEL32 random L1 s0 top3 M TAX gb0.02 noST seed=14 |\n| NONE_long_screen | 591 | +5.91 | 0.50 | 6 | +3.17 | -0.31 | 0.38 | 0.353 | 0.068 | FSEL32 mom L252 s0 top1 M |\n| CA_screen | 205 | +0.66 | 0.67 | 3 | -3.10 | +0.26 | 0.50 | 0.155 | 0.089 | IND16 mom L63+126+252 s0 top5 Q TAX gb0.01 |\n| NONE_screen | 128 | +6.05 | 1.00 | 3 | -2.49 | +1.30 | 0.75 | 0.407 | 0.093 | IND16 mom L126 s0 top2 M |\n\n* **The CA grid's best config by monthly mean is a random-pick control.**\n* **CA walk-forward is unstable.**\n  - The 10/5 picks flip between momentum, tax-managed and random configs; its +3.4 pp mean rests on one 1998-2003 decision (+14.5 pp).\n  - The 5/3 walk-forward is -4.3 pp.\n* **Deflated Sharpe ratios of the best configs are 0.04-0.09.**\n* **Walk-forward decisions are few** on the yearly-start screens: 3 to 6 (see lab bugs).\n\n## 8. Conclusion\n\n* **For the user's taxable account: nothing here clears the bar.** The only CA wins come from tax-managed execution:\n  - random picks and the equal-weight menu share them, so they are not evidence of sector-selection skill;\n  - on mutual-fund menus they are further inflated by the engine's untaxed distributions;\n  - on its own protocol, the incumbent's exact rule does no better than a random picker on 8 other sector universes.\n* **For the incumbent:** the pre-2000 holdout does not contradict it on its pre-ETF analog menu.\n  - There it beat its controls in every pre-2000 window and roughly matched VFINX after distribution tax.\n  - But the mechanism is the same buy-early-winners-and-freeze bet, and the effect does not transfer across sector universes.\n  - Treat its +0.66 pp as menu composition plus a growth/tech regime bet that happened to work on INC22, where it did beat 10 of 10 random pickers in 2000-2026, rather than as a robust momentum effect.\n* **Pre-tax:** fine-grained industry momentum (Fidelity Selects) was a real pre-2000 anomaly that roughly halved afterwards. It is cost-fragile at monthly turnover, survivorship-inflated, parameter-fragile on 2000-2026, and absent on coarse sector ETFs. It is only relevant to a tax-deferred account.\n\n## Lab issues found\n\n1. `realism.record(cfg, regime, start, end)` accepts `end`, but `RecordingGate` keeps recording to the data end, while `_adjust_path` takes the liquidation value at `end`. The result is wrong engine and \"real\" CAGRs for any `end` before 2026-07-01. `verify.battery` uses the default end and is unaffected. A clipped-gate workaround in scratch reproduces cached window excess exactly.\n2. `realism.adjusted()` hard-codes SPY as the benchmark, so it cannot price pre-1993 windows.\n3. `realism.character()` treats all non-bond fund distributions as qualified dividends. That is lenient for active mutual funds with short-term capital-gain distributions.\n4. `metrics.walk_forward(step_quarters=4)` steps over start indices, so yearly-start protocols re-select only every 4 years: 3 decisions on `screen` and 6 on `long_screen`, versus 12 on `full`.\n5. Minor: the scratch label helper omits `lag=0`. Use `cfg_json` to tell lag-0 configs apart."
+}

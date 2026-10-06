@@ -1,0 +1,911 @@
+{
+ "family": "risk_alloc",
+ "module_path": "/Users/siddhartha/dev/StockTest/research/lab/families/risk_alloc.py",
+ "results_md": "/Users/siddhartha/dev/StockTest/research/lab/results/risk_alloc.md (full table of every run: /Users/siddhartha/dev/StockTest/research/lab/results/risk_alloc_table.csv, 1022 rows = config x regime x protocol, with protocol/set/group/role, matched-vol Sharpe columns and uses_leverage/uses_synthetic flags). Scripts/logs/job sets: /Users/siddhartha/dev/StockTest/research/lab/scratch/risk_alloc/ (resume_sets.py -> extra_sets.json; run_extra.py; final_table.py; write_md.py + render_md.py + doc_text.py + doc_template.txt build the md; candidates.py -> candidates.json; battery.py -> battery_ca.json; diagnostics_final.json). The family module was NOT edited, so all 637 cached results of the first researcher stayed valid.",
+ "n_configs_tested": 558,
+ "headline": "No risk-based allocation or volatility-management rule beats buying and holding SPY after California taxes with good confidence. None of the 258 unlevered configs beats SPY in any regime. That covers vol targeting, risk parity / min-variance / max-diversification / HRP / risk budgets, CPPI, drawdown tiers, vol-scaled momentum and a vol-target overlay on the incumbent: they cut drawdowns and sometimes raise the Sharpe ratio, but they cost about 0.5-9 pp/yr. Levered vol targeting with SSO does beat SPY over 2006-2026 (CA with tax-aware execution: score +3.40 pp, full +4.85 pp, boot_p 0.011; NONE: +4.64 pp, boot_p 0.010), but only through about 1.7-1.8x leverage. In CA the gain budget freezes it into near-constant ~1.9x leverage, and a never-rebalanced 50% SPY / 50% SSO scores the same (+3.39 pp). On synthetic 2x history (2000-2026 and 1986-2026) it fails the bar (boot_p 0.26-0.35, Sharpe below SPY's, max drawdown -79%), and the family's walk-forward is negative in CA, so nothing passes.",
+ "findings": [
+  "Scope: 558 configs ran (454 family search configs, the multiple-testing count; 104 hindsight-check configs), giving 1022 (config, regime, protocol) results on the screen/full/long_screen/long protocols. The first researcher's 637 cached results were reused unchanged because the module was not edited. Their planned 753-config screen was cut by the battery throttle: 213 grid configs ran in full plus a 56-config representative subset of the RP/CPPI/DD/VM/OV/filter groups.",
+  "Unlevered vol targeting of SPY (146 configs, 2000-2026): before tax it works as advertised. Median max drawdown is -40% vs SPY's -55%, and in NONE 86% of configs raise the Sharpe ratio (median +0.03, matched-vol +0.5 pp). But return falls: median score -1.06 pp/yr in CA and -0.76 in NONE; best CA +0.03 and best NONE +0.50 (boot_p 0.46). In CA most of the Sharpe gain is gone (median -0.005) because de-risking sales realize gains. Tax-aware execution brings it back to about zero (best CA +0.14, boot_p 0.77) by suppressing trades. Power-2 (Moreira-Muir), 200-day trend and VIX term-structure filters all lowered the score.",
+  "Risk parity / min-var / max-div / HRP / risk budgets lose to SPY in every regime: SPY+VUSTX -1.4 to -1.7 pp/yr (CA), SPY+TLT -2.3 to -2.5, with gold -3.3 to -3.9, the global 8-asset menu -5.6 to -7.7. Risk-adjusted they look best: SPY/TLT/GLD min-variance has a NONE Sharpe of 0.88 vs 0.67 and +3.2 pp matched-vol. Levered RP via SSO/UBT/UGL (2010-2026) still lost 1.1-2.1 pp/yr in NONE and 3.0-3.6 in CA. ERC on 40 random BROAD_POOL_2003 menus lost by a median 3.0-5.5 pp/yr (79 of 80 menu x regime cases negative). Removing GLD changes nothing.",
+  "CPPI lost 3.0-5.0 pp/yr (CA). Drawdown-tier de-risking lost 0.05-0.8 (CA) and cut the max drawdown to -34% to -43%. Vol-scaled momentum lost 3.5-8.6. Tax-executed inverse-vol momentum on the incumbent's 22 ETFs scored -0.36 (CA). The tax-executed vol-target overlay on the incumbent's rotation scored CA -0.18 with full +1.53 pp and boot_p 0.056 on the full protocol: Sharpe 0.57 vs SPY's 0.42 and volatility 12.5%. The incumbent scores +0.66 / +1.54 / boot_p 0.025 with Sharpe 0.51. The overlay is a smoother incumbent, not a better beat-SPY strategy (10y beat 60%).",
+  "Levered vol target (SPY+SSO, exposure = 25%/21d vol, cap 2x), full protocol 2006-07..2026: in NONE score +4.64, full +4.33, all 10-year windows ahead (worst +2.92), boot_p 0.010, Sharpe 0.71 vs 0.67, max drawdown -55% (= SPY). Average exposure is 1.66x. The 1.5x-capped version scores +3.18 (boot_p 0.012, Sharpe 0.72, matched-vol +0.79).",
+  "With plain execution in CA the same levered signal is taxed away: score +0.83, full +0.38, boot_p 0.40 (FED +1.78, boot_p 0.19). Its 1986-2026 synthetic analogue scores -0.18 in CA (long protocol).",
+  "With tax-aware execution (SPY/IWB/VTI + SSO/DDM, lots chosen by tax cost, 1%/yr realized-gain budget) the CA score is +3.40, full +4.85, 10y beat 98%, 15y beat 100%, boot_p 0.011, max drawdown -61%; FED +3.64 and NONE +4.01. That clears bar items 1-3 on the SSO-era sample. But the gain budget freezes the exposure: average 1.82x, about 1.9x every year since 2010 for the 2006 start, and stuck near 1.35x for a 2019 start. It is a path-dependent constant-leverage portfolio. Matched-vol excess is only +0.12 pp. Constant 1.5x, 1.8x and 2x and the never-rebalanced 50/50 SPY/SSO score +3.4 to +6.0 with drawdowns of -71% to -85%.",
+  "Longer history with cost-calibrated synthetic 2x funds (research-only) shows the leverage dependence. The CA lead's 2000-2026 analogue scores +2.31 with boot_p 0.35 (Sharpe 0.36 vs 0.42). The 1986-2026 long protocol gives +2.46, 10y beat 74%, 15y beat 72%, boot_p 0.26, max drawdown -79%; the pre-2000 holdout is positive (ho5 +5.8). The NONE lead's 1986-2026 analogue passes items 1-3 (+2.68, 81%/92%, boot_p 0.057), but its Sharpe is below VFINX's (0.55 vs 0.57) and its max drawdown is -65%.",
+  "Cross-underlying hindsight check: the same levered rule on DIA/MDY/IWM/EFA/EEM/QQQ (synthetic 2x) beats its own index's buy-and-hold only for high-Sharpe indexes. In NONE: QQQ +4.80, DIA +2.97, MDY +0.83, IWM -0.81, EFA -0.72, EEM -2.30, with Sharpe below the index's own on 5 of 6. With tax-aware execution in CA it loses on IWM/EFA/EEM, with drawdowns of -63% to -83%. Its success is a bet on the levered index's equity premium.",
+  "Overfitting diagnostics (screen family). In CA the walk-forward is negative: 10y->5y -0.53 pp and 5y->3y -1.26 pp with the lab's default steps; 10y->5y -1.42 pp (25% of 12 decisions) with yearly steps. PBO is 0.002 only because leverage dominated every sub-sample. The deflated Sharpe of the best config is 0.002, and the verification battery gives the CA lead a DSR of 0.067. In NONE the walk-forward is -2.89 / -1.59 pp, PBO 0.145.",
+  "Verification battery for the CA lead: robust to costs (CA score +3.62 / +3.11 / +2.24 at 0 / 15 / 35 bps per side). Stricter yearly distribution-tax accounting moves the excess little (from 2006: +4.85 -> +4.59). Sub-periods: CA 2010-2020 +2.50, 2020-2026 +3.36. Rebalance-offset and lag tests do not apply to the custom kind."
+ ],
+ "candidates": [
+  {
+   "label": "TVT s21 t0.25 c2.0 v3 LSSO/DDM b0.1 gb0.01 (CA lead: tax-aware levered vol target)",
+   "cfg": {
+    "kind": "risk_alloc.taxvt",
+    "signal": {
+     "est": "simple",
+     "window": 21,
+     "target": 0.25,
+     "cap": 2
+    },
+    "vehicles": [
+     "SPY",
+     "IWB",
+     "VTI"
+    ],
+    "band": 0.1,
+    "cash": [
+     "SHY",
+     "VFISX"
+    ],
+    "lever": [
+     [
+      "SSO",
+      2
+     ],
+     [
+      "DDM",
+      2
+     ]
+    ],
+    "gain_budget": 0.01,
+    "requires": [
+     "SSO"
+    ]
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.03404,
+     "full_excess": 0.04847,
+     "ex5_mean": 0.02031,
+     "ex10_mean": 0.03918,
+     "ex10_beat": 0.97561,
+     "ex10_min": -0.02322,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.011,
+     "max_dd": -0.6068,
+     "bench_max_dd": -0.55189,
+     "trades": 992,
+     "turnover": 0.0824
+    },
+    "FED": {
+     "score": 0.03638,
+     "full_excess": 0.06316,
+     "ex5_mean": 0.02246,
+     "ex10_mean": 0.0419,
+     "ex10_beat": 0.97561,
+     "ex10_min": -0.02815,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.001,
+     "max_dd": -0.5879,
+     "bench_max_dd": -0.55189,
+     "trades": 1069,
+     "turnover": 0.07777
+    },
+    "NONE": {
+     "score": 0.04007,
+     "full_excess": 0.03398,
+     "ex5_mean": 0.04025,
+     "ex10_mean": 0.04143,
+     "ex10_beat": 1,
+     "ex10_min": 0.02667,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.024,
+     "max_dd": -0.53886,
+     "bench_max_dd": -0.55189,
+     "trades": 1167,
+     "turnover": 4.14335
+    }
+   },
+   "long_protocol": {
+    "CA": {
+     "protocol": "long (quarterly 1986-2023), synthetic analogue TVT s21 t0.25 c2.0 vVFINX LSYN_VFINX2XC gb0.01",
+     "score": 0.02463,
+     "full_excess": 0.01185,
+     "ho5_mean": 0.05829,
+     "ho5_beat": 0.81081,
+     "ho10_mean": 0.05373,
+     "ex10_beat": 0.73984,
+     "ex15_beat": 0.71845,
+     "boot_p": 0.26,
+     "max_dd": -0.78641
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": true,
+   "hindsight_risk": "high",
+   "robustness_notes": "Passes bar items 1-3 only on the SSO-era sample (2006-07..2026). Fails item 4: the CA family walk-forward is negative (-0.53 pp with lab default steps, -1.42 pp with yearly steps). Neighbourhood holds: all 18 screened tax-aware neighbours are positive (+2.2 to +5.0, boot_p <= 0.039), and full-protocol neighbours score +0.88 to +2.09. This is leverage, not risk management. Average exposure is 1.82x and the gain budget freezes it near 1.9x after 2009. A never-rebalanced 50/50 SPY/SSO scores the same (+3.39). Matched-vol excess is +0.12 pp. Synthetic history fails: 2000-2026 boot_p 0.35 (Sharpe 0.36 vs 0.42); 1986-2026 10y beat 74%, 15y beat 72%, boot_p 0.26, max drawdown -79% (pre-2000 holdout +5.8 pp). The rule beats its own index only on high-Sharpe indexes (QQQ, DIA). Battery: CA score +2.24 at 35 bps; stricter tax accounting costs -0.26 pp from 2006; DSR 0.067. About 21% of realized losses sit within 30 days of a same-fund purchase, i.e. unenforced wash sales. Results are path-dependent on the start date. Not runnable on the website (SSO/DDM/IWB/SHY are research tickers; custom kind)."
+  },
+  {
+   "label": "TVT s21 t0.25 c2.0 v3 LSSO/DDM b0.1 gb0.0 (same, zero gain budget)",
+   "cfg": {
+    "kind": "risk_alloc.taxvt",
+    "signal": {
+     "est": "simple",
+     "window": 21,
+     "target": 0.25,
+     "cap": 2
+    },
+    "vehicles": [
+     "SPY",
+     "IWB",
+     "VTI"
+    ],
+    "band": 0.1,
+    "cash": [
+     "SHY",
+     "VFISX"
+    ],
+    "lever": [
+     [
+      "SSO",
+      2
+     ],
+     [
+      "DDM",
+      2
+     ]
+    ],
+    "gain_budget": 0,
+    "requires": [
+     "SSO"
+    ]
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.03165,
+     "full_excess": 0.05536,
+     "ex5_mean": 0.0177,
+     "ex10_mean": 0.03708,
+     "ex10_beat": 0.97561,
+     "ex10_min": -0.0267,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.002,
+     "max_dd": -0.56592,
+     "bench_max_dd": -0.55189,
+     "trades": 120,
+     "turnover": 0.05774
+    },
+    "FED": {
+     "score": 0.03365,
+     "full_excess": 0.05665,
+     "ex5_mean": 0.01957,
+     "ex10_mean": 0.03959,
+     "ex10_beat": 0.97561,
+     "ex10_min": -0.02851,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.002,
+     "max_dd": -0.56592,
+     "bench_max_dd": -0.55189,
+     "trades": 120,
+     "turnover": 0.05774
+    },
+    "NONE": {
+     "score": 0.04007,
+     "full_excess": 0.03398,
+     "ex5_mean": 0.04025,
+     "ex10_mean": 0.04143,
+     "ex10_beat": 1,
+     "ex10_min": 0.02667,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.024,
+     "max_dd": -0.53886,
+     "bench_max_dd": -0.55189,
+     "trades": 1167,
+     "turnover": 4.14335
+    }
+   },
+   "long_protocol": {
+    "CA": {
+     "protocol": "long_screen, synthetic analogue (single VFINX vehicle + SYN_VFINX2XC, gb0.0)",
+     "score": 0.02185,
+     "full_excess": -0.00192,
+     "ho5_mean": 0.06818,
+     "ho5_beat": 0.8,
+     "ho10_mean": 0.05286,
+     "ex10_beat": 0.64516,
+     "ex15_beat": 0.57692,
+     "boot_p": 0.558,
+     "max_dd": -0.58347
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": true,
+   "hindsight_risk": "high",
+   "robustness_notes": "Same mechanism as the CA lead, with the exposure locked even harder. Over 1986-2026 the synthetic single-vehicle version stayed near 1.1x for 38 years after the 1987 crash. Sub-period 2016-2021 was -4.7 pp/yr while the 1%-budget twin gained +0.5. The family walk-forward chose this config in 2017 and 2018 and lost 3.0 and 4.1 pp/yr over the next 5 years. Full CA boot_p 0.002 rests on the 2006-07 start dodging 2008. The 1986-2026 synthetic analogue has full excess -0.19 pp and boot_p 0.56. It is leverage."
+  },
+  {
+   "label": "BH SPY:0.5,SSO:0.5 (constant-leverage control, never rebalanced)",
+   "cfg": {
+    "kind": "buyhold",
+    "weights": {
+     "SPY": 0.5,
+     "SSO": 0.5
+    }
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.0339,
+     "full_excess": 0.02346,
+     "ex5_mean": 0.02981,
+     "ex10_mean": 0.03627,
+     "ex10_beat": 1,
+     "ex10_min": 0.00088,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.111,
+     "max_dd": -0.70824,
+     "bench_max_dd": -0.55189,
+     "trades": 2,
+     "turnover": 0
+    },
+    "FED": {
+     "score": 0.03618,
+     "full_excess": 0.02411,
+     "ex5_mean": 0.03322,
+     "ex10_mean": 0.03845,
+     "ex10_beat": 1,
+     "ex10_min": 0.00097,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.105,
+     "max_dd": -0.70824,
+     "bench_max_dd": -0.55189,
+     "trades": 2,
+     "turnover": 0
+    },
+    "NONE": {
+     "score": 0.03839,
+     "full_excess": 0.0247,
+     "ex5_mean": 0.03665,
+     "ex10_mean": 0.04051,
+     "ex10_beat": 1,
+     "ex10_min": 0.00107,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.113,
+     "max_dd": -0.70824,
+     "bench_max_dd": -0.55189,
+     "trades": 2,
+     "turnover": 0
+    }
+   },
+   "long_protocol": {
+    "CA": {
+     "protocol": "long_screen, synthetic analogue BH VFINX 0.5 / SYN_VFINX2XC 0.5",
+     "score": 0.01455,
+     "full_excess": 0.01796,
+     "ho5_mean": 0.03886,
+     "ho5_beat": 0.9,
+     "ho10_mean": 0.04082,
+     "ex10_beat": 0.67742,
+     "ex15_beat": 0.65385,
+     "boot_p": 0.138,
+     "max_dd": -0.76545
+    },
+    "NONE": {
+     "protocol": "long_screen, synthetic analogue",
+     "score": 0.01692,
+     "full_excess": 0.01818,
+     "ho5_mean": 0.04569,
+     "ho5_beat": 0.9,
+     "ho10_mean": 0.04464,
+     "ex10_beat": 0.67742,
+     "ex15_beat": 0.65385,
+     "boot_p": 0.146,
+     "max_dd": -0.76545
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": true,
+   "hindsight_risk": "high",
+   "robustness_notes": "Included as the honest benchmark for every levered result in this family. It has no timing at all, yet matches the tax-aware vol target's score (+3.39 vs +3.40 CA) and beat SPY to 2026 from all 69 quarterly starts. Fails item 3 (boot_p 0.111). Max drawdown is -71% and its Sharpe is below SPY's. Over 1986-2026 (synthetic) the 10y beat is 68%, boot_p 0.14 and max drawdown -77%. It is pure leverage on the S&P 500 and belongs to the leverage family's territory."
+  },
+  {
+   "label": "VT SPY s21 t0.25 c2.0 SSO |M (NONE lead: plain levered vol target)",
+   "cfg": {
+    "kind": "weights",
+    "signal": "risk_alloc.voltarget",
+    "params": {
+     "est": "simple",
+     "window": 21,
+     "risk": "SPY",
+     "target": 0.25,
+     "cap": 2,
+     "cash": [
+      "SHY",
+      "VFISX"
+     ],
+     "lever": "SSO",
+     "lever_k": 2
+    },
+    "rebalance": "M",
+    "execution": "standard",
+    "requires": [
+     "SSO"
+    ]
+   },
+   "regime_target": "NONE",
+   "stats": {
+    "CA": {
+     "score": 0.00829,
+     "full_excess": 0.0038,
+     "ex5_mean": 0.01098,
+     "ex10_mean": 0.00909,
+     "ex10_beat": 0.92683,
+     "ex10_min": -0.00392,
+     "ex15_beat": 0.90476,
+     "ex20_beat": 1,
+     "boot_p": 0.404,
+     "max_dd": -0.58769,
+     "bench_max_dd": -0.55189,
+     "trades": 362,
+     "turnover": 2.5123
+    },
+    "FED": {
+     "score": 0.01785,
+     "full_excess": 0.01506,
+     "ex5_mean": 0.01879,
+     "ex10_mean": 0.01866,
+     "ex10_beat": 1,
+     "ex10_min": 0.00395,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.193,
+     "max_dd": -0.57584,
+     "bench_max_dd": -0.55189,
+     "trades": 362,
+     "turnover": 2.50055
+    },
+    "NONE": {
+     "score": 0.04643,
+     "full_excess": 0.04333,
+     "ex5_mean": 0.04703,
+     "ex10_mean": 0.04594,
+     "ex10_beat": 1,
+     "ex10_min": 0.02924,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.01,
+     "max_dd": -0.54787,
+     "bench_max_dd": -0.55189,
+     "trades": 355,
+     "turnover": 2.4723
+    }
+   },
+   "long_protocol": {
+    "NONE": {
+     "protocol": "long (quarterly 1986-2023), synthetic analogue VT VFINX s21 t0.25 c2.0 SYN_VFINX2XC",
+     "score": 0.02682,
+     "full_excess": 0.02571,
+     "ho5_mean": 0.05186,
+     "ho5_beat": 0.78378,
+     "ho10_mean": 0.04968,
+     "ex10_beat": 0.81301,
+     "ex15_beat": 0.92233,
+     "boot_p": 0.057,
+     "max_dd": -0.64927
+    },
+    "CA": {
+     "protocol": "long, same analogue",
+     "score": -0.00179,
+     "full_excess": -0.01203,
+     "ho5_mean": 0.01879,
+     "ho5_beat": 0.62162,
+     "ho10_mean": 0.01219,
+     "ex10_beat": 0.62602,
+     "ex15_beat": 0.4466,
+     "boot_p": 0.817,
+     "max_dd": -0.67964
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": true,
+   "hindsight_risk": "high",
+   "robustness_notes": "The best numbers in the family, but NONE is a diagnostic regime and in CA it is taxed away (+0.83, boot_p 0.40). In NONE it passes items 1-3 on the full protocol and on the 1986-2026 synthetic long protocol. It fails item 4: the NONE walk-forward is -2.89 pp with lab default steps and -0.78 pp with yearly steps. On 2000-2026 synthetic history boot_p is 0.15. The excess is leverage: average exposure 1.66x, 40-year Sharpe below buy-and-hold (0.55 vs 0.57), max drawdown -65%. Neighbours are positive in NONE (1.5x cap +3.18, EWMA/63-day variants +3.0 to +4.2 on screen). Across indexes it beats its own buy-and-hold only on QQQ/DIA/MDY, with Sharpe below the index's own on 5 of 6."
+  },
+  {
+   "label": "VT SPY s21 t0.25 c1.5 SSO |M (levered vol target capped at 1.5x)",
+   "cfg": {
+    "kind": "weights",
+    "signal": "risk_alloc.voltarget",
+    "params": {
+     "est": "simple",
+     "window": 21,
+     "risk": "SPY",
+     "target": 0.25,
+     "cap": 1.5,
+     "cash": [
+      "SHY",
+      "VFISX"
+     ],
+     "lever": "SSO",
+     "lever_k": 2
+    },
+    "rebalance": "M",
+    "execution": "standard",
+    "requires": [
+     "SSO"
+    ]
+   },
+   "regime_target": "NONE",
+   "stats": {
+    "CA": {
+     "score": 0.00916,
+     "full_excess": 0.00687,
+     "ex5_mean": 0.01235,
+     "ex10_mean": 0.00908,
+     "ex10_beat": 0.60976,
+     "ex10_min": -0.00621,
+     "ex15_beat": 0.90476,
+     "ex20_beat": 1,
+     "boot_p": 0.329,
+     "max_dd": -0.539,
+     "bench_max_dd": -0.55189,
+     "trades": 504,
+     "turnover": 1.01608
+    },
+    "FED": {
+     "score": 0.01622,
+     "full_excess": 0.01582,
+     "ex5_mean": 0.01763,
+     "ex10_mean": 0.01624,
+     "ex10_beat": 0.97561,
+     "ex10_min": -0.00026,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.12,
+     "max_dd": -0.52998,
+     "bench_max_dd": -0.55189,
+     "trades": 504,
+     "turnover": 1.00243
+    },
+    "NONE": {
+     "score": 0.0318,
+     "full_excess": 0.03011,
+     "ex5_mean": 0.03198,
+     "ex10_mean": 0.03175,
+     "ex10_beat": 1,
+     "ex10_min": 0.01408,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.012,
+     "max_dd": -0.51964,
+     "bench_max_dd": -0.55189,
+     "trades": 506,
+     "turnover": 0.98191
+    }
+   },
+   "long_protocol": {},
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": true,
+   "hindsight_risk": "high",
+   "robustness_notes": "The best risk-adjusted levered config: NONE Sharpe 0.72 vs 0.67, matched-vol +0.79 pp, max drawdown -52%, i.e. less than SPY's. Still leverage-driven, and it fails item 4 (NONE walk-forward). In CA it scores +0.91 with boot_p 0.33 and a 10y beat of 61%. No synthetic-history run for this exact config; the 2x-cap analogue's 40-year Sharpe is below buy-and-hold."
+  },
+  {
+   "label": "TVT e20 t0.25 c1.0 v3 b0.1 gb0.0 (best unlevered: tax-aware vol target)",
+   "cfg": {
+    "kind": "risk_alloc.taxvt",
+    "signal": {
+     "est": "ewma",
+     "halflife": 20,
+     "window": 20,
+     "target": 0.25,
+     "cap": 1
+    },
+    "vehicles": [
+     "SPY",
+     "IWB",
+     "VTI"
+    ],
+    "band": 0.1,
+    "cash": [
+     "SHY",
+     "VFISX"
+    ],
+    "gain_budget": 0
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.00047,
+     "full_excess": 0.00124,
+     "ex5_mean": -0.00126,
+     "ex10_mean": 0.00189,
+     "ex10_beat": 0.47761,
+     "ex10_min": -0.01147,
+     "ex15_beat": 0.65957,
+     "ex20_beat": 0.66667,
+     "boot_p": 0.469,
+     "max_dd": -0.47732,
+     "bench_max_dd": -0.55189,
+     "trades": 49,
+     "turnover": 0.03371
+    },
+    "FED": {
+     "score": 0.00052,
+     "full_excess": 0.00128,
+     "ex5_mean": -0.0014,
+     "ex10_mean": 0.00208,
+     "ex10_beat": 0.47761,
+     "ex10_min": -0.01226,
+     "ex15_beat": 0.65957,
+     "ex20_beat": 0.66667,
+     "boot_p": 0.459,
+     "max_dd": -0.47732,
+     "bench_max_dd": -0.55189,
+     "trades": 49,
+     "turnover": 0.03371
+    },
+    "NONE": {
+     "score": -0.00207,
+     "full_excess": -0.00361,
+     "ex5_mean": -0.00284,
+     "ex10_mean": -0.00119,
+     "ex10_beat": 0.55224,
+     "ex10_min": -0.02052,
+     "ex15_beat": 0.46809,
+     "ex20_beat": 0.07407,
+     "boot_p": 0.711,
+     "max_dd": -0.46126,
+     "bench_max_dd": -0.55189,
+     "trades": 80,
+     "turnover": 0.19058
+    }
+   },
+   "long_protocol": {
+    "CA": {
+     "protocol": "long_screen, standard-execution analogue VT VFINX e20 t0.25 c1.0",
+     "score": -0.00177,
+     "full_excess": -0.01226,
+     "ho5_mean": -0.00231,
+     "ho5_beat": 0,
+     "ho10_mean": -0.00277,
+     "ex10_beat": 0.35484,
+     "ex15_beat": 0.46154,
+     "boot_p": 0.95,
+     "max_dd": -0.53108
+    },
+    "NONE": {
+     "protocol": "long_screen, same analogue",
+     "score": -0.00029,
+     "full_excess": -0.00188,
+     "ho5_mean": -0.00145,
+     "ho5_beat": 0.2,
+     "ho10_mean": -0.00135,
+     "ex10_beat": 0.41935,
+     "ex15_beat": 0.46154,
+     "boot_p": 0.636,
+     "max_dd": -0.46385
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "low",
+   "robustness_notes": "The best the family manages without leverage in CA: basically SPY with a lower drawdown (-48% vs -55%) and a slightly higher after-tax Sharpe (0.46 vs 0.42). Score +0.05 pp, 10y beat 48%, boot_p 0.47. It fails items 2-5. The gain budget makes it nearly buy-and-hold (49 trades in 26 years). The 1986-2026 standard-execution analogue is negative, including the pre-2000 holdout."
+  },
+  {
+   "label": "RP MF2 erc lb63 |M (risk parity, SPY + long Treasuries, ERC)",
+   "cfg": {
+    "kind": "weights",
+    "signal": "risk_alloc.riskpar",
+    "params": {
+     "menu": [
+      "SPY",
+      "VUSTX"
+     ],
+     "method": "erc",
+     "lookback": 63,
+     "cash": [
+      "SHY",
+      "VFISX"
+     ]
+    },
+    "rebalance": "M",
+    "execution": "standard",
+    "requires": [
+     "SPY",
+     "VUSTX"
+    ],
+    "require_days": 101
+   },
+   "regime_target": "NONE",
+   "stats": {
+    "CA": {
+     "score": -0.01616,
+     "full_excess": -0.0153,
+     "ex5_mean": -0.01618,
+     "ex10_mean": -0.01505,
+     "ex10_beat": 0.49254,
+     "ex10_min": -0.08114,
+     "ex15_beat": 0.23404,
+     "ex20_beat": 0.18519,
+     "boot_p": 0.704,
+     "max_dd": -0.30844,
+     "bench_max_dd": -0.55189,
+     "trades": 638,
+     "turnover": 0.37895
+    },
+    "FED": {
+     "score": -0.01544,
+     "full_excess": -0.01192,
+     "ex5_mean": -0.01719,
+     "ex10_mean": -0.01404,
+     "ex10_beat": 0.50746,
+     "ex10_min": -0.08677,
+     "ex15_beat": 0.2766,
+     "ex20_beat": 0.18519,
+     "boot_p": 0.651,
+     "max_dd": -0.29876,
+     "bench_max_dd": -0.55189,
+     "trades": 638,
+     "turnover": 0.3745
+    },
+    "NONE": {
+     "score": -0.01333,
+     "full_excess": -0.0071,
+     "ex5_mean": -0.01663,
+     "ex10_mean": -0.0117,
+     "ex10_beat": 0.52239,
+     "ex10_min": -0.09089,
+     "ex15_beat": 0.3617,
+     "ex20_beat": 0.22222,
+     "boot_p": 0.6,
+     "max_dd": -0.28799,
+     "bench_max_dd": -0.55189,
+     "trades": 638,
+     "turnover": 0.37057
+    }
+   },
+   "long_protocol": {
+    "CA": {
+     "protocol": "long_screen, analogue RP L-SB erc lb63 (VFINX + VUSTX)",
+     "score": -0.0142,
+     "full_excess": -0.03699,
+     "ho5_mean": -0.04032,
+     "ho5_beat": 0.11111,
+     "ho10_mean": -0.04795,
+     "ex10_beat": 0.4,
+     "ex15_beat": 0.36,
+     "boot_p": 0.954,
+     "max_dd": -0.30852
+    },
+    "NONE": {
+     "protocol": "long_screen, same analogue",
+     "score": -0.01042,
+     "full_excess": -0.02351,
+     "ho5_mean": -0.04298,
+     "ho5_beat": 0.11111,
+     "ho10_mean": -0.04412,
+     "ex10_beat": 0.43333,
+     "ex15_beat": 0.44,
+     "boot_p": 0.846,
+     "max_dd": -0.28811
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "medium",
+   "robustness_notes": "A representative failure: classic stock/bond risk parity loses to SPY in every regime and in the 1986-2026 history (pre-2000 holdout -4.3 pp). It looks good only risk-adjusted: NONE matched-vol +2.9 pp, max drawdown -29%. That benefit relies on the 2000-2020 bond bull market, and the levered versions lost 2010-2026. Bond interest is taxed as deferred gains in the engine, which flatters it in CA/FED. ERC on 40 random menus lost by a median 3-5.5 pp/yr. VUSTX is a research-only mutual fund."
+  },
+  {
+   "label": "DD 0.1:1.0,0.2:0.5,1.0:0.0 hw252 |M (drawdown-tier de-risking of SPY)",
+   "cfg": {
+    "kind": "weights",
+    "signal": "risk_alloc.ddtier",
+    "params": {
+     "tiers": [
+      [
+       0.1,
+       1
+      ],
+      [
+       0.2,
+       0.5
+      ],
+      [
+       1,
+       0
+      ]
+     ],
+     "hi_window": 252,
+     "cash": [
+      "SHY",
+      "VFISX"
+     ]
+    },
+    "rebalance": "M",
+    "execution": "standard"
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": -0.00534,
+     "full_excess": -0.00599,
+     "ex5_mean": -0.00458,
+     "ex10_mean": -0.00514,
+     "ex10_beat": 0.52239,
+     "ex10_min": -0.0374,
+     "ex15_beat": 0.42553,
+     "ex20_beat": 0.14815,
+     "boot_p": 0.639,
+     "max_dd": -0.35239,
+     "bench_max_dd": -0.55189,
+     "trades": 139,
+     "turnover": 0.55621
+    },
+    "FED": {
+     "score": -0.00432,
+     "full_excess": -0.00288,
+     "ex5_mean": -0.00457,
+     "ex10_mean": -0.00398,
+     "ex10_beat": 0.52239,
+     "ex10_min": -0.03877,
+     "ex15_beat": 0.46809,
+     "ex20_beat": 0.18519,
+     "boot_p": 0.576,
+     "max_dd": -0.33717,
+     "bench_max_dd": -0.55189,
+     "trades": 136,
+     "turnover": 0.5428
+    },
+    "NONE": {
+     "score": -0.00138,
+     "full_excess": 0.00163,
+     "ex5_mean": -0.00259,
+     "ex10_mean": -0.00079,
+     "ex10_beat": 0.53731,
+     "ex10_min": -0.03764,
+     "ex15_beat": 0.48936,
+     "ex20_beat": 0.37037,
+     "boot_p": 0.485,
+     "max_dd": -0.33717,
+     "bench_max_dd": -0.55189,
+     "trades": 119,
+     "turnover": 0.52689
+    }
+   },
+   "long_protocol": {
+    "CA": {
+     "protocol": "long_screen, VFINX analogue",
+     "score": -0.00211,
+     "full_excess": -0.01819,
+     "ho5_mean": -0.01212,
+     "ho5_beat": 0,
+     "ho10_mean": -0.01438,
+     "ex10_beat": 0.51613,
+     "ex15_beat": 0.69231,
+     "boot_p": 0.907,
+     "max_dd": -0.35338
+    },
+    "NONE": {
+     "protocol": "long_screen, VFINX analogue",
+     "score": 0.00187,
+     "full_excess": -0.00426,
+     "ho5_mean": -0.01192,
+     "ho5_beat": 0,
+     "ho10_mean": -0.01184,
+     "ex10_beat": 0.51613,
+     "ex15_beat": 0.69231,
+     "boot_p": 0.637,
+     "max_dd": -0.3383
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "low",
+   "robustness_notes": "The closest unlevered rule to SPY's return on the full protocol (CA -0.53 pp/yr), and it cuts the max drawdown to -35% vs -55%. It fails items 1-5. CA 10y beat is 52% and boot_p 0.64. In 1986-2026 it scores -0.21 CA and +0.19 NONE (boot_p 0.64), with a negative pre-2000 holdout. Drawdown control insures the portfolio at the cost of return; it does not beat SPY."
+  }
+ ],
+ "diagnostics": {
+  "CA": {
+   "n_configs": 421,
+   "walk_forward": {
+    "oos_mean": -0.0053,
+    "oos_beat": 0.3333,
+    "is_mean": 0.0496,
+    "avg_config_oos_mean": -0.0278,
+    "mean_oos_rank_pct": 0.6645
+   },
+   "walk_forward_5_3": {
+    "oos_mean": -0.0126,
+    "oos_beat": 0.5,
+    "is_mean": 0.0651,
+    "avg_config_oos_mean": -0.0012,
+    "mean_oos_rank_pct": 0.4946
+   },
+   "pbo": {
+    "pbo": 0.002,
+    "n_configs": 421,
+    "n_splits": 5000,
+    "is_best_mean": 0.0735,
+    "oos_of_is_best_mean": 0.0564,
+    "oos_of_is_best_p_pos": 0.9748
+   },
+   "dsr_best": {
+    "sr_monthly": 0.1463,
+    "sr_annual": 0.5066,
+    "sr0_monthly": 0.3759,
+    "dsr": 0.0019,
+    "psr": 0.9674
+   },
+   "best_by_monthly_mean": "877eb3b196ba4e",
+   "best_label": "TVT const2.0 v3 LSSO/DDM b0.1 gb0.0 (constant 2x leverage)",
+   "note": "family screen configs only (hindsight/reference excluded). PBO/DSR use 2011-01..2026-07 only, because metrics.monthly_matrix drops months not covered by every config. Yearly-step walk-forward (step_quarters=1): 10y->5y OOS -1.42 pp (25% of 12 decisions), 5y->3y +1.96 pp (58% of 19). Subsets: from2000 WF10/5 -2.23 pp, PBO 0.30; SSO-era WF10/5 +0.45 pp (2 decisions), PBO 0.008; unlevered_from2000 WF10/5 -2.23 pp, PBO 0.29."
+  },
+  "NONE": {
+   "n_configs": 324,
+   "walk_forward": {
+    "oos_mean": -0.0289,
+    "oos_beat": 0.3333,
+    "is_mean": 0.0484,
+    "avg_config_oos_mean": -0.032,
+    "mean_oos_rank_pct": 0.4499
+   },
+   "walk_forward_5_3": {
+    "oos_mean": -0.0159,
+    "oos_beat": 0.75,
+    "is_mean": 0.0771,
+    "avg_config_oos_mean": -0.0003,
+    "mean_oos_rank_pct": 0.5002
+   },
+   "pbo": {
+    "pbo": 0.1446,
+    "n_configs": 324,
+    "n_splits": 5000,
+    "is_best_mean": 0.0502,
+    "oos_of_is_best_mean": 0.0095,
+    "oos_of_is_best_p_pos": 0.6952
+   },
+   "dsr_best": {
+    "sr_monthly": 0.1181,
+    "sr_annual": 0.409,
+    "sr0_monthly": 0.2891,
+    "dsr": 0.0134,
+    "psr": 0.9369
+   },
+   "best_by_monthly_mean": "bf41d70c34c4f6",
+   "best_label": "VT SPY s21 t0.25 c2.0 SSO |M",
+   "note": "Yearly-step walk-forward: 10y->5y -0.78 pp (58%), 5y->3y -0.50 pp (58%). unlevered_from2000: WF10/5 -4.94 pp, PBO 0.84."
+  }
+ },
+ "hindsight_checks": "(1) The levered SPY vol target uses the benchmark index itself, so there is no star instrument to remove. The hindsight risk is the decision to lever the US large-cap index after its best era. Check (a): the same levered rule (25% target, 2x cap) ran on the six other indexes that have cost-calibrated synthetic 2x series: DIA, MDY, IWM, EFA, EEM, QQQ. Each was compared with its own buy-and-hold on the screen protocol from 2000-2004. This set is fixed and predefined because synthetic 2x exists only for these, so it is not a random draw. In NONE the rule beats its own index on QQQ (+4.80 pp/yr), DIA (+2.97) and MDY (+0.83), and loses on IWM (-0.81), EFA (-0.72) and EEM (-2.30); its Sharpe is below the index's own on 5 of 6. In CA with plain execution it loses on 5 of 6. With tax-aware execution in CA: QQQ +4.92, DIA +2.71, MDY +0.23, IWM -1.28, EFA -1.77, EEM -3.37, with max drawdowns of -63% to -83%. Conclusion: the rule works only where the levered index had a high Sharpe, so it is a leverage bet on that index's equity premium. Check (b): synthetic 2x history extends the SPY rule to 2000 (CA lead boot_p 0.35) and to 1986 (CA lead 10y beat 74%, 15y beat 72%, boot_p 0.26; pre-2000 holdout +5.8 pp, positive). (2) Unlevered vol targeting (EWMA20, 18% target) on 20 random funds from BROAD_EQUITY_POOL_2003, each against its own buy-and-hold in NONE: the median score was -0.81 pp/yr with 3 of 20 positive. The Sharpe was higher on 10 of 20 (median +0.013), and the max drawdown was smaller on 19 of 20 and tied on 1. This matches the SPY result: lower risk, lower return. (3) Risk parity: removing the star GLD from the SPY/TLT/GLD, all-weather and global menus leaves every version losing 2.0-8.9 pp/yr. ERC on 20 random 6-fund menus from BROAD_POOL_2003 and on 20 random 4-equity + 2-bond menus lost to SPY in 79 of 80 menu x regime cases, by a median 3.0-5.5 pp/yr, with a Sharpe above SPY's in only 0-25% of menus. The hand-picked menus were no worse than random ones.",
+ "concerns": [
+  "Every levered result rests on 2006-07..2026 for real SSO, a sample dominated by a post-2009 low-volatility bull market in which 1.5-2x S&P exposure was simply the right bet. Its one big de-risking win was 2008, and only for portfolios started before the crash. Synthetic extensions to 2000 and 1986 weaken it sharply.",
+  "Tax-aware vol targeting is path-dependent: the gain budget freezes the exposure at whatever level it had when gains accumulated. Results therefore depend on the start date relative to volatility regimes, so a new investor today would lock in about 1.9x leverage that cannot be de-risked without large realized gains. A crash after gains have built up would hit at close to 2x, with -79% to -85% drawdowns on synthetic history.",
+  "Synthetic 2x series (SYN_*2XC) are model-built and research-only: 2x total return, minus T-bills + 0.6%/yr financing, minus 0.9%/yr expense, calibrated to SSO within 0.1 pp/yr over 2006-2026. Pre-2006 financing and fund frictions may differ.",
+  "The engine does not enforce wash sales, and the family's tax-aware kind (like the lab's 'tax' execution) blocks only re-buys after a loss sale. For the CA lead's 2007 start, 21% of realized losses ($10.3k of $49.1k) came from loss sales within 30 days of a same-fund purchase. Under the real rule those losses would be deferred, so they are front-loaded in the backtest.",
+  "Leveraged ETFs (SSO, DDM, UPRO) carry daily-reset decay, about 0.9%/yr fees, swap financing and closure risk. The engine has no margin, so leverage can come only from these funds.",
+  "Not runnable on the website today: SSO, DDM, IWB and SHY are research-only tickers and risk_alloc.taxvt is a research kind. The risk-parity menus use research-only bond, gold and commodity funds such as VUSTX.",
+  "Compute throttling (battery) cut the first researcher's planned 753-config screen. RP/CPPI/DD/VM/OV and the vol-target filters were covered by a 56-config representative subset plus targeted sets, not the full grid. All 56 lost in CA, so a reversal elsewhere in the grid is unlikely but not proven.",
+  "The 1986+ tax-aware analogue uses a single 1x vehicle (VFINX). After a loss sale the 31-day re-buy block can leave it in cash, which may understate a multi-fund implementation. The 3-vehicle ETF-era synthetic test from 2000 also failed boot_p (0.35), so the conclusion does not hinge on this.",
+  "Engine distributions are taxed only at sale. The battery's stricter yearly accounting moved the CA lead's excess by only -0.01 to -0.26 pp, but bond-heavy risk-parity results are flattered by the engine; they lose anyway.",
+  "The pre-registered score and the first-start bootstrap reward different things. Constant leverage has a higher score than vol-targeted leverage, while the vol target wins boot_p only because the bootstrap uses the 2006-07 start's path, which includes the 2008 de-risking."
+ ],
+ "untested_ideas": [
+  "Hedge-sleeve vol targeting for taxable accounts: keep a never-sold 1x core and de-risk by trimming a separate SSO sleeve or buying an inverse ETF (SH) with cash, so de-risking does not realize gains on the low-basis core. This needs a new signal in risk_alloc.py, which would have invalidated all cached results, so it was not done.",
+  "A wash-sale-correct tax-aware kind that also blocks loss sales within 30 days after a same-fund purchase, and re-scoring the CA lead with it.",
+  "The rest of the planned screening grid: RP lookbacks 21/126/252 on all menus; the all-weather (AW5), G6, US4, G7 and MF4 menus unlevered; 3x levered RP (UPRO/TMF); target-vol RP on more menus; more CPPI multipliers/floors and drawdown-tier shapes; time-series VM with blended lookbacks; UPRO 3x vol targets beyond the 2 that ran.",
+  "Long-history (1986+) runs of the 1.5x-capped NONE variant and of more tax-aware neighbours (only t0.20/c1.5, t0.30 and EWMA ran).",
+  "A neighbourhood of the tax-executed vol-target overlay on the incumbent rotation (targets 12-20%, vol lookbacks 21/126, monthly vs quarterly). Only one config ran; it gave a smoother incumbent (Sharpe 0.57 vs 0.51) but a negative score.",
+  "Leverage financed more cheaply than 2x ETFs (futures, box spreads, portfolio margin). This is not expressible in the engine.",
+  "Vol targeting with downside-semivariance or correlation-aware (multi-asset) scaling of the incumbent's top-5 holdings under the incumbent's tax-managed trade rule.",
+  "FED-specific tuning (only the finalists ran in FED); random-menu checks for tax-executed RP."
+ ],
+ "lab_bugs": [
+  "report.diagnostics calls metrics.walk_forward with the default step_quarters=4 whatever the protocol. On the yearly 'screen' protocol that steps 4 starts, i.e. 4 years, leaving only 3 (10y->5y) or 4 (5y->3y) decision dates. The step should be 4 quarters, i.e. 1 start per year on screen. I report yearly-step results alongside.",
+  "metrics.monthly_matrix ends in .dropna(), so PBO (cscv_pbo) and the deflated Sharpe silently use only the months that every config covers. For this family that is 2011-01..2026-07, because a few levered risk-parity configs start in 2011. That drops 2000-2010, including 2000-02 and 2008, for all configs and is not reported in the diagnostics output.",
+  "The wash-sale guard in blocks.WeightStrategy 'tax' execution (copied by this family's TaxVT) only blocks re-buying a ticker within wash_days after a loss sale. It does not catch a loss sale within 30 days after a purchase of the same ticker, and the engine does not enforce wash sales, so harvested losses are front-loaded. Measured: about 21% of the CA lead's realized losses for a 2007 start.",
+  "registry.code_version hashes the source file that registers a signal (and core files) but not the files of signals it wraps. For example, risk_alloc.overlay with inner 'common.momentum' would keep stale cache entries if families/common.py changed.",
+  "metrics.summary takes bench_max_dd and bench_sharpe from the benchmark's run from the protocol's first start (2000-01), not from the config's own first start (2006-07 for SSO-based configs). Max drawdown is unaffected here because SPY's worst drawdown falls in both periods, but the engine-Sharpe comparison is misaligned for late-starting configs."
+ ]
+}

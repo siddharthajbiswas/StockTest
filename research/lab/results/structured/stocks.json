@@ -1,0 +1,464 @@
+{
+ "family": "stocks",
+ "module_path": "/Users/siddhartha/dev/StockTest/research/lab/families/stocks.py",
+ "results_md": "/Users/siddhartha/dev/StockTest/research/lab/results/stocks.md",
+ "n_configs_tested": 280,
+ "headline": "No individual-stock strategy can be recommended with confidence. On the survivorship-biased point-in-time S&P 500 panel, 20 randomly picked stocks with the site's tax-managed machinery beat SPY by +3.24 pp/yr in CA (10 seeds, full protocol), and 9 of 10 random seeds pass criteria 1-3 of the bar. Stock selection signals add nothing measurable over a random pick with identical machinery: 74 credible screened configs average -0.43 pp/yr (CA) and -1.52 pp/yr (NONE) vs random. The best finalist, 6-1 momentum semi-annual TM, is +1.02 CA (p 0.14) and -0.37 NONE. Its edge comes from AAPL, AMD and AMZN, held since 2000, and turns to -0.92 pp/yr when 9 star names are removed from the strategy and its controls. Calibration against RSP puts the panel's universe bias at +1.6 to +3.1 pp/yr in CA, about as large as every finalist's whole edge over SPY.",
+ "findings": [
+  "Survivorship dominates: price data exists for only 37% of the 2000 index members (43% 2005, 54% 2010, 62% 2015, 78% 2020, 93% 2025). Random 20-stock portfolios with identical machinery beat SPY on the full protocol in CA by +3.24 pp/yr (quarterly TM, 10 seeds; 9/10 pass criteria 1-3) and +3.11 (semi-annual TM; 9/10 pass). With the lab's pro-rata tax execution, 5/5 random seeds pass.",
+  "Grid-wide (screen, s1+s2): 74 credible configs with same-machinery random controls. Strategy minus random averages -0.43 pp/yr in CA (median -0.39, 38% positive) and -1.52 in NONE (14% positive), while 59% (CA) / 85% (NONE) 'beat SPY'. By signal (CA vs random): momentum family (56 configs) -0.29, 52-week high -2.79, low vol -0.58, low beta -0.95, residual momentum -0.85, composites -0.77, size -1.04, reversal +0.10, seasonality +0.62 (1 config).",
+  "Turnover confound: the site's RandomPicker reshuffles everything each rebalance, so monthly configs look better than it for tax reasons. Monthly low-vol is +1.37 pp/yr vs site random (b10 0.94) but -1.30 vs a turnover-matched shadow random (b10 0.12). The monthly momentum configs are also negative vs their shadows.",
+  "Finalists, full protocol, CA: F1 12-1 mom Q TM n20 scores +0.0305 but fails ex10_beat (0.72) / ex15_beat (0.70); minus random -0.19 (FED -0.24, NONE -2.77). F2 6-1 mom S TM n20 scores +0.0414 and passes 1-3 vs SPY; minus random +1.02 (bootstrap p 0.14), NONE -0.37; minus shadow +1.43 CA. F3 EW-PIT TM scores +0.0314 (ex10_min > 0) and equals random (-0.10). W1, pro-rata 12-1 momentum, scores +0.0276; minus pro-rata random -0.09 (p 0.72).",
+  "Stars: F1 from 2000 is 64.5% AAPL by P&L (top 5 = 96.8%). F2 from 2000 is AAPL 68.8% + AMD 18.3% + AMZN 7.2% (AAPL bought 2000-01-03, never sold). Removing 9 star names (AAPL AVGO AMZN AMD AMAT AZO BKNG MA CBRE) from the strategy and control universes (screen, CA): F2 minus random +1.03 -> -0.92, F2 vs SPY ex10_beat 0.94 -> 0.65, boot_p 0.000 -> 0.18; F1 vs SPY +0.0295 -> +0.0018 (minus random -1.90); W1 minus random 0.00 -> -0.88. The equal-weight universe loses only 0.44 pp/yr.",
+  "Execution artifact: the site's TaxManagedCombo places buys in sorted(ticker) order, capped by cash. When the 1% gain budget blocks sells, A-C tickers get filled. In CA, F1 holds on average 70% of its stock value in A-C tickers (97% since 2015) vs a 26% universe share, with only 8.7 effective names; the random control holds 74%. In NONE there is no tilt (28%). Pro-rata execution (stocks.weights tax) mostly removes it (34% / 30%). The alphabet lottery is worth about +0.4 to +0.5 pp/yr on vs-SPY scores and is common to strategy and control.",
+  "Period dependence: 12-1 momentum minus random over 5-year windows by start period, CA: +0.96, -6.16, -0.66, +1.80, +1.70 (2000-04 ... 2020-23); NONE: -0.23, -9.41, -1.92, -0.58, +11.03. Starts >= 2015 look strong (F1 +5.5, F2 +5.1 pp/yr vs random, CA) but rest on 7 overlapping 10-year windows and the 2020-26 semiconductor/AI run. Calendar years: F2 minus random is carried by 2009 (+18.8), 2019 (+16.1), 2020 (+31.2) and 2023 (+19.0), and is -0.4/yr over 2010-14.",
+  "Calibration vs real survivorship-free funds (screen, same windows): panel EW-PIT minus RSP is +3.05 pp/yr (NONE) / +1.97 (CA) over 5-year windows from 2004. By start period it is NONE +4.78 / +2.71 / +3.26 / +3.06 / +2.47 and CA +3.11 / +1.75 / +2.18 / +1.91 / +1.57. RSP itself trails SPY (CA ex5 -0.31). The panel flatters high-beta / past-loser selections (SPHB rule: panel +4.05 vs real +1.95 relative to equal weight) and penalizes momentum (SPMO rule: panel -2.45 vs real +5.27; MTUM: -3.03 vs +2.49). So strategy-minus-random on this panel is itself biased against momentum-type signals and is a sanity check, not a measurement.",
+  "Survivorship probes (buy the deepest 52-week drawdown, 3-year losers, highest vol, smallest size) beat random by +4.2 (CA) / +7.0 (NONE) pp/yr. Example: reversed 52-week-high Q TM, CA score +0.0795, ex10_beat 1.00, boot_p 0.000. This is the signature of a survivor-only panel.",
+  "Robustness (CA, full, vs SPY): F1 rebalance offsets 0/23/46/69 d score +0.0305/+0.0285/+0.0294/+0.0258; criteria 1-3 pass only at 23 and 46 d. F2 offsets 0/46/91/137 d score +0.0414/+0.0463/+0.0293/+0.0433; it fails at 91 d (ex10_beat 0.69, ex15_beat 0.62). A 1-day lag gives F1 +0.0305 and F2 +0.0369.",
+  "Hindsight 'random menus' analog: across 4 random half-universes, 12-1 momentum minus random is -0.60/-1.23/-0.82/+0.29 pp/yr, and momentum trails the equal weight of its own half in all four; every half's EW beats SPY by +3.2 to +4.1. In the less-biased top-100-by-dollar-volume universe, momentum minus random is +0.89 (CA) / +0.66 (NONE) pp/yr (5 seeds, screen only). That is the most favourable selection cell and it is small.",
+  "The only effect that survives every control is a tax effect, not picking skill: over the same stocks, TM execution beats standard execution by +0.65 pp/yr in CA (EW-PIT TM vs EW-PIT standard, b10 0.85, bootstrap p 0.004), +0.46 in FED, +0.11 in NONE.",
+  "Diagnostics (screen grid, CA): the all-configs walk-forward picks the survivorship probes and 'earns' +5.68 pp/yr OOS with PBO 0.02, so the diagnostics cannot detect the bias. Credible configs only: WF 10->5 OOS -0.02 (beat 0.33); WF vs each config's own random control +1.63 (10->5) and -0.92 (5->3). NONE credible: WF -3.30, PBO 0.60."
+ ],
+ "candidates": [
+  {
+   "label": "F2: 6-1 momentum, top 20 S&P 500 PIT stocks, semi-annual, site TaxManagedCombo 1% gain budget (best config; NOT recommended)",
+   "cfg": {
+    "kind": "stocks.combo",
+    "signal": "mom",
+    "params": {
+     "lookback": 126,
+     "skip": 21
+    },
+    "top_n": 20,
+    "rebalance": "S",
+    "trade_rule": "tax_managed",
+    "gain_budget": 0.01,
+    "wash_days": 31
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.0414,
+     "full_excess": 0.086,
+     "ex5_mean": 0.033,
+     "ex10_mean": 0.0477,
+     "ex10_beat": 0.9403,
+     "ex10_min": -0.0091,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0,
+     "max_dd": -0.6057,
+     "bench_max_dd": -0.5519,
+     "trades": 493,
+     "turnover": 0.0815,
+     "minus_random_same_machinery_10seeds": 0.0102,
+     "minus_random_boot_p": 0.138,
+     "minus_shadow_5seeds": 0.0143,
+     "minus_random_stars_removed_screen": -0.0092
+    },
+    "FED": {
+     "score": 0.045,
+     "full_excess": 0.0877,
+     "ex5_mean": 0.0371,
+     "ex10_mean": 0.0517,
+     "ex10_beat": 0.9403,
+     "ex10_min": -0.0099,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0,
+     "max_dd": -0.6047,
+     "bench_max_dd": -0.5519,
+     "trades": 494,
+     "turnover": 0.0872,
+     "minus_ew_pit_tm": 0.0103
+    },
+    "NONE": {
+     "score": 0.0265,
+     "full_excess": 0.0672,
+     "ex5_mean": 0.0284,
+     "ex10_mean": 0.0252,
+     "ex10_beat": 0.9254,
+     "ex10_min": -0.0129,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.021,
+     "max_dd": -0.5946,
+     "bench_max_dd": -0.5519,
+     "trades": 2009,
+     "turnover": 1.8492,
+     "minus_random_same_machinery_5seeds": -0.0037
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "high",
+   "robustness_notes": "Passes criteria 1-3 vs SPY in CA/FED/NONE, but so do 9/10 random 20-stock portfolios with identical machinery (survivorship; results are upper bounds). Fails criterion 4: the family walk-forward vs control is not positive OOS (CA +1.63 for 10->5, -0.92 for 5->3). Fails 5: neighbours fail (F1 12-1 Q fails beat rates; the 91-day rebalance offset fails ex10_beat 0.69 / ex15_beat 0.62). Fails 6: P&L since 2000 is AAPL 69% / AMD 18% / AMZN 7%; with 9 stars removed from strategy and controls, minus random goes to -0.92 and vs SPY to ex10_beat 0.65 / boot_p 0.18 (screen). Minus random by 5y start period (CA): +2.37, -2.58, +0.32, +1.57, +1.93. No pre-2000 PIT holdout (criterion 7 unverifiable). Lag 1d +0.0369. Its execution carries the site TaxManagedCombo alphabetical-buy tilt.",
+   "long_protocol": {
+    "note": "not applicable: PIT S&P 500 membership data starts 1996, so no pre-2000 holdout windows exist for stock strategies"
+   }
+  },
+  {
+   "label": "F1: 12-1 momentum, top 20 stocks, quarterly, site TaxManagedCombo 1% (the 'Beat the S&P (CA)' preset rule applied to single stocks)",
+   "cfg": {
+    "kind": "stocks.combo",
+    "signal": "mom",
+    "params": {
+     "lookback": 252,
+     "skip": 21
+    },
+    "top_n": 20,
+    "rebalance": "Q",
+    "trade_rule": "tax_managed",
+    "gain_budget": 0.01,
+    "wash_days": 31
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.0305,
+     "full_excess": 0.0677,
+     "ex5_mean": 0.0216,
+     "ex10_mean": 0.04,
+     "ex10_beat": 0.7164,
+     "ex10_min": -0.0377,
+     "ex15_beat": 0.7021,
+     "ex20_beat": 1,
+     "boot_p": 0.004,
+     "max_dd": -0.5926,
+     "bench_max_dd": -0.5519,
+     "trades": 654,
+     "turnover": 0.0896,
+     "minus_random_same_machinery_10seeds": -0.0019,
+     "minus_random_boot_p": 0.276,
+     "minus_shadow_5seeds": 0.0021
+    },
+    "FED": {
+     "score": 0.0329,
+     "full_excess": 0.0694,
+     "ex5_mean": 0.0245,
+     "ex10_mean": 0.0424,
+     "ex10_beat": 0.7164,
+     "ex10_min": -0.0425,
+     "ex15_beat": 0.7234,
+     "ex20_beat": 1,
+     "boot_p": 0.006,
+     "max_dd": -0.5919,
+     "bench_max_dd": -0.5519,
+     "trades": 654,
+     "turnover": 0.0935,
+     "minus_random_same_machinery_5seeds": -0.0024
+    },
+    "NONE": {
+     "score": 0.0012,
+     "full_excess": 0.0343,
+     "ex5_mean": 0.0112,
+     "ex10_mean": -0.0035,
+     "ex10_beat": 0.3881,
+     "ex10_min": -0.0418,
+     "ex15_beat": 0.4894,
+     "ex20_beat": 0.6296,
+     "boot_p": 0.152,
+     "max_dd": -0.5581,
+     "bench_max_dd": -0.5519,
+     "trades": 3235,
+     "turnover": 2.1478,
+     "minus_random_same_machinery_10seeds": -0.0277
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "high",
+   "robustness_notes": "Fails criterion 2 vs SPY (ex10_beat 0.72, ex15_beat 0.70), i.e. worse on the bar than 9/10 random portfolios. Selection adds nothing: minus random -0.19 (CA), -0.24 (FED), -2.77 (NONE); minus 5y windows by start period CA +0.96/-6.16/-0.66/+1.80/+1.70. 64.5% of P&L since 2000 is AAPL; with stars removed, vs SPY +0.0018 and minus random -1.90 (screen). Offsets 23/46 d pass 1-3 vs SPY, 0/69 d and lag 1 d do not. In CA it holds 70% of its stock value in A-C tickers (alphabet artifact), with 8.7 effective names.",
+   "long_protocol": {
+    "note": "not applicable (PIT membership from 1996)"
+   }
+  },
+  {
+   "label": "F3: equal weight of all PIT S&P 500 survivors, quarterly, site TaxManagedCombo 1% (universe control / crude equal-weight direct index; NOT a recommendation)",
+   "cfg": {
+    "kind": "combo",
+    "picker": "random",
+    "picker_params": {
+     "seed": 1,
+     "fraction": 1
+    },
+    "timer": "buy_hold",
+    "timer_params": {},
+    "top_n": 1000,
+    "rebalance": "Q",
+    "universe": "sp500-pit",
+    "trade_rule": "tax_managed",
+    "gain_budget": 0.01,
+    "wash_days": 31
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.0314,
+     "full_excess": 0.0567,
+     "ex5_mean": 0.0293,
+     "ex10_mean": 0.0316,
+     "ex10_beat": 1,
+     "ex10_min": 0.0029,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0,
+     "max_dd": -0.5366,
+     "bench_max_dd": -0.5519,
+     "trades": 4953,
+     "turnover": 0.0214,
+     "minus_random_q_tm_10seeds": -0.001,
+     "minus_ew_standard": 0.0065
+    },
+    "FED": {
+     "score": 0.0346,
+     "full_excess": 0.0585,
+     "ex5_mean": 0.0334,
+     "ex10_mean": 0.0349,
+     "ex10_beat": 1,
+     "ex10_min": 0.0035,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0,
+     "max_dd": -0.5352,
+     "bench_max_dd": -0.5519,
+     "trades": 5081,
+     "turnover": 0.0215
+    },
+    "NONE": {
+     "score": 0.0384,
+     "full_excess": 0.0487,
+     "ex5_mean": 0.0393,
+     "ex10_mean": 0.0379,
+     "ex10_beat": 0.9552,
+     "ex10_min": -0.0031,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.001,
+     "max_dd": -0.5406,
+     "bench_max_dd": -0.5519,
+     "trades": 33079,
+     "turnover": 0.2138
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "high",
+   "robustness_notes": "Numerically passes criteria 1-3 in every regime, but it is the universe control itself: its excess is the survivorship bias (the panel EW runs 1.6-3.1 pp/yr above the real equal-weight fund RSP in CA, and RSP trails SPY by about 0.3 pp/yr) plus the TM rule's tax deferral (+0.65 pp/yr over standard execution, bootstrap p 0.004). The edge fades for late starts (2010+: +0.0176; 2015+: +0.0052 vs SPY). It ends the run 21% NVDA / 20% AAPL (frozen winners) and holds ~400 names. Read it as a measure of the bias, not as a strategy.",
+   "long_protocol": {
+    "note": "not applicable (PIT membership from 1996)"
+   }
+  },
+  {
+   "label": "W1: 12-1 momentum, top 20 stocks, quarterly, lab pro-rata tax execution (stocks.weights; no alphabetical-buy artifact)",
+   "cfg": {
+    "kind": "stocks.weights",
+    "signal": "mom",
+    "params": {
+     "lookback": 252,
+     "skip": 21
+    },
+    "top_n": 20,
+    "rebalance": "Q",
+    "execution": "tax",
+    "gain_budget": 0.01
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.0276,
+     "full_excess": 0.0382,
+     "ex5_mean": 0.0195,
+     "ex10_mean": 0.0364,
+     "ex10_beat": 0.8358,
+     "ex10_min": -0.0241,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.015,
+     "max_dd": -0.6039,
+     "bench_max_dd": -0.5519,
+     "trades": 2963,
+     "turnover": 0.1168,
+     "minus_pro_rata_random_5seeds": -0.0009,
+     "minus_random_boot_p": 0.72
+    },
+    "FED": {
+     "score": 0.0301,
+     "full_excess": 0.0391,
+     "ex5_mean": 0.0225,
+     "ex10_mean": 0.0392,
+     "ex10_beat": 0.8358,
+     "ex10_min": -0.027,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.023,
+     "max_dd": -0.6039,
+     "bench_max_dd": -0.5519,
+     "trades": 2963,
+     "turnover": 0.1179
+    },
+    "NONE": {
+     "score": 0.0011,
+     "full_excess": 0.0343,
+     "ex5_mean": 0.0111,
+     "ex10_mean": -0.0035,
+     "ex10_beat": 0.3881,
+     "ex10_min": -0.0418,
+     "ex15_beat": 0.4894,
+     "ex20_beat": 0.6296,
+     "boot_p": 0.152,
+     "max_dd": -0.5579,
+     "bench_max_dd": -0.5519,
+     "trades": 3241,
+     "turnover": 2.1476,
+     "minus_pro_rata_random_3seeds": -0.0283
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "high",
+   "robustness_notes": "Passes criteria 1-3 vs SPY in CA/FED, but all 5 pro-rata random seeds with identical execution pass too (mean score +0.0285). Selection adds nothing: minus random -0.09 CA (10y beat 0.37; bootstrap -1.28 pp/yr, p 0.72), -2.83 NONE. Stars removed: vs SPY +0.0121, minus random -0.88 (screen). Positive vs random only for 2010+/2015+ starts (+2.0/+4.2, the 2020-26 episode). Ends the run with NVDA 23% / AAPL 23%.",
+   "long_protocol": {
+    "note": "not applicable (PIT membership from 1996)"
+   }
+  }
+ ],
+ "diagnostics": {
+  "note": "report.diagnostics on the screened grid (screen protocol, s1+s2): 96 strategy configs including 11 bias probes/reversal configs ('all') and 85 without them ('credible'). Plus a control-relative walk-forward over 72 config-control pairs (excess measured against each config's own same-machinery random control). Excess in CAGR fraction. Source: research/lab/scratch/stocks/diag_s1_screen_s2_screen.json",
+  "CA": {
+   "all_strategies": {
+    "n_configs": 96,
+    "walk_forward_10_5": {
+     "oos_mean": 0.0568,
+     "oos_beat": 1,
+     "is_mean": 0.0836,
+     "avg_config_oos_mean": 0.0007,
+     "mean_oos_rank_pct": 0.844
+    },
+    "walk_forward_5_3": {
+     "oos_mean": 0.0894,
+     "oos_beat": 1,
+     "is_mean": 0.1137,
+     "avg_config_oos_mean": 0.001,
+     "mean_oos_rank_pct": 0.924
+    },
+    "pbo": 0.023,
+    "dsr_best": 0.626,
+    "best_by_monthly_mean": "mom(126,21) n20 Q TM"
+   },
+   "credible_only": {
+    "n_configs": 85,
+    "walk_forward_10_5": {
+     "oos_mean": -0.0002,
+     "oos_beat": 0.333,
+     "is_mean": 0.0613,
+     "avg_config_oos_mean": -0.0031,
+     "mean_oos_rank_pct": 0.655
+    },
+    "walk_forward_5_3": {
+     "oos_mean": 0.0018,
+     "oos_beat": 0.5,
+     "is_mean": 0.0803,
+     "avg_config_oos_mean": -0.0085,
+     "mean_oos_rank_pct": 0.585
+    },
+    "pbo": 0.019,
+    "dsr_best": 0.632
+   },
+   "wf_vs_own_random_control_10_5": {
+    "n_dates": 12,
+    "oos_mean": 0.0163,
+    "oos_beat": 0.667,
+    "avg_config_oos": 0.0057
+   },
+   "wf_vs_own_random_control_5_3": {
+    "n_dates": 19,
+    "oos_mean": -0.0092,
+    "oos_beat": 0.474,
+    "avg_config_oos": -0.0069
+   },
+   "grid_strategy_minus_random_mean": -0.0043,
+   "grid_share_positive": 0.38
+  },
+  "NONE": {
+   "all_strategies": {
+    "n_configs": 96,
+    "walk_forward_10_5": {
+     "oos_mean": 0.0809,
+     "oos_beat": 0.667,
+     "is_mean": 0.1147,
+     "avg_config_oos_mean": 0.0124,
+     "mean_oos_rank_pct": 0.847
+    },
+    "walk_forward_5_3": {
+     "oos_mean": 0.0081,
+     "oos_beat": 0.75,
+     "is_mean": 0.1245,
+     "avg_config_oos_mean": 0.0209,
+     "mean_oos_rank_pct": 0.461
+    },
+    "pbo": 0.348,
+    "dsr_best": 0.685,
+    "best_by_monthly_mean": "mom(756,0) reversed (3-year losers) n20 Q TM - a survivorship probe"
+   },
+   "credible_only": {
+    "n_configs": 85,
+    "walk_forward_10_5": {
+     "oos_mean": -0.033,
+     "oos_beat": 0.333,
+     "is_mean": 0.0635,
+     "avg_config_oos_mean": 0.0054,
+     "mean_oos_rank_pct": 0.263
+    },
+    "walk_forward_5_3": {
+     "oos_mean": -0.0189,
+     "oos_beat": 0.75,
+     "is_mean": 0.1036,
+     "avg_config_oos_mean": 0.0089,
+     "mean_oos_rank_pct": 0.441
+    },
+    "pbo": 0.598,
+    "dsr_best": 0.552,
+    "best_by_monthly_mean": "rank-blend 12/6/3-1 n10 Q TM"
+   },
+   "wf_vs_own_random_control_10_5": {
+    "n_dates": 12,
+    "oos_mean": -0.011,
+    "oos_beat": 0.25,
+    "avg_config_oos": 0.0077
+   },
+   "wf_vs_own_random_control_5_3": {
+    "n_dates": 19,
+    "oos_mean": -0.0109,
+    "oos_beat": 0.474,
+    "avg_config_oos": -0.0099
+   },
+   "grid_strategy_minus_random_mean": -0.0152,
+   "grid_share_positive": 0.14
+  }
+ },
+ "hindsight_checks": "1) Remove the stars: per-ticker P&L attribution (stars.py) found F1/F2 depend on a handful of survivor mega-winners (F1 from 2000: AAPL 64.5%, top-5 96.8%; F2: AAPL 68.8% + AMD 18.3% + AMZN 7.2%). The 9 union stars (AAPL AVGO AMZN AMD AMAT AZO BKNG MA CBRE) were removed via the `exclude` param from the universe of the strategies AND of their random / EW controls (screen, CA). Result: F2 minus random +1.03 -> -0.92 pp/yr, F2 vs SPY ex10_beat 0.94 -> 0.65 and boot_p 0.000 -> 0.18; F1 vs SPY +0.0295 -> +0.0018 (minus random -1.90); pro-rata W1 minus random 0.00 -> -0.88. The EW universe loses only 0.44 pp/yr. Criterion 6 fails. 2) Random menus (stock analog of PROTOCOL 5.3): 4 fixed pseudo-random half-universes (subset_frac 0.5, md5-hashed tickers, applied identically to strategy and controls). 12-1 momentum minus random is -0.60/-1.23/-0.82/+0.29 pp/yr, and momentum trails its own half's equal weight in all four; every half's EW 'beats SPY' by 3.2-4.1 pp/yr. 3) Lower-bias universe (top 100 by dollar volume): momentum minus random +0.89 CA / +0.66 NONE (5 seeds, screen), small. 4) Calibration vs real survivorship-free funds (RSP, SPLV, SPHB, SPMO, MTUM, PDP, XLG, OEF): the panel EW runs +1.6 to +3.1 pp/yr (CA) / +2.5 to +4.8 (NONE) above RSP in every start period, and panel selection effects are distorted (momentum penalized, high-beta flattered). 5) Survivorship probes (loser-buying) beat random by +4.2 / +7.0 pp/yr, confirming the bias's direction. 6) Look-ahead test: 21 picker variants at 4 dates give identical picks on full vs clipped markets (0 mismatches); a 1-day execution lag barely changes F1 (+0.0305) and F2 (+0.0369). No pre-2000 holdout exists (PIT membership starts 1996).",
+ "concerns": [
+  "Every number in this family is a survivorship-inflated upper bound: only today's survivors have price data (37% of 2000 index members). Random picks alone pass the vs-SPY parts of the confidence bar 9 times out of 10. Do not compare stock-family scores with ETF-family scores as if they were on the same footing.",
+  "Strategy-minus-random on this panel is itself biased. Survivorship inflates random/loser-heavy selections more than momentum-type selections (calibration: SPMO/MTUM rules look 5-8 pp/yr worse vs EW on the panel than the real funds did vs RSP), so the panel cannot measure real-world momentum skill in either direction.",
+  "The site's TaxManagedCombo alphabetical buy order creates a large, signal-free A-C ticker tilt and concentration (CA: 70-74% of stock value in A-C tickers, 94-97% since 2015, 8.7 effective names for F1). It applies identically to strategy and random control, but it distorts absolute vs-SPY numbers by about 0.4-0.5 pp/yr and makes results depend on which early-alphabet names became mega-winners.",
+  "The late-start strength of momentum (2015+ starts: +5 pp/yr vs random, +7 vs SPY in CA) is one episode (2020-26 semiconductors/AI): 7 overlapping 10-year windows. Momentum lost 6-9 pp/yr to random for 2005-09 starts. Treat it as a regime bet, similar to the incumbent ETF preset's frozen growth/tech tilt.",
+  "The monthly bootstrap of a single 2000-start path can look significant (F2 vs shadow p = 0.006) when the path hangs on one never-sold position (AAPL from 2000-01-03). Window-averaged paired comparisons are more reliable here (+1.43 pp/yr, b10 0.57).",
+  "Heavy-config budget: this family has run 268 heavy configs in total (the previous researcher's screens used 208 before this session). The multiple-testing penalty is large, and the PBO/DSR numbers cannot see the survivorship bias (PBO 0.02 for a grid whose walk-forward picks loser-buying probes).",
+  "The engine taxes dividends as deferred capital gains (total-return prices) for both strategies and SPY. Dividend-heavy stock portfolios would be slightly worse under real annual dividend taxation. Not separately quantified for this family (realism.py was not run)."
+ ],
+ "untested_ideas": [
+  "Re-run the whole family (same code: stocks.combo / stocks.weights plus random and shadow controls) on a survivorship-free stock panel with delisted names (CRSP, Norgate, Sharadar). That is the precondition for any honest stock-selection conclusion.",
+  "Cap-weighted direct indexing with tax-loss harvesting against SPY (needs point-in-time market caps, which the site lacks). The equal-weight TM vs standard result (+0.65 pp/yr in CA) hints at the tax alpha, and a real index would offer more losers to harvest.",
+  "Fix TaxManagedCombo's alphabetical buy order on the site (pro-rata or signal-rank priority) and re-test the ETF presets, including the incumbent 'Beat the S&P (CA)'.",
+  "Top-100 large-cap momentum (+0.7 to +0.9 pp/yr vs random on screen) on the full protocol with 10 seeds, stars removed, and shadow controls.",
+  "12-1 momentum top 10 quarterly TM (best screened config vs random, +1.45 pp/yr) on the full protocol. Not promoted because it is even more concentrated and likely more star-dependent than F1/F2.",
+  "Turnover-matched shadow controls for every screened config (only 4 configs and the finalists have them). The site random picker's full reshuffle makes low-turnover strategies look better than random for tax reasons.",
+  "realism.py (annual dividend taxation) for the stock finalists."
+ ],
+ "lab_bugs": [
+  "metrics.summary (research/lab/metrics.py): for records whose first start is later than the protocol's (cfg min_start), bench_max_dd / bench_sharpe come from the benchmark run from the protocol's first start (2000). Example: min_start 2010 records report bench_max_dd -0.552 (SPY 2000-2026) instead of SPY's drawdown since 2010. Window excesses and the bootstrap correctly use the record's own start.",
+  "Site design flaw reproduced exactly by the lab (not a lab bug): backtester/composite.py TaxManagedCombo.on_day places buys `for t in sorted(longs)`, and engine.place_order caps each buy at available cash. When the gain budget blocks sells, the alphabetically first targets are filled and later ones are not, so portfolios drift into A-C tickers (stock F1 in CA: 70% of value in A-C tickers vs 26% of the universe; 97% since 2015). It can affect ETF menus too whenever cash is short.",
+  "Cache design note: registry.code_version hashes the whole family file, so any edit (even an opt-in parameter) re-keys every config of the family. The previous researcher's patches left 256 cached stocks runs unreachable under the current module. Their pickled records were verified to be reproduced exactly by v4 (2 configs re-run, 0.0 difference) and were reused."
+ ]
+}

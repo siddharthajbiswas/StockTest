@@ -1,0 +1,230 @@
+{
+ "coverage_gaps": [
+  {
+   "idea": "Section 1256 index futures (ES/MES) or SPX options to implement the timing and leverage rules",
+   "why": "Short-term rates eat every leveraged or timing edge in CA: about 3 pp/yr of the leaders' excess, and 0.75 + 0.23 x turnover pp/yr for TAA. Section 1256 contracts are taxed 60% long-term / 40% short-term whatever the holding period. That is 36.1% blended in CA against 48.1% short-term, and 26.8% against 38.8% for a federal filer once NIIT is included. They are marked to market yearly and allow a 3-year loss carryback. Their leverage costs about T-bill plus basis. A 3x ETF costs a 0.9% fee plus the swap spread verify_lev_mech measured: 0.44% + 0.13 x T-bill on the borrowed notional. mean_reversion and risk_alloc listed this as untested, and no family modelled it.",
+   "how_to_test": "Build a synthetic futures excess-return series (IDX_SP500TR minus SYN_TBILL, less 0.1-0.3%/yr for roll and basis). Add a custom kind: exposure = k x futures plus T-bill collateral, taxed yearly as 60/40 mark-to-market with carryback. Rerun the SMA175/3%-band rule at 1.5x, 2x and 3x, the SSO EMA100/200 cross and the RH dip sleeve. Use full (2000+) and long (1986+) in CA and FED, on the same windows as the ETF versions."
+  },
+  {
+   "idea": "Contributions and withdrawals (cash flows)",
+   "why": "Every tax-managed candidate breaks down on its frozen book. By 2026 KX3 is 87% unrealized gain and 56% growth/tech; the cyclical and value/growth tilts froze after 2002 and 2008. A real saver re-ranks and rebalances with new money without realizing gains, and a retiree sells lots selectively. The engine has no cash flows, so it measures neither the freeze nor its cure. Four families listed this as untested.",
+   "how_to_test": "Extend Gate to add the same scheduled contribution to strategy and SPY benchmark (for example 10% of the initial capital a year, paid monthly). The strategy sends new cash to underweight or top-ranked names and sells nothing. Score after-tax terminal wealth on a money-weighted basis on full and long. Add a decumulation phase: 4%/yr withdrawals using HIFO sales. Run KX3, KX1, INC, B378 combo, the cyclical tax tilt and the value/growth switch."
+  },
+  {
+   "idea": "Other ways the position ends: step-up at death, donating appreciated lots, gradual liquidation in retirement",
+   "why": "The protocol liquidates everything at the end of each window. I recomputed excess from cached records using pre-liquidation equity (ck[1]) for both sides, which needs no new backtests. Frozen books barely move: KX3 CA score +0.0099 -> +0.0108, full +0.0184 -> +0.0186; INC +0.0066 -> +0.0072. Rules that realize gains along the way lose part of their edge: unlevered EMA100/200 score +0.0101 -> +0.0075 and full +0.0136 -> +0.0076; macro uninv540 full +0.0376 -> +0.0267; GATED +0.0280 -> +0.0197; 3x SMA175 full +0.0710 -> +0.0669. Terminal liquidation therefore mildly favours high-realization rules over a SPY holder who never sells. Script: /private/tmp/claude-501/-Users-siddhartha-dev-StockTest/30740174-6df3-42fd-9108-dbc7a9c13aa4/scratchpad/stepup.py",
+   "how_to_test": "Add stepup_* columns to metrics.summary from ck[1] for strategy and benchmark; this costs no new runs. Add a 'retire' terminal rule: sell HIFO lots evenly over 20 years at long-term rates. Report bar items 1-3 for every finalist under all three end-of-window treatments."
+  },
+  {
+   "idea": "Specific-lot (HIFO / minimum-tax) sales, exact budget sizing, and IRS netting that keeps short- and long-term character",
+   "why": "The engine sells FIFO only. A budget-limited partial sale is sized on the average gain per share, but FIFO sells the lowest-basis lots first, so KX3 overshot its 1% budget in 18 of 25 years, by up to 1.32x. Real brokers allow specific-lot selection, which lets a tax-managed rotation turn over more for the same tax. In the other direction, backtester/tax.py compute_year_tax pools all losses, including long-term losses and carryforwards, against short-term gains first. That is more generous than IRS netting when a switcher has both long-term losses and short- and long-term gains.",
+   "how_to_test": "Add engine options lot_method in {fifo, hifo, mintax} and netting in {pooled, irs}. Rerun KX3, KX1, INC, B378, TVT, the value/growth switch, the SMA175/3% 3x rule and the TAA lt configs on full in CA. Report the change against current numbers."
+  },
+  {
+   "idea": "California tax-exempt (muni) bonds as the safe asset, and correct Treasury/T-bill tax in risk-off legs",
+   "why": "Every risk-off leg used VFITX, IEF, SHY or BIL. In reality their interest is taxed yearly at the federal ordinary rate plus NIIT (38.8%) and is CA-exempt; the engine defers it and taxes it at 28.1%. A CA investor would hold VCAIX (1994), VCITX (CA long-term, 1986), VWITX (1977) or CMF/MUB (2007), whose interest is tax-free. The Treasury leg supplies 0.6-1.1 pp/yr of every timing result. Nobody tested munis; taa_models listed them as untested.",
+   "how_to_test": "Add the muni funds as instruments. Extend realism.character with 'muni' (0% on interest) and 'treasury' (federal ordinary, CA-exempt), and run realism on all 95 starts, not 4. Compare muni and Treasury legs for: macro GATED with the bond-equivalent curve and a weekly check, the EMA100/200 cross, GEM3-x-rm5, the RH reserve, and the off-leg of the SMA175/3% rule."
+  },
+  {
+   "idea": "Menus built by a fixed rule, as of each date, for the tax-managed rotation",
+   "why": "Every tax_rotation pass needs the 22-ETF menu chosen in 2026 (QQQ/XLK). The random-menu control draws from BROAD_POOL_2003, which common.py defines as every ETF in the lab that launched by 2003. That pool contains only survivors the lab chose to download, and it already holds 7 tech winners (QQQ, XLK, IYW, IGV, SMH, SOXX, ONEQ). KX3's lead grows with the number of tech funds in a menu: 0 -> -0.79, 3 -> +1.10. Neither menu is one an investor would have picked in 2000-02.",
+   "how_to_test": "Pre-register a menu rule applied each Jan 1 to data available then. For example: all US-listed equity ETFs with at least 1 year of history in the top 30 by volume or AUM, with the menu growing as funds launch, and delisted ETFs included where prices exist. Run KX3, KX1, INC and B378 on full in CA and FED. Also run the K-execution on SPDR9/SPDR11."
+  },
+  {
+   "idea": "Rotation anchored to the benchmark: hold SPY by default, change a slot only on a large momentum margin",
+   "why": "tax_rotation listed this as untested. It targets KX3's two weak points: beat rates near a coin flip on random menus (ex10_beat ~0.5), and dependence on the menu. It also realizes fewer gains, which suits CA.",
+   "how_to_test": "Add anchor='SPY' to the Rank signal: a slot moves to the top-ranked fund only when that fund's 378-day return beats SPY's by 5, 10 or 20 pp. Use the K-execution, a 0-1% budget and S cadence. Screen in CA on the incumbent menu, rule-built menus and the 30 random menus; promote the best to full with rebalance offsets."
+  },
+  {
+   "idea": "Test the leverage and trend rules before 1986 (^GSPC daily from 1927 is already in research/lab/data/IDX_GSPC.csv)",
+   "why": "The leverage plateau's only crash before 2000 is 1987. My replay shows VFINX's SMA175 margin went from -0.89% (10-15) to -6.03% (10-16), so the -3% band was crossed only at the 10-16 close. I ran a quick pre-tax proxy outside the engine on 1928-1985 (^GSPC prices plus approximate dividends, T-bill off-leg, constant 0.6% spread):\n- 3x SMA175/3%, daily: 16.0%/yr CAGR vs 8.6% buy-and-hold. It exited 1929-10-23, before the 10-28/29 crash; with a 1-day lag it made 17.1%.\n- But its worst drawdowns were -89% (1932-09 -> 1935-05) and -82% (1941-42), both in choppy, high-volatility markets.\n- 2x: 13.4%, drawdown -70%. 1.5x: 11.5%, drawdown -56%.\nPre-tax this supports the rule out of sample, but 3x shows drawdowns close to ruin. Script: /private/tmp/claude-501/-Users-siddhartha-dev-StockTest/30740174-6df3-42fd-9108-dbc7a9c13aa4/scratchpad/pre1986.py",
+   "how_to_test": "Build a research-only total-return series from ^GSPC, a dividend-yield table and T-bill history (^IRX from 1960, published annual rates before), with leverage financing that depends on rates. Run the leverage, trend and timing finalists through the engine in CA, FED and NONE on a 1928-1985 protocol, and report drawdowns and bar items."
+  },
+  {
+   "idea": "Allocation by valuation (CAPE, excess CAPE yield, earnings yield vs the 10-year)",
+   "why": "No family tested valuation. macro_regime covered the curve, credit, commodities and breadth, and global had no valuation data. Slow valuation tilts trade rarely, which suits CA taxes, and they are the best-documented long-horizon predictors.",
+   "how_to_test": "Add monthly Shiller CAPE and earnings as a side-channel series, lagged at least 2 months. Example rule: equity weight 60-100% by CAPE percentile on an expanding window, executed losses-only or with a 1% budget, or with new money only. Run the long protocol (1986-2026) and the 1928-1985 proxy."
+  },
+  {
+   "idea": "Crash protection that never sells the core: index put spreads or collars (SPX, Section 1256), or a long-volatility sleeve",
+   "why": "Every crash-avoidance rule loses in CA, mostly because exits realize gains on low-basis lots. An options overlay hedges without selling. No family had option instruments; trend_timing and mean_reversion listed this as untested.",
+   "how_to_test": "Use CBOE PPUT (5% put protection, 1986+) and CLL (collar) index series, or a Black-Scholes replica priced off ^VIX, as an overlay on a SPY core that is never sold. Tax the overlay as Section 1256. Compare CA score and drawdowns with SPY and with the trend rules."
+  },
+  {
+   "idea": "Lower-leverage, ensemble and T-bill-off versions of the banded daily trend rule, with financing that depends on rates",
+   "why": "The 3x plateau has the largest after-tax excess found, but its drawdowns are -79% (1987 with a 1-day lag) and -89% (1930s proxy). In verify_lev_robust's random 1987-style crash insertion, 3x has a 6-9% chance of a drawdown of -80% or worse, while 2x keeps a positive mean 10-year excess (+0.8 to +2.1 pp) with no -80% drawdowns. The SYN_* series assume a constant 0.6% spread, but UPRO's implied spread is 0.44% + 0.13 x T-bill, so the synthetic series beats the real fund by about 0.55 pp/yr when T-bills are above 2%. That flatters 1986-2008 for 3x.",
+   "how_to_test": "Recalibrate SYN_* with spread = a + b x irx. Run SMA150-200 x bands of 3-4% at 1.5x and 2x; an ensemble (exposure = 1x + 2x x the share of 6 SMA/band rules that are on); and a T-bill off-asset. Use full, long and the 1928-1985 proxy, with crash insertion and a constant-leverage control at the same average exposure."
+  },
+  {
+   "idea": "Asset location across a taxable account and an IRA",
+   "why": "Several rules have real pre-tax edges that tax destroys: the untaxed B378 rotation passes 1-3 on 1986-2026 NONE (+2.25, boot_p 0.058); the ConnorsRSI<15 3x dip overlay; credit-spread rules; sector seasonality. If the user also has an IRA or 401(k), running those there with SPY or a never-sold core in the taxable account may beat SPY in both. The engine models one account only.",
+   "how_to_test": "Run the IRA leg (NONE) and the taxable leg (CA) separately with fixed account sizes (for example 30/70) and combine after-tax terminal values. Enforce wash sales across accounts: an IRA purchase within 30 days disallows a taxable loss."
+  },
+  {
+   "idea": "Yearly tax on dividends and distributions, for every start date and for SPY itself",
+   "why": "The engine defers distributions for every strategy and the benchmark. Realism was run on only 4 starts and treats every non-bond distribution as qualified. That understates low-yield books (KX3 gains +0.03 to +0.06 pp under realism) and overstates high-distribution proxies by 0.2-1.5 pp/yr. Examples: Fidelity Selects pay 4-5%/yr, mostly short-term capital gains; leveraged ETFs pay ordinary-income distributions.",
+   "how_to_test": "Run realism.adjusted on all 95 full starts for every finalist and for the benchmark, taxing each distribution by its true character (short-term capital-gain distributions at ordinary rates). Add a realism-adjusted score to the tables."
+  },
+  {
+   "idea": "Test the leveraged-trend plateau on other markets",
+   "why": "The leverage family listed this as untested. Synthetic 2x/3x series for IWM, MDY, EFA, EEM, DIA and many country funds are already in research/lab/data. A rule that works only on the S&P 500, in one history, is weak evidence.",
+   "how_to_test": "Run SMA175/3% daily at 2x and 3x (signal on the underlying, IEF or T-bills when off) on SYN_IWM3XC, SYN_MDY2XC, SYN_EFA2XC, SYN_EEM3XC, SYN_DIA2XC and about 10 country series. Compare each with buy-and-hold of its own underlying in CA: share positive, median excess, drawdowns."
+  },
+  {
+   "idea": "Resampled market histories for strategies whose result depends on the path (tax-frozen books)",
+   "why": "Every 10- and 15-year window starts in 2000-2011 and most contain 2000-02 or 2008. Frozen books depend on what was bought first: KX3's full-period excess ranges from -0.75 to +1.84 pp depending on the start. One history cannot show what happens when a frozen growth book meets a tech bust. Replaying the 2000-03 bust on the 2015-start KX3 book gives -71% against SPY's -47.5%.",
+   "how_to_test": "Stationary block bootstrap (24-36 month blocks) of the joint monthly returns of the 22-ETF menu: 200 paths of 26 years. Run KX3 and INC against SPY in CA, through the engine or a validated fast replica such as verify_curve's casim. Report the distribution of excess and drawdowns."
+  },
+  {
+   "idea": "Fund data free of survivorship for random menus and long-history proxies",
+   "why": "BROAD_POOL_2003, LONG_MENU and PRE20/FSEL contain only funds alive today. Merged or closed Fidelity Selects and delisted early ETFs are missing, which inflates random-menu and pre-2000 results. Stocks are an extreme case: only 37% of the 2000 S&P 500 members have data.",
+   "how_to_test": "Add price histories of delisted ETFs and funds where they can be found (archived Yahoo or CRSP-style sources). Redraw the random menus and rerun the PRE20/FSEL long-history controls. Until then, label these results as upper bounds."
+  }
+ ],
+ "suspicious": [
+  {
+   "family": "tax_rotation",
+   "candidate": "KX3 (and KX1): 378-0 / 252-21 momentum, top 5, with keep-in-top-2N, no trimming and worst-ranked-first gain spending",
+   "concern": "full_excess (+1.84) and boot_p (0.011) both come from one start, 2000-01. On that date only SPY, MDY and DIA had the 379 days of history the rule needs. It bought one third MDY and never trimmed it, so MDY was 39-45% of the book until 2008.\n- From starts at or after 2002, KX3 scores +0.81 and ex15_beat is 0.82, which fails item 2. Full-period excess is +0.83 from 2002-01 and -0.75 from 2003-01.\n- The default rebalance schedule is the 3rd best of 26 offsets for full_excess (median offset +1.00). boot_p is above 0.10 at 14 of 26 offsets, and only 35% of offsets pass items 1-3.\n- KX3 minus the incumbent is +0.28 pp/yr (p 0.38), and -0.59 pp/yr over 2010-2026. DSR is 0.038 over ~12,000 configs.\n- The menu is the 22 ETFs chosen in 2026.\n- The 'momentum beats random ranking, t~7' result comes from 30 menus that share one 2000-2026 history and are drawn from a survivor pool with 7 tech winners. The lift grows with tech count: +0.18 pp with no tech fund, +1.04 with three.",
+   "check": "Report boot_p and full_excess for every start 2000-2003 and for starts from 2002, or add an option that starts windows only once every menu fund has the lookback. Rerun on menus built by a fixed rule as of each date. Present the random-menu t-statistic as consistency across menus within one history, not as evidence about the future."
+  },
+  {
+   "family": "leverage",
+   "candidate": "Daily trend, 3x S&P / intermediate Treasuries, SMA175 with 3% band (picked after the fact)",
+   "concern": "This is leverage: 2.17x on average, after-tax volatility 24% vs 14%, M2 +0.9.\n- The band was chosen post hoc; the pre-registered 2% band has p 0.117.\n- Its one crash escape before 2000 depends on filling at the same close: VFINX's SMA175 margin went -0.89% -> -6.03% only on 1987-10-16. With a 1-day lag it lost 58 pp to the index in 1987 and drew down 79%.\n- The synthetic legs use a constant 0.6% spread, but measured UPRO spreads are 0.44% + 0.13 x T-bill. Synthetic is flattered by ~0.55 pp/yr when T-bills are above 2%, and more in 1986-2000 at 3x.\n- The intermediate-Treasury off-leg adds a falling-rate tailwind; with a T-bill off-leg the 2% band scores p 0.18.\n- 2022: -43% vs SPY -17%.\n- In verify_lev_robust's random 1987-style crash insertion, 10-year excess falls from +9.1 to +0.8..+2.2 pp, beat rate 0.54-0.74, and the chance of a -80% drawdown is 6-9%.\n- My 1928-85 pre-tax proxy shows -89% (1932-35) and -82% (1941-42) drawdowns at 3x.",
+   "check": "Recalibrate the spread to depend on rates and rerun long. Run the 3% band with a T-bill off-leg on every history. Use intraday data to check whether an order before the close could have exited on 1987-10-16. Run the 1928-1985 engine test. Wash sales are not the issue: my replay found only one 3x-leg loss exit (2023-10-27, -2.5%) bought back within 30 days, plus one safe-leg loss bought back in 24 days."
+  },
+  {
+   "family": "leverage / trend_timing / mean_reversion / risk_alloc",
+   "candidate": "Every leveraged result on real ETFs (UPRO/SSO windows): UPRO buy-and-hold, 10% UPRO + 90% SPY, LEV-HAA-UPRO, the real SMA175 rule",
+   "concern": "Real UPRO/SSO windows start 2009-07 / 2006-07, so the sample is a bull market only. UPRO buy-and-hold 'passes' (CA +17.12, p 0.004), and so does 10% UPRO + 90% SPY never traded (+2.38, p 0.015). bench_max_dd always reports SPY's 2000-2026 drawdown of -55%, even for strategies that start in 2009 (SPY's drawdown since then: -34%), so the drawdown comparison flatters them.",
+   "check": "Judge each leveraged rule against constant or buy-and-hold leverage at the same average exposure, and on synthetic 2000+, 1986+ and 1928-1985 histories. Compute bench_max_dd and bench_sharpe from the record's own first start."
+  },
+  {
+   "family": "risk_alloc",
+   "candidate": "TVT: tax-aware levered vol target (SPY/IWB/VTI + SSO/DDM, 1% budget)",
+   "concern": "verify_levvt already FAILED it.\n- After 2009 the gain budget freezes exposure at 1.6-1.9x, so vol targeting is effectively off.\n- 25% of realized-loss dollars break the wash-sale rule (a purchase within 30 days before the loss sale), which the lab guard misses.\n- It is mostly a 2x Dow bet through DDM.\n- Trivial perturbations swing full excess from +1.6 to +7.0.\n- Long history fails (boot_p 0.26).",
+   "check": "Retire it. Keep it as the test case for the two-sided wash-sale fix (wash_pre) and for leverage frozen by the path."
+  },
+  {
+   "family": "macro_regime",
+   "candidate": "uninv540 minlen90 | chkM and GATED uninv540 & spy200 | chkM",
+   "concern": "verify_curve already FAILED both.\n- The edge is two events: 2001 and 2007 supply 120-146% of the CA log excess.\n- min_len 90 works only because ^TNX-^IRX uses the T-bill discount yield. On FRED's T10Y3M, 2019 is one 141-day inversion; corrected, the score falls to +2.67 with boot_p 0.23.\n- GATED's headline uses the best of 28 possible check days (median +1.63).\n- The battery's offset test was degenerate for signals with a monthly check, so every macro finalist got an optimistic timing test.",
+   "check": "Retire both. Fix the curve definition (bond-equivalent yield) and the battery offset mechanism before reusing any macro rule."
+  },
+  {
+   "family": "factor_style",
+   "candidate": "N5_vgh: value/growth 12-1 switch, 6% hysteresis, monthly, 1% budget",
+   "concern": "13 trades in 26 years, and in effect one decision: value until 2008-12, IWF since.\n- The IWD/IWF launch forces the first start to 2000-07, after the growth peak. This is the launch-window effect the family itself flagged for VUG, MGK and SPMO.\n- boot_p 0.040 treats 319 months as information.\n- Quarterly siblings have p 0.20-0.28 and the long VIVAX/VIGRX twin p 0.224. Only 1-2 of 24 random pairs pass.\n- 2013-14 starts are stuck in value and lose 2.6-2.9 pp/yr.",
+   "check": "Trade VIVAX/VIGRX from 2000-01 and from 1993 with the same signal, and bootstrap from several starts. Count independent decisions. Compare with static IWF on the same windows."
+  },
+  {
+   "family": "seasonal",
+   "candidate": "Tax-managed cyclicals Oct1-May1 (and Nov-Apr) / SPY, 1% budget",
+   "concern": "Oct1-May1 is the best of 7 boundary pairs, chosen after the fact. The budget freezes the rule into a static XLY/XLI/XLB/XLK tilt after 2002. verify_tilts' control with no season ('cyclicals all year, tax1 monthly') does better in CA: score +0.99, full +0.97, 10/15y beat 1.00/0.98, boot_p 0.077. The season adds nothing. Without XLK the basket scores +0.46 to +0.51 and fails.",
+   "check": "Treat it as a sector-basket bet that depends on XLK. Run the CA basket placebo on all 126 four-SPDR baskets with the same tax execution (CA covered only 44)."
+  },
+  {
+   "family": "tax_structures / seasonal / sector_deep / tax_rotation (LONG_MENU)",
+   "candidate": "Results from 1986 that rely on Fidelity Select proxies: sector proxy +1.49 (p 0.052), static cyclical basket +2.44 (p 0.048), FSEL equal-weight TM control (p 0.069)",
+   "concern": "These are actively managed Select funds that survived to today. They distributed 4-5%/yr, largely short-term capital gains; the engine defers that tax and realism counts it as qualified. Loads, redemption fees and frequent-trading limits are not modelled. Distribution tax alone removes 0.2-1.2 pp/yr, more at ordinary rates.",
+   "check": "Do not count these as pre-2000 support. Rerun with short-term capital-gain distributions taxed yearly at 48.1%, add closed and merged Selects, and charge historical loads."
+  },
+  {
+   "family": "stocks",
+   "candidate": "F2 / F3 / W1 (CA +2.8 to +4.1, boot_p ~0)",
+   "concern": "Survivorship: only 37% of the 2000 S&P 500 members have data, and 9 of 10 random 20-stock seeds pass items 1-3. Alphabetical buying drifts 70-74% of value into A-C tickers. F2's P&L is 69% AAPL.",
+   "check": "Keep them off every candidate list. Only comparisons against random picks on the same machinery mean anything, and those are about zero."
+  },
+  {
+   "family": "global",
+   "candidate": "N1 SPY vs VEIEX ratio switch (CA +2.67, boot_p 0.04)",
+   "concern": "Two trades in 26 years (into VEIEX in 2001-04, out in 2012-01). The ETF twin scores -2.06; swapping VEIEX for random funds gives -0.29 on average. VEIEX's purchase fees are not modelled.",
+   "check": "A bootstrap p-value means little for a strategy with two decisions; report the number of decisions with it. It already fails on beat rates."
+  },
+  {
+   "family": "mean_reversion",
+   "candidate": "RH dip sleeve (80% SPY never sold + 20% reserve -> UPRO on %b<0 above SMA200, held at least 366 days)",
+   "concern": "The UPRO sleeve is never rebalanced, so leverage drifts from 1.5x to 2.7x. Real data covers 2009+ only. DSR 0.06. Against constant 1.5-2x or buy-and-hold 30-50% UPRO the difference has p 0.10-0.41. The synthetic legs share the constant-spread financing bias.",
+   "check": "Permute entry dates at random while keeping the same hold of at least 366 days and the RSI(2)>65 exit, on synthetic 1986+. Rebalance the sleeve to a fixed weight. Use rate-dependent financing. Run the 1928-1985 proxy."
+  },
+  {
+   "family": "trend_timing",
+   "candidate": "SSO while EMA100 > EMA200 x 1.01, else IEF (CA +6.34, p 0.034)",
+   "concern": "4 switches since 2006, and its Sharpe equals SPY's (0.65 vs 0.65), so the excess is leverage. The real-SSO sample starts 2006-07, just before the one bear market it avoided.",
+   "check": "Run the same checks as the leverage plateau: crash insertion, rate-dependent financing, and a constant 1.6x control."
+  },
+  {
+   "family": "all families (CA results of switching strategies)",
+   "candidate": "Standard-execution TAA, trend, seasonal and VIX timers; tax-executed TAA with lt/tax1",
+   "concern": "Three engine conventions flatter these results:\n- backtester/tax.py pools every loss, including long-term losses and carryforwards, against short-term gains first, which beats IRS netting when long-term losses meet short-term gains.\n- Standard execution never enforces wash sales.\n- The January tax is paid from cash, so cash can go negative: VIX timers average -3% to -6% cash (worth 0.5-1 pp/yr); VAA-lt averages -0.75% (minimum -10.6%); seasonal standard averages -1.26%.",
+   "check": "Recompute finalists' taxes from trade logs with IRS netting and wash-sale disallowance. Flag or exclude configs with avg_cash below -0.5%."
+  },
+  {
+   "family": "all families (the bar itself)",
+   "candidate": "Bar items 1-3 as applied to every finalist",
+   "concern": "The ex10 and ex15 beat rates come from overlapping windows that all start in 2000-2011 and mostly contain 2000-02 or 2008: about 2-3 independent decades. boot_p uses only the first start's path. So items 1-3 largely ask whether a rule avoided or exploited 2000-2010 from a 2000 start. Every finalist loses 3-5 pp/yr in 5-year windows starting 2020-2023.",
+   "check": "Add a sub-bar for starts after 2009 and a bootstrap across several starts. Report the number of independent decisions or events behind each finalist's statistics."
+  }
+ ],
+ "combinations": [
+  "SPY core that harvests losses + satellite that realizes gains. 70% SPY core with tax_structures' best harvest chain (SPY->IWB->VTI->VV, 15% threshold, monthly, no swap back) + a 30% sleeve on the leverage family's daily SMA175/3% rule at 2x or 3x (SYN_SPY3XC/UPRO <-> IEF or T-bills). The engine credits harvesting only when it offsets gains the strategy realizes anyway (1%-budget gap -0.05..-0.10 -> -0.02..-0.03), and the sleeve realizes mostly short-term gains at 48.1%. Measure the CA gap against a ZERO twin, the score, and drawdown against constant 1.6x.",
+  "Never-sold SPY core + banded leveraged-trend satellite. The leverage family's 24 overlay configs used SMA150/200 with no band (best CA screen +2.63, boot_p 0.34). Rerun with the 3-4% band plateau: core 50/67/80%, 2x or 3x satellite, daily check, IEF or T-bill off-leg. Compare with constant leverage at the same average exposure and with the all-in rule, on full, long and the 1928-1985 proxy.",
+  "KX3 (75%) + 2x banded-trend sleeve (25%, SSO/SYN_SPY2XC <-> T-bills). The sleeve sells out in broad bear markets, which are exactly what would hit KX3's frozen growth book (replayed 2000-03 bust on the 2015-start book: -71% vs SPY -47.5%), and it never touches KX3's low-basis lots.",
+  "KX3/B378 + a 25-50% SPY core that is never sold. It passed items 1-3 on screen; promote it to full with QQQ/XLK removal and the 30 random menus. This is the cheapest way to cut KX3's tracking error and menu dependence.",
+  "K-execution anchored to SPY. Every slot holds SPY by default and switches to the top-ranked menu fund only when its 378-day return beats SPY's by at least 10 pp. Keep in top 2N, no trimming, worst-ranked first, 0-1% budget.",
+  "K-execution (no trim, keep in top 2N, worst-ranked first) on canonical menus free of hindsight: SPDR9/SPDR11 for 2000+, and PRE20/FSEL11 for 1986+ with distribution-tax realism. This tests whether the +0.5 pp K lift on the incumbent menu transfers; the plain incumbent rule scored -0.06/-0.10 on SPDR9/11.",
+  "Low-vol gate x banded trend for leverage. 3x only when SPY is above SMA175 by the 3% band AND 60-day vol is below 15% (16.5%/13.5% hysteresis); 1x SPY when the trend is on but volatile; T-bills or IEF when the trend is off. The low-vol rule failed 1987 (vol was low beforehand); the trend rule failed in the 2022 whipsaw and the 1932-35 chop (-89% in the proxy). First confirm whether the leverage family's lowvol+trend grid included the 3% band.",
+  "RH dip sleeve + trend exit. Keep mean_reversion's 80% never-sold SPY + 20% reserve -> UPRO on %b<0 above SMA200. During the 366-day hold, move the sleeve to T-bills on a banded SMA175 break, and rebalance the sleeve back to 20%. The family listed both changes as untested.",
+  "Muni off-leg for timing rules. Run macro GATED (bond-equivalent curve, weekly check) and the EMA100/200 cross with VCAIX/VWITX instead of VFITX, scored with realism that exempts the interest. The Treasury leg supplies 0.6-1.1 pp/yr of every timing result, so the safe asset's tax character matters.",
+  "Section 1256 futures version of the leveraged trend sleeve (ES notional + T-bill collateral, 60/40 mark-to-market) against the UPRO/SSO version on the same windows, in CA and FED.",
+  "Household asset location. The IRA runs the untaxed B378 rotation (long 1986-2026 NONE: +2.25, boot_p 0.058, ho5 +1.10) or the ConnorsRSI<15 3x dip overlay; the taxable account holds SPY or KX3. Compare with SPY in both accounts, with cross-account wash-sale enforcement.",
+  "Incumbent/KX3 with a 0% gain budget (rotate only through losses) + proportional buys. tax_structures' 0%-budget incumbent nearly passes (CA +0.64, 10/15y beat 0.79/0.81, boot_p 0.047, gap -0.0001). Combining it with the K-execution may keep the momentum edge at almost no tax cost."
+ ],
+ "strongest": {
+  "CA": [
+   "Verdict: nothing clears the 7-item bar in CA. The default for the taxable account is still SPY buy-and-hold. In lab data IVV and VOO beat SPY by only +0.03 to +0.04 pp/yr, so which S&P fund to hold does not matter.",
+   "Unlevered #1: KX3 (378-0 momentum, top 5, semiannual, 1% budget, keep-in-top-2N, no trimming, worst-ranked-first gain spending, proportional buys).\n- Full CA: score +0.99, full_excess +1.84, 10/15y beat 0.90/0.85, boot_p 0.011, max drawdown -54% (SPY -55%).\n- All 26 rebalance offsets keep a positive score (+0.65 to +1.27) and full_excess. It is robust to a 1-day lag, costs, the stricter distribution-tax accounting (slightly better) and step-up accounting (+1.08). Momentum beats random ranking with the same execution by +0.7-0.8 pp on 80-90% of random menus.\n- It is not good confidence. It fails item 4 (PBO 0.60, walk-forward ~0), item 6 (needs QQQ/XLK) and item 7 (pre-2000 flat or negative). Its items 1-3 pass leans on the 2000-01 launch-date artifact: from starts at or after 2002, ex15_beat is 0.82. Its improvement over the incumbent is not significant (p 0.38). Treat it as a better-engineered growth/tech regime bet that needs new knobs in the code and cannot run on the site today.",
+   "Unlevered #2: KX1 (12-1 signal, quarterly, K-execution, long-term gains only, 2% budget).\n- CA +0.93 / +1.82 / 0.91 / 0.89 / boot_p 0.011.\n- Less sensitive to the 2000-01 artifact than KX3: from starts at or after 2002 it scores +0.80 with 10/15y beat 0.90/0.87, and full excess from 2002 is +1.55.\n- Weaker across offsets: 4 of 13 pass, worst +0.38.\n- Same failures on items 4, 6 and 7.",
+   "The site can run today: B378 combo (TaxManagedCombo, lookback 378, skip 0, top 5, semiannual, 1% budget). CA +0.79 / +1.05 / 0.82 / 0.91 / boot_p 0.073. It is the smallest change from the current preset (+0.66, beat 0.70/0.83, boot_p 0.025) and carries the same hindsight and regime caveats. A site-side switch to proportional buys adds about +0.1.",
+   "Leveraged research lead (flagged as leverage): the daily SMA175/3%-band S&P trend rule (3x: CA +9.65, p 0.029).\n- It is the only rule with a large after-tax excess on all three histories: synthetic 2000-2026, real UPRO since 2009, and synthetic 1986-2026 (ho10 +7.81). My pre-tax proxy for 1928-1985 also supports it (16.0% vs 8.6%).\n- Most of it is paid-for risk: 2.2x average exposure, M2 +0.9. It was picked after the fact, PBO is 0.67, and it depends on one day (1987-10-16). Drawdowns reach -79% to -89% at 3x.\n- If pursued at all, run it at 1.5-2x, or as a satellite around a never-sold SPY core. At 2x, random crash insertion keeps a positive 10y excess with no -80% drawdown.",
+   "Leveraged template: the RH dip sleeve (80% SPY never sold + 20% reserve -> UPRO dips, held at least 366 days). It has the most tax-efficient structure, since the core is never realized and sleeve gains are long-term. Items 1-3 pass on real 2009+, synthetic 2000+ and synthetic 1986+ data. But DSR is 0.06, walk-forward is negative, and the leverage is not distinguishable from constant leverage.",
+   "Dropped:\n- TVT: verified fail; frozen 1.9x leverage.\n- Macro curve rules: verified fail; two events, a curve artifact and check-day luck.\n- Value/growth switch and seasonal cyclicals: static growth/tech tilts. A no-season cyclical basket does as well.\n- Stocks: survivorship.\n- Global N1: two trades."
+  ],
+  "FED": [
+   "Same conclusion: nothing clears the full bar in FED. Note that the FED regime (35/15) leaves out the 3.8% NIIT that applies in the 35% bracket; 38.8/18.8 would slightly lower every strategy that realizes gains.",
+   "KX3 / KX1 pass items 1-3 with more room: FED +1.10 / +1.05, boot_p 0.006 / 0.009, 10/15y beat 0.90/0.87 and 0.93/0.91. They fail items 4, 6 and 7 as in CA.",
+   "INC WS: the current preset's knobs with proportional instead of alphabetical buys. Passes items 1-3 in FED: +0.81, 10/15y 0.85/0.85, boot_p 0.044. It is the cheapest site-side improvement, with the same menu hindsight.",
+   "Leveraged: the SMA175/3% rule scores FED +11.26, p 0.016. It carries the same post-hoc, one-day and drawdown caveats; the lower federal short-term rate reduces its tax drag.",
+   "Not candidates:\n- Macro after150 short-hold curve rule: passes items 1-3 on full in FED only, fails long (p 0.14-0.33) and is a narrow parameter spike.\n- Seasonal cyclicals and the value/growth switch (FED p 0.027 / 0.041): static tilts."
+  ],
+  "reasoning": "No family produced a strategy that beats SPY after CA or FED tax with good confidence. The unlevered survivors are all one bet:\n- Tax-frozen momentum or tilts on a menu chosen in 2026 that contains QQQ/XLK.\n- Their item 1-3 statistics come mostly from 2000-2010 and from the 2000 start.\n- Every one loses 3-5 pp/yr in 5-year windows starting 2020-2023.\nWithin that bet, KX3/KX1 are the best engineered and the most thoroughly verified, and the only robust finding is relative: momentum beats random ranking under the same tax rule. The leveraged survivors' excess is mostly paid-for risk. The banded daily trend rule is the only one with supporting evidence before 2000 (and before 1986 in my proxy), which makes it the best leveraged research lead, but 3x carries drawdowns close to ruin. Round 2 should run the hindsight-free menu, cash-flow, end-of-window-treatment and Section 1256 tests on KX3/KX1 and on a 2x core-plus-satellite trend structure, after the P0 lab fixes.",
+  "reviewer_quick_checks": [
+   "Step-up / no-liquidation excess from cached records: /private/tmp/claude-501/-Users-siddhartha-dev-StockTest/30740174-6df3-42fd-9108-dbc7a9c13aa4/scratchpad/stepup.py",
+   "Wash-sale exposure and the 1987 SMA175 margin replay for the 3x band rules: /private/tmp/claude-501/-Users-siddhartha-dev-StockTest/30740174-6df3-42fd-9108-dbc7a9c13aa4/scratchpad/lev_wash.py",
+   "Pre-tax proxy outside the engine, 1928-1985 ^GSPC, SMA175/3% at 1.5x/2x/3x: /private/tmp/claude-501/-Users-siddhartha-dev-StockTest/30740174-6df3-42fd-9108-dbc7a9c13aa4/scratchpad/pre1986.py"
+  ]
+ },
+ "lab_bug_triage": [
+  "P0 metrics.walk_forward / report.diagnostics: step_quarters=4 steps over start indices, not time. On yearly protocols (screen, long_screen) that means one decision every 4 years: only 3 dates for 10y->5y (2012, 2016, 2020). Criterion 4 is decided on this. Fix: derive the step from the protocol's start spacing (one year), report n_decisions, and rerun diagnostics for every family from cached records. Every family reported this.",
+  "P0 metrics.monthly_matrix(...).dropna(): PBO and DSR silently use only the months every config covers. One late-starting config (UPRO 2009/2011, VXUS 2013) truncates the whole family's sample (risk_alloc PBO 0.002, mean_reversion 0.00, seasonal 199 of 319 months). Fix: compute on configs sharing the protocol's first start (late starters as their own sub-family), always output T, and never mix 2000-era and leveraged-ETF-era configs.",
+  "P0 verify.battery offset test: weights_x offset_days shifts only WeightStrategy's rebalance key. Signals with their own check calendar (MacroSwitch check='M', leverage.regime check='M') still evaluate on the first trading day, so the test reports false robustness: GATED showed +2.64..+3.12 against a true +0.88..+3.12 over 28 check days. The battery also cannot offset or lag custom kinds (tax_rotation.ws, risk_alloc.taxvt). Fix: pass offset and lag through ctx into Signal period keys, or require a check_offset parameter; add generic lag support.",
+  "P0 sweep cache poisoning: run_one computes registry.code_version from the file on disk at write time, while forked workers run the module imported when the pool started. A mid-sweep edit stores old-code results under the new hash; this happened in tax_rotation at 09:34. Fix: hash the loaded module's source at import and refuse to write when the disk hash differs. Also hash the files of wrapped or inner signals (risk_alloc overlay -> common.momentum).",
+  "P0 wash sales: the engine ignores them, and the lab's 'tax' execution guard only blocks re-buys after a loss sale. It misses loss sales within 30 days after a purchase: 25% of TVT's loss dollars (verify_levvt) and 21% for risk_alloc's first start. Fix: add a lab-side replay that disallows the loss and adds it to the replacement lot's basis, in both directions and across substantially-identical groups (and across accounts). Report it as a column for every CA finalist, and adopt verify_levvt's wash_pre in the guard.",
+  "P0 protocol: boot_p and full_excess both come from the first start only. With history-eligibility rules the first start can be an artifact: on KX3's 2000-01 start only SPY, MDY and DIA were eligible. Fix: report boot_p from several early starts and from starts at or after 2002, and/or add require_menu_history, which starts windows only once the menu has the lookback.",
+  "P1 engine negative cash: the January tax settlement is taken from cash even when the portfolio is fully invested. Tax executions that cannot sell carry an interest-free loan: VIX timers -3% to -6% (about +0.5 to 1 pp/yr), VAA-lt minimum -10.6%, mean_reversion swap ladders below zero equity. The site engine is pinned by the golden suite, so add a lab option to sell enough to cover the tax or charge T-bill interest on negative cash, and flag configs with avg_cash below -0.5%.",
+  "P1 metrics.summary: bench_max_dd and bench_sharpe come from the benchmark's run from the protocol's first start, not the record's. UPRO-era configs are compared with SPY's -55% from 2008 instead of -34% since 2009. Fix: use benchmark_monthly from the record's first start; it already exists for the bootstrap.",
+  "P1 synthetic leverage: SYN_*XC use a constant 0.6% swap spread, but verify_lev_mech measured spreads that rise with rates (UPRO 0.44% + 0.13 x T-bill; synthetic beats real by ~0.55 pp/yr when T-bills are above 2%). Fix: recalibrate as a + b x irx before relying on 1986-2008 synthetic evidence. SYN tickers also have no distribution records for realism.",
+  "P1 realism.py has four problems:\n- record(end) keeps trading to the data end, mixing horizons when end is before 2026-07.\n- adjusted() hard-codes SPY and has no VFINX benchmark.\n- character() treats every non-bond distribution as qualified, which is lenient for active funds' short-term capital-gain distributions and leveraged ETFs' ordinary income.\n- It bypasses core.cpu_slot.\nFix all four, then run realism on every start of every finalist.",
+  "P1 tax model (backtester/tax.py and the lab tax execution):\n- Losses, including long-term losses and carryforwards, are pooled against short-term gains first, which is more generous than IRS netting.\n- Lots are FIFO only.\n- Budgeted partial sales are sized on the average gain per share, so the budget overshoots by up to 1.32x. The site's TaxManagedCombo shares this.\nFix: lab options for IRS netting, HIFO / specific lots and exact FIFO budget sizing, with the change reported for each finalist.",
+  "P1 regimes: FED = 35/15 leaves out the 3.8% NIIT, which applies to any single filer in the 35% bracket, while CA's 48.1/28.1 includes it (35+3.8+9.3 / 15+3.8+9.3). Fix: FED = 38.8/18.8, or add a FED_NIIT regime, so the secondary regime matches the primary's construction.",
+  "P1 NONE regime keeps no tax lots, so tax executions (WS 'tax', TaxManagedCombo, TLH) silently become plain rotations. CA-vs-NONE comparisons then compare different rules, and duplicate NONE twins inflate n_trials. Fix: promote variants.py's ZERO regime (tax accounting with 0% rates) into core.REGIMES as the standard pre-tax diagnostic, and dedupe NONE twins.",
+  "P1 macro curve indicator: ^TNX - ^IRX uses the T-bill discount yield. It is biased up by 0.10-0.12 pp, misses the 1989 inversion and splits 2019 into 51 + 71 days. Fix: make verify_curve's curve_bey (bond-equivalent) the default.",
+  "P1 reporting before round 2:\n- results/taa_models.md and results/sector_deep.md were never written (the harness blocked .md writes; the content is in results_md).\n- verify_taxrot_mech.md and verify_taxrot_robust.md still contain unfilled placeholders (__VERDICT__, __VARIANTS__, __NONEOFF__, __LAGFED__, PLACEHOLDER_REM/NB/PRE/BAT/END). The robustness verification's star-removal, neighbourhood and pre-2000 sections are missing.\nWrite these before round 2.",
+  "P2 blocks.FixedWeights / common.mix silently renormalize to the funds already trading, and registry.min_start applies `requires` only to buyhold. Before a fund launches, the mix sits 100% in the other asset (trend_timing's long MIX control). Fix: require every mix ticker automatically, or warn.",
+  "P2 WeightStrategy(band=...) also blocks opening a new position whose target is below the band; global's band-0.5 configs never invested. tax_structures' band rule leaves sale proceeds idle. Fix: warn when target < band, or apply the band only to existing positions.",
+  "P2 family-code bugs to fix before reuse: mean_reversion DipLadder._settle_cash never sells the dip asset, so cash goes negative and synthetic swap ladders show a -103% drawdown; tax_structures' band variant leaves cash idle; sector_deep's sdh.label gives lag-0 and lag-1 configs the same label.",
+  "P2 site design flaw, faithfully reproduced by the lab: TaxManagedCombo buys in alphabetical order, capped by available cash. Stocks drift to 70-74% of value in A-C tickers; on ETF menus it costs about 0.1 of score against proportional buys. Fix on the site with proportional buys, which is also a free improvement to the incumbent preset.",
+  "P2 housekeeping:\n- sweep 'elapsed' includes slot waiting and SIGSTOP time.\n- core.run_starts walks the calendar from the earliest instrument (1985 when SYN_TBILL is in a 2000+ menu).\n- Cache keys include labels, tags and number formatting (cap 2 vs 2.0), causing duplicate runs.\n- Hashing the whole family file re-keys every config on any edit.\n- Pre-mid-1985 mutual-fund prints are stale month-end values.\n- Vanguard/Fidelity frequent-trading limits and loads are not modelled.\n- BROAD_POOL_2003 contains only survivors the lab downloaded; label results built on it as upper bounds."
+ ]
+}

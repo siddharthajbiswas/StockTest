@@ -1,0 +1,934 @@
+{
+ "family": "factor_style",
+ "module_path": "/Users/siddhartha/dev/StockTest/research/lab/families/factor_style.py",
+ "results_md": "/Users/siddhartha/dev/StockTest/research/lab/results/factor_style.md (full table of every run: /Users/siddhartha/dev/StockTest/research/lab/results/factor_style_table.csv, 2,840 rows, with a protocol column and the exact config JSON; all configs: /Users/siddhartha/dev/StockTest/research/lab/scratch/factor_style/grid.py)",
+ "n_configs_tested": 1661,
+ "headline": "No factor or style strategy beats SPY after California tax with good confidence. Among static tilts only growth won over 2000-2026, and only because of the 2007-2026 growth era. The late-launched growth funds (VUG, MGK, IWY, SCHG, ONEQ, SPMO) clear criteria 1-3 in CA, but IWF scored on exactly the same windows clears them too, so their pass comes from the launch window, not the fund. Style rotations lose to CA taxes. The one CA survivor is a value/growth 12-1 switch with 6% hysteresis and tax-managed execution (monthly): full-protocol CA score +1.16 pp, full +1.83 pp, boot_p 0.040. It is still not good confidence, because it is a tax-frozen growth-era bet: its quarterly siblings fail the bootstrap, its 1994-2026 index-fund twin fails, and on random pairs it works only where one leg is growth/tech. In NONE (diagnostic) the small-value/large-growth 6-1 switch clears criteria 1-3, but the family's out-of-sample selection there is negative and PBO is 0.57.",
+ "findings": [
+  "RESUMED WORK. The previous researcher's screens were reused from the cache unchanged: groups A, B, C, D, L complete; E, F2, C2 partial. The family module was not edited, so all cached results stay valid. This session ran G2, H2, I2, J2 and K2, added groups N1-N6 (CA execution variants, long-horizon momentum, style vs SPY, the neighbourhood of the CA standout), and ran the hindsight controls ROB1, HP and HP2-HP4 (random pairs), N2 (random ETFs) and HS (launch-window control), 40 full-protocol finalists (CA/FED/NONE), 53 long_screen and 9 long-protocol index-fund configs, and diagnostics.",
+  "SCALE. 1,661 distinct configs were run: 1,513 strategies and 148 hindsight controls. Records: screen CA 1,496 / NONE 1,156; full CA 40 / FED 13 / NONE 33; long_screen CA 53 / NONE 31; long CA 9 / NONE 9. grid.py defines a further 1,416 configs that were not run because of the battery throttle (mainly the unpruned F/G/H/I/J/K and long-history grids); they are listed in the md.",
+  "STATIC TILTS (CA, screen). Only growth tilts beat SPY clearly. Value (-0.4 to -3.7 pp score), dividend (-0.7 to -2.6), low-vol (-1.9, -3.0), quality and equal-weight lost. Small, mid, high-beta, buyback and FCF funds netted to about zero (-0.9 to +0.5, boot_p >= 0.15): mid and small caps won +2.8 to +4.8 pp in 5-year windows starting 2000-04 and +1.2 to +2.6 pp for 2005-09 starts, then lost 1.6-3.1 pp/yr in every window starting 2010-21.",
+  "GROWTH ERA. Every 2000-era large-cap growth fund lost 1.5-4.2 pp/yr in 5-year windows starting 2000-04 and won 1.1-4.1 pp/yr afterwards. On the full protocol in CA: IWF score +1.21, full -0.33, boot_p 0.53; IVW +0.91 / +0.11 / 0.42; VIGRX +0.93 / +0.15 / 0.45. All fail.",
+  "LATE-LAUNCH HINDSIGHT. VUG (+1.60, boot_p 0.096), MGK (+2.10, 0.032), IWY (+2.99, 0.030), ONEQ (+2.37, 0.055), SPMO (+2.79, 0.025), and on screen SCHG and MGC, clear criteria 1-3 in CA. IWF scored on the same windows clears them too: from VUG's 2004-04 start +1.84 (boot_p 0.082), from 2008 +2.03 (0.037), from 2010 +2.19 (0.073), from 2016 +2.58 (0.091). The pass comes from the launch window, not the fund.",
+  "LONG HISTORY (index funds vs VFINX). VIGRX beat VFINX +2.1 pp/yr in 1993-2000, lost -1.8 in 2000-10, won +0.9 in 2010-20 and +2.1 in 2020-26; over 1993-2026 CA score +0.65, boot_p 0.25, which fails. NAESX (small) lost 8.1 pp/yr in 1986-2000 and 2.4 pp/yr over 1986-2026. VIVAX (value) lost 2.6 pp/yr in 1993-2000. No static style has a confident 26-40-year edge.",
+  "ROTATION IN CA. Of about 1,500 rotation configs, only one tax-execution family passes criteria 1-3. Group medians: pair momentum -1.3, menu momentum -2.1, factor momentum -3.0 (all negative), mean reversion -0.8, seasonal size -2.5, site-expressible TaxManagedCombo over style menus -1.7. Standard execution destroys any pre-tax edge. Of the tax variants: long-term-gains-only is worse than the 1% budget in 11/14 rule/cadence pairs, a 5% budget is worse in 13/14, and a 50% SPY core passes nothing.",
+  "CA STANDOUT. N5_vgh|VG_R|lb252|sk21|M|h0.06|tax1 switches IWD/IWF on 12-1 momentum computed on VIVAX/VIGRX lagged 1 day, needs a 6 pp lead to switch, and executes tax-managed with a 1% budget. Full protocol: CA +1.16 / full +1.83 / 10y beat 88% / 15y beat 100% / boot_p 0.040; FED +1.26 / 0.041; NONE +1.23 / 0.117. Rebalance offsets of 7/14/21 days plus a 1-day lag score +0.86 to +1.22 with boot_p 0.022-0.149; 4 of 5 clear 1-3 in CA. Distribution-tax realism: +1.83 becomes +1.85.",
+  "WHY THE CA STANDOUT FAILS THE BAR. (a) Quarterly siblings fail boot_p on full: 0.199 (h0.06), 0.201 (h0.10), 0.233 (skip 0), 0.247 (tax0), 0.283 (S&P V/G); only SPYV/SPYG passes (0.014, from 2002). (b) Its 1994-2026 VIVAX/VIGRX twin fails in CA: +0.61, 10y beat 60%, boot_p 0.224. (c) Same rule on 24 random pairs: 1/24 pass (quarterly) and 2/24 (monthly), only pairs with a growth/tech leg (IUSG/SPYV, IJR/QQQ); medians -0.69 and -0.72. (d) Walk-forward picked it in 2019 and it lost 1.0 pp/yr out of sample. (e) Mechanism: it switches only when the position it sells is at a loss or within the budget, then the budget freezes it. From 2000-07 it held mostly value until the 2008 crash and has held only IWF since 2008-12, with 13 trades in 26 years. A 2013 start buys IWD and is still about 95% value in 2026 (-2.9 pp/yr). A 1995 index-fund start buys VIGRX and never trades. It is a growth-era regime bet, like the incumbent's frozen growth/tech book.",
+  "NONE (diagnostic). C_pairmom|SVLG|lb126|sk21|Q|std (IWN vs IWF, 6-1 momentum, quarterly) clears criteria 1-3 on full: +1.89, full +3.05, 10y beat 98%, boot_p 0.037. In CA it scores -0.14, in FED +0.44. It has no long proxy; on random pairs only one scores higher. The plain value/growth 12-1 switch is +1.55 in NONE on full but boot_p 0.323; on the long protocol +1.03, boot_p 0.20, with pre-2000 5-year windows +3.8 pp (100% beat). The monthly hysteresis twin clears 1-3 in NONE on the long protocol: +1.37, boot_p 0.059, ho5 +3.6 pp.",
+  "PRE-2000 HOLDOUT CONTRADICTS THE SIZE RULES. MDY/SPY- and IJR/SPY-style 3-month switches looked strong in the ETF era in NONE (ML +2.07, boot_p 0.005, but 10y beat 66%). Their index-fund twins lose before 2000 (ho5 -2.1 and -3.4 pp in NONE, -5.2 and -5.3 in CA) and over 1986-2026 in CA (-2.4 and -2.1 score).",
+  "SITE-EXPRESSIBLE. The best style-only TaxManagedCombo is L_site|SITE_STYLE8|lb252|top1|Q|tax_managed (8 site style ETFs, 12-1 momentum, top 1, quarterly): CA +0.22, full +1.20, 10y beat 48%, boot_p 0.21. It is worse than the incumbent's 22-ETF menu (+0.66 / +1.54 / 0.025).",
+  "DIAGNOSTICS. The family 'passes' walk-forward only through static growth funds: the yearly-step walk-forward picks QQQ every year from 2015 to 2021. Restricted to dynamic strategies (772 CA configs) it is -1.6 pp/yr (10y IS / 5y OOS, 0 of 12 decisions positive) and -0.6 pp/yr (5y/3y); PBO 0.34, DSR 0.008. In NONE the dynamic subset gives -1.2 / -0.4 pp/yr and PBO 0.57. On the long-history grid, CA walk-forward is -0.1 / -1.2 pp/yr with PBO 0.60, and NONE PBO is 0.81-0.86."
+ ],
+ "candidates": [
+  {
+   "label": "N5_vgh|VG_R|lb252|sk21|M|h0.06|tax1 (value/growth 12-1 switch, 6% hysteresis, monthly, tax-managed 1% budget)",
+   "cfg": {
+    "kind": "weights",
+    "signal": "factor_style.rotate",
+    "params": {
+     "menu": [
+      "IWD",
+      "IWF"
+     ],
+     "lookback": 252,
+     "skip": 21,
+     "top_n": 1,
+     "hyst": 0.06,
+     "proxies": {
+      "IWD": "VIVAX",
+      "IWF": "VIGRX"
+     }
+    },
+    "rebalance": "M",
+    "execution": "tax",
+    "gain_budget": 0.01,
+    "requires": [
+     "IWD",
+     "IWF"
+    ],
+    "tag": "N5_vgh|VG_R|lb252|sk21|M|h0.06|tax1"
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.0116,
+     "full_excess": 0.0183,
+     "ex5_mean": 0.0079,
+     "ex10_mean": 0.0106,
+     "ex10_beat": 0.8769,
+     "ex10_min": -0.0313,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.04,
+     "max_dd": -0.531,
+     "bench_max_dd": -0.5519,
+     "trades": 13,
+     "turnover": 0.0376
+    },
+    "FED": {
+     "score": 0.0126,
+     "full_excess": 0.0188,
+     "ex5_mean": 0.0089,
+     "ex10_mean": 0.0116,
+     "ex10_beat": 0.8769,
+     "ex10_min": -0.0336,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.041,
+     "max_dd": -0.531,
+     "bench_max_dd": -0.5519,
+     "trades": 13,
+     "turnover": 0.0376
+    },
+    "NONE": {
+     "score": 0.0123,
+     "full_excess": 0.013,
+     "ex5_mean": 0.0164,
+     "ex10_mean": 0.0107,
+     "ex10_beat": 0.7846,
+     "ex10_min": -0.01,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.117,
+     "max_dd": -0.5128,
+     "bench_max_dd": -0.5519,
+     "trades": 21,
+     "turnover": 0.334
+    }
+   },
+   "long_protocol": {
+    "twin": "LN6_vghm|VG_MF|lb252|sk21|M|h0.06|tax1 (same rule trading VIVAX/VIGRX vs VFINX, quarterly starts 1994-2023)",
+    "CA": {
+     "score": 0.0061,
+     "full_excess": 0.0079,
+     "ho5_mean": 0.0237,
+     "ho5_beat": 0.8,
+     "ho10_mean": null,
+     "ex10_beat": 0.6044,
+     "boot_p": 0.224
+    },
+    "NONE": {
+     "score": 0.0137,
+     "full_excess": 0.014,
+     "ho5_mean": 0.0364,
+     "ho5_beat": 1,
+     "ho10_mean": null,
+     "ex10_beat": 0.7912,
+     "boot_p": 0.059
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "high",
+   "robustness_notes": "Clears criteria 1-3 in CA and FED on the full protocol and is the family's best CA result; it fails the bar. Neighbourhood: on screen, 11 of 13 monthly neighbours (hysteresis 3-10%, skip 0, tax0/tax5, S&P 500 / S&P 900 / IUSV-IUSG pairs, growth-vs-SPY) and 11 of 25 quarterly ones clear 1-3. On full, the quarterly versions fail boot_p (0.20-0.28) except SPYV/SPYG (0.014, from 2002); the standard-execution twin scores 0.00; lookbacks 189 and 315 fail. Rebalance offsets of 7/14/21 days and a 1-day lag score +0.86 to +1.22, boot_p 0.022-0.149, 4 of 5 pass in CA; in NONE none passes (boot_p 0.11-0.57). Realism (annual distribution tax) +1.83 becomes +1.85. Hindsight: on 24 random pairs, 1/24 (quarterly) and 2/24 (monthly) pass, only pairs with a growth/tech leg. The long-history twin fails in CA (10y beat 60%, boot_p 0.22). Walk-forward picked it in 2019 and it lost 1.0 pp/yr out of sample. Mechanism: 1-5 switches, each at a loss or within the budget, then frozen in growth since 2008-12. Starts in value years stay frozen in value (2013 start -2.9 pp/yr). A regime bet on growth, like the incumbent."
+  },
+  {
+   "label": "A_static|VUG (Vanguard Growth ETF, buy and hold; launched 2004)",
+   "cfg": {
+    "kind": "buyhold",
+    "weights": {
+     "VUG": 1
+    },
+    "tag": "A_static|VUG"
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.016,
+     "full_excess": 0.014,
+     "ex5_mean": 0.015,
+     "ex10_mean": 0.0156,
+     "ex10_beat": 1,
+     "ex10_min": 0.003,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.096,
+     "max_dd": -0.5068,
+     "bench_max_dd": -0.5519,
+     "trades": 1,
+     "turnover": 0
+    },
+    "FED": {
+     "score": 0.0172,
+     "full_excess": 0.0143,
+     "ex5_mean": 0.0167,
+     "ex10_mean": 0.0167,
+     "ex10_beat": 1,
+     "ex10_min": 0.0032,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.106,
+     "max_dd": -0.5068,
+     "bench_max_dd": -0.5519,
+     "trades": 1,
+     "turnover": 0
+    },
+    "NONE": {
+     "score": 0.0185,
+     "full_excess": 0.0146,
+     "ex5_mean": 0.0186,
+     "ex10_mean": 0.0178,
+     "ex10_beat": 1,
+     "ex10_min": 0.0035,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.112,
+     "max_dd": -0.5068,
+     "bench_max_dd": -0.5519,
+     "trades": 1,
+     "turnover": 0
+    }
+   },
+   "long_protocol": {
+    "twin": "LA_static|VIGRX (VUG's own mutual-fund share class, from 1992; long protocol vs VFINX)",
+    "CA": {
+     "score": 0.0065,
+     "full_excess": 0.0064,
+     "ho5_mean": 0.0265,
+     "ho5_beat": 0.8889,
+     "ho10_mean": null,
+     "ex10_beat": 0.7263,
+     "boot_p": 0.246
+    },
+    "NONE": {
+     "score": 0.0077,
+     "full_excess": 0.0065,
+     "ho5_mean": 0.031,
+     "ho5_beat": 0.8889,
+     "ho10_mean": null,
+     "ex10_beat": 0.7263,
+     "boot_p": 0.263
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "high",
+   "robustness_notes": "Clears criteria 1-3 in CA only (FED boot_p 0.106, NONE 0.112), and only because it launched in 2004, after the 2000-02 growth crash. IWF scored on exactly VUG's windows (min_start 2004-04-01) also passes: +1.84, full +1.41, boot_p 0.082. The same fund's 1992-2026 history (VIGRX) gives CA +0.65, boot_p 0.25 (fail): it lost 1.8 pp/yr in 2000-10 after winning 2.1 pp/yr in 1993-2000. 2000-era growth funds fail (IWF boot_p 0.53, IVW 0.42). Realism: +1.40 becomes +1.52 from 2004 (growth pays smaller dividends than SPY). A growth-era bet."
+  },
+  {
+   "label": "A_static|IWF (Russell 1000 Growth, buy and hold; site ticker, launched 2000-05)",
+   "cfg": {
+    "kind": "buyhold",
+    "weights": {
+     "IWF": 1
+    },
+    "tag": "A_static|IWF"
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.0121,
+     "full_excess": -0.0033,
+     "ex5_mean": 0.0098,
+     "ex10_mean": 0.0131,
+     "ex10_beat": 0.8923,
+     "ex10_min": -0.0355,
+     "ex15_beat": 0.8889,
+     "ex20_beat": 0.92,
+     "boot_p": 0.532,
+     "max_dd": -0.6418,
+     "bench_max_dd": -0.5519,
+     "trades": 1,
+     "turnover": 0
+    },
+    "FED": {
+     "score": 0.013,
+     "full_excess": -0.0035,
+     "ex5_mean": 0.0111,
+     "ex10_mean": 0.014,
+     "ex10_beat": 0.8923,
+     "ex10_min": -0.0355,
+     "ex15_beat": 0.8889,
+     "ex20_beat": 0.92,
+     "boot_p": 0.538,
+     "max_dd": -0.6418,
+     "bench_max_dd": -0.5519,
+     "trades": 1,
+     "turnover": 0
+    },
+    "NONE": {
+     "score": 0.014,
+     "full_excess": -0.0035,
+     "ex5_mean": 0.0125,
+     "ex10_mean": 0.015,
+     "ex10_beat": 0.8923,
+     "ex10_min": -0.0355,
+     "ex15_beat": 0.8889,
+     "ex20_beat": 0.92,
+     "boot_p": 0.551,
+     "max_dd": -0.6418,
+     "bench_max_dd": -0.5519,
+     "trades": 1,
+     "turnover": 0
+    }
+   },
+   "long_protocol": {
+    "twin": "LA_static|VIGRX (growth index fund proxy, different index family)",
+    "CA": {
+     "score": 0.0065,
+     "full_excess": 0.0064,
+     "ho5_mean": 0.0265,
+     "ho5_beat": 0.8889,
+     "ho10_mean": null
+    },
+    "NONE": {
+     "score": 0.0077,
+     "full_excess": 0.0065,
+     "ho5_mean": 0.031,
+     "ho5_beat": 0.8889,
+     "ho10_mean": null
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "high",
+   "robustness_notes": "The honest 2000-era growth tilt. Positive score from the post-2005 windows, but full-period excess from its 2000-07 launch is negative (-0.33 pp) and boot_p 0.53. 5-year windows starting 2000-04 average -2.0 pp/yr; later starts +1.3 to +2.0. Sub-periods (CA): 2000-10 -3.66, 2010-20 +1.42, 2020-26 +2.01. Max drawdown -64% vs SPY -55%. Fails criteria 1 and 3."
+  },
+  {
+   "label": "A_static|IVW (S&P 500 Growth, buy and hold)",
+   "cfg": {
+    "kind": "buyhold",
+    "weights": {
+     "IVW": 1
+    },
+    "tag": "A_static|IVW"
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.0091,
+     "full_excess": 0.0011,
+     "ex5_mean": 0.0068,
+     "ex10_mean": 0.0101,
+     "ex10_beat": 0.8615,
+     "ex10_min": -0.0231,
+     "ex15_beat": 0.9333,
+     "ex20_beat": 0.96,
+     "boot_p": 0.423,
+     "max_dd": -0.5733,
+     "bench_max_dd": -0.5519,
+     "trades": 1,
+     "turnover": 0
+    },
+    "FED": {
+     "score": 0.0099,
+     "full_excess": 0.0011,
+     "ex5_mean": 0.0077,
+     "ex10_mean": 0.0109,
+     "ex10_beat": 0.8615,
+     "ex10_min": -0.0231,
+     "ex15_beat": 0.9333,
+     "ex20_beat": 0.96,
+     "boot_p": 0.427,
+     "max_dd": -0.5733,
+     "bench_max_dd": -0.5519,
+     "trades": 1,
+     "turnover": 0
+    },
+    "NONE": {
+     "score": 0.0106,
+     "full_excess": 0.0012,
+     "ex5_mean": 0.0087,
+     "ex10_mean": 0.0116,
+     "ex10_beat": 0.8615,
+     "ex10_min": -0.0231,
+     "ex15_beat": 0.9333,
+     "ex20_beat": 0.96,
+     "boot_p": 0.422,
+     "max_dd": -0.5733,
+     "bench_max_dd": -0.5519,
+     "trades": 1,
+     "turnover": 0
+    }
+   },
+   "long_protocol": {
+    "twin": "LA_static|VIGRX (tracked S&P 500/Barra Growth until 2003, i.e. IVW's index family before 2000)",
+    "CA": {
+     "score": 0.0065,
+     "full_excess": 0.0064,
+     "ho5_mean": 0.0265,
+     "ho5_beat": 0.8889,
+     "ho10_mean": null
+    },
+    "NONE": {
+     "score": 0.0077,
+     "full_excess": 0.0065,
+     "ho5_mean": 0.031,
+     "ho5_beat": 0.8889,
+     "ho10_mean": null
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "medium",
+   "robustness_notes": "The closest 2000-era growth fund to passing (screen boot_p 0.124; full boot_p 0.42). Its excess flips sign by decade: 2000-10 -2.30, 2010-20 +1.02, 2020-26 +2.25 pp/yr. Realism +0.11 becomes +0.19 from 2000-07. Not a confident edge."
+  },
+  {
+   "label": "C_pairmom|SVLG|lb63|sk0|M|tax1 (small value IWN vs large growth IWF, 3-month momentum, monthly, tax-managed)",
+   "cfg": {
+    "kind": "weights",
+    "signal": "factor_style.rotate",
+    "params": {
+     "menu": [
+      "IWN",
+      "IWF"
+     ],
+     "lookback": 63,
+     "skip": 0,
+     "top_n": 1
+    },
+    "rebalance": "M",
+    "execution": "tax",
+    "gain_budget": 0.01,
+    "requires": [
+     "IWN",
+     "IWF"
+    ],
+    "require_days": 111,
+    "tag": "C_pairmom|SVLG|lb63|sk0|M|tax1"
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.0055,
+     "full_excess": 0.0282,
+     "ex5_mean": 0.0019,
+     "ex10_mean": 0.0037,
+     "ex10_beat": 0.6667,
+     "ex10_min": -0.0369,
+     "ex15_beat": 0.9302,
+     "ex20_beat": 1,
+     "boot_p": 0.013,
+     "max_dd": -0.5179,
+     "bench_max_dd": -0.5519,
+     "trades": 67,
+     "turnover": 0.0394
+    },
+    "FED": {
+     "score": 0.0062,
+     "full_excess": 0.0294,
+     "ex5_mean": 0.0026,
+     "ex10_mean": 0.0043,
+     "ex10_beat": 0.6667,
+     "ex10_min": -0.0394,
+     "ex15_beat": 0.9302,
+     "ex20_beat": 1,
+     "boot_p": 0.006,
+     "max_dd": -0.5173,
+     "bench_max_dd": -0.5519,
+     "trades": 65,
+     "turnover": 0.0391
+    },
+    "NONE": {
+     "score": 0.0129,
+     "full_excess": 0.0168,
+     "ex5_mean": 0.0135,
+     "ex10_mean": 0.0132,
+     "ex10_beat": 0.7937,
+     "ex10_min": -0.0158,
+     "ex15_beat": 0.907,
+     "ex20_beat": 0.8696,
+     "boot_p": 0.196,
+     "max_dd": -0.5521,
+     "bench_max_dd": -0.5519,
+     "trades": 163,
+     "turnover": 3.0333
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "medium",
+   "robustness_notes": "The best plain pair-momentum result in CA. Large full-period excess (+2.82 pp) with low boot_p (0.013), but the score is only +0.55 and the 10y beat rate 67% (fails criterion 2). Most of the excess comes from 2001-04 starts (small-value boom): 5y windows by start era are +1.82 (2000-04), -0.57 (2005-09), -0.21 (2010-15), +0.14 (2016-23) pp/yr. There is no long-history proxy for small value."
+  },
+  {
+   "label": "L_site|SITE_STYLE8|lb252|top1|Q|tax_managed (website-expressible: TaxManagedCombo, momentum 12-1, top 1, quarterly, 8 site style ETFs)",
+   "cfg": {
+    "kind": "combo",
+    "picker": "momentum",
+    "picker_params": {
+     "lookback": 252,
+     "skip": 21
+    },
+    "timer": "buy_hold",
+    "timer_params": {},
+    "top_n": 1,
+    "rebalance": "Q",
+    "menu": [
+     "SPY",
+     "DIA",
+     "MDY",
+     "IWM",
+     "IJR",
+     "IWD",
+     "IWF",
+     "RSP"
+    ],
+    "trade_rule": "tax_managed",
+    "gain_budget": 0.01,
+    "wash_days": 31,
+    "tag": "L_site|SITE_STYLE8|lb252|top1|Q|tax_managed"
+   },
+   "regime_target": "CA",
+   "stats": {
+    "CA": {
+     "score": 0.0022,
+     "full_excess": 0.012,
+     "ex5_mean": 0.0025,
+     "ex10_mean": 0.0037,
+     "ex10_beat": 0.4776,
+     "ex10_min": -0.0277,
+     "ex15_beat": 0.4468,
+     "ex20_beat": 0.5185,
+     "boot_p": 0.21,
+     "max_dd": -0.5561,
+     "bench_max_dd": -0.5519,
+     "trades": 128,
+     "turnover": 0.0752
+    },
+    "FED": {
+     "score": 0.0029,
+     "full_excess": 0.0131,
+     "ex5_mean": 0.0034,
+     "ex10_mean": 0.0043,
+     "ex10_beat": 0.4925,
+     "ex10_min": -0.0311,
+     "ex15_beat": 0.4681,
+     "ex20_beat": 0.5185,
+     "boot_p": 0.198,
+     "max_dd": -0.5561,
+     "bench_max_dd": -0.5519,
+     "trades": 128,
+     "turnover": 0.0759
+    },
+    "NONE": {
+     "score": -0.0182,
+     "full_excess": -0.0002,
+     "ex5_mean": -0.0146,
+     "ex10_mean": -0.0194,
+     "ex10_beat": 0.1194,
+     "ex10_min": -0.0434,
+     "ex15_beat": 0.0638,
+     "ex20_beat": 0.1852,
+     "boot_p": 0.51,
+     "max_dd": -0.6327,
+     "bench_max_dd": -0.5519,
+     "trades": 105,
+     "turnover": 1.6265
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "low",
+   "robustness_notes": "The best style-only version of the site's own TaxManagedCombo; directly reproducible on the website. Its edge is all from 2000-04 starts (+3.70 pp/yr 5y mean) and negative afterwards: 2010-20 sub-period -1.27 pp. 10y beat 48%. Clearly worse than the incumbent's 22-ETF menu (+0.66 / +1.54 / boot_p 0.025). A style-only menu does not improve the preset."
+  },
+  {
+   "label": "C_pairmom|SVLG|lb126|sk21|Q|std (small value IWN vs large growth IWF, 6-1 momentum, quarterly, standard execution)",
+   "cfg": {
+    "kind": "weights",
+    "signal": "factor_style.rotate",
+    "params": {
+     "menu": [
+      "IWN",
+      "IWF"
+     ],
+     "lookback": 126,
+     "skip": 21,
+     "top_n": 1
+    },
+    "rebalance": "Q",
+    "execution": "standard",
+    "requires": [
+     "IWN",
+     "IWF"
+    ],
+    "require_days": 232,
+    "tag": "C_pairmom|SVLG|lb126|sk21|Q|std"
+   },
+   "regime_target": "NONE",
+   "stats": {
+    "CA": {
+     "score": -0.0014,
+     "full_excess": 0.0033,
+     "ex5_mean": -0.0003,
+     "ex10_mean": -0.0007,
+     "ex10_beat": 0.3548,
+     "ex10_min": -0.0261,
+     "ex15_beat": 0.4762,
+     "ex20_beat": 0.2727,
+     "boot_p": 0.463,
+     "max_dd": -0.5856,
+     "bench_max_dd": -0.5519,
+     "trades": 78,
+     "turnover": 1.1331
+    },
+    "FED": {
+     "score": 0.0044,
+     "full_excess": 0.0128,
+     "ex5_mean": 0.0046,
+     "ex10_mean": 0.0049,
+     "ex10_beat": 0.5968,
+     "ex10_min": -0.0182,
+     "ex15_beat": 0.6667,
+     "ex20_beat": 0.5455,
+     "boot_p": 0.207,
+     "max_dd": -0.5726,
+     "bench_max_dd": -0.5519,
+     "trades": 79,
+     "turnover": 1.1196
+    },
+    "NONE": {
+     "score": 0.0189,
+     "full_excess": 0.0305,
+     "ex5_mean": 0.0191,
+     "ex10_mean": 0.0189,
+     "ex10_beat": 0.9839,
+     "ex10_min": -0.0025,
+     "ex15_beat": 0.9524,
+     "ex20_beat": 1,
+     "boot_p": 0.037,
+     "max_dd": -0.5684,
+     "bench_max_dd": -0.5519,
+     "trades": 64,
+     "turnover": 1.101
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "medium",
+   "robustness_notes": "Clears criteria 1-3 in NONE (tax-deferred, diagnostic only) on the full protocol. Fails criterion 4: the family's dynamic walk-forward in NONE is negative (-1.2 pp/yr 10y/5y) and PBO is 0.57. Criterion 7 cannot be checked (no small-value proxy before 2000). On screen in NONE, neighbours lb126 sk21 M (+1.69) and Q also pass; lb126 sk0 (+1.34) and lb63 (+1.51 M) are positive. On 24 random pairs (HP4) the same rule passes once (IJR/QQQ; median -1.59); one pair scores above it. Era: 5y windows +6.4 pp (2000-04 starts), +0.0 (2005-09), +3.0 (2010-15), -0.5 (2016-23). In CA it is negative (-0.14), so it is useless for the user's taxable account."
+  },
+  {
+   "label": "C_pairmom|VG_R|lb252|sk21|Q|std (value/growth 12-1 momentum IWD vs IWF, quarterly, standard execution)",
+   "cfg": {
+    "kind": "weights",
+    "signal": "factor_style.rotate",
+    "params": {
+     "menu": [
+      "IWD",
+      "IWF"
+     ],
+     "lookback": 252,
+     "skip": 21,
+     "top_n": 1,
+     "proxies": {
+      "IWD": "VIVAX",
+      "IWF": "VIGRX"
+     }
+    },
+    "rebalance": "Q",
+    "execution": "standard",
+    "requires": [
+     "IWD",
+     "IWF"
+    ],
+    "tag": "C_pairmom|VG_R|lb252|sk21|Q|std"
+   },
+   "regime_target": "NONE",
+   "stats": {
+    "CA": {
+     "score": 0.003,
+     "full_excess": -0.0062,
+     "ex5_mean": 0.0037,
+     "ex10_mean": 0.0036,
+     "ex10_beat": 0.7231,
+     "ex10_min": -0.0131,
+     "ex15_beat": 0.6889,
+     "ex20_beat": 0.64,
+     "boot_p": 0.673,
+     "max_dd": -0.5624,
+     "bench_max_dd": -0.5519,
+     "trades": 59,
+     "turnover": 0.9226
+    },
+    "FED": {
+     "score": 0.0074,
+     "full_excess": -0.0018,
+     "ex5_mean": 0.0074,
+     "ex10_mean": 0.0078,
+     "ex10_beat": 0.9077,
+     "ex10_min": -0.0071,
+     "ex15_beat": 0.9111,
+     "ex20_beat": 0.96,
+     "boot_p": 0.533,
+     "max_dd": -0.5624,
+     "bench_max_dd": -0.5519,
+     "trades": 58,
+     "turnover": 0.925
+    },
+    "NONE": {
+     "score": 0.0155,
+     "full_excess": 0.005,
+     "ex5_mean": 0.0156,
+     "ex10_mean": 0.0156,
+     "ex10_beat": 0.9846,
+     "ex10_min": -0.0028,
+     "ex15_beat": 1,
+     "ex20_beat": 1,
+     "boot_p": 0.323,
+     "max_dd": -0.5624,
+     "bench_max_dd": -0.5519,
+     "trades": 45,
+     "turnover": 0.9274
+    }
+   },
+   "long_protocol": {
+    "twin": "LC_pairmom|VG_MF|lb252|sk21|Q|std (VIVAX vs VIGRX, vs VFINX, 1994-2023 quarterly starts)",
+    "CA": {
+     "score": 0.0019,
+     "full_excess": -0.0084,
+     "ho5_mean": 0.0313,
+     "ho5_beat": 1,
+     "ho10_mean": null,
+     "boot_p": 0.781
+    },
+    "NONE": {
+     "score": 0.0103,
+     "full_excess": 0.0079,
+     "ho5_mean": 0.0378,
+     "ho5_beat": 1,
+     "ho10_mean": null,
+     "boot_p": 0.201
+    }
+   },
+   "passes_confidence_bar": false,
+   "uses_leverage_or_synthetic": false,
+   "hindsight_risk": "medium",
+   "robustness_notes": "The classic value/growth momentum switch and the family's most persistent pre-tax idea. NONE: 10y beat 98%, 15y beat 100% on full, but boot_p 0.323 (full-period excess from the 2000-07 start only +0.50 pp; it was +1.51 from 2001-01 on screen). Screen lookback/skip neighbours pass in NONE (lb252 sk42 +1.99, sk10 +1.88, lb273 +1.76); other large-cap V/G index families are positive (SPYV/SPYG +0.51, IUSV/IUSG +0.47, RPV/RPG +0.93, VTV/VUG +1.36) but none passes; mid and small V/G pairs are negative. Random pairs (HP, NONE): 0/24 pass, median -2.11, and VG_R would rank 2nd of 25. Pre-2000 holdout positive (ho5 +3.8 pp, 100%). In CA the taxes erase it (+0.30, boot_p 0.67)."
+  }
+ ],
+ "diagnostics": {
+  "note": "report.diagnostics on the screened grid (screen protocol, controls excluded; NONE excludes tax-execution twins that are identical to their standard twins without tax). Lab-default walk-forward on the yearly screen protocol has only 3 (10y/5y) or 4 (5y/3y) decisions; the *_yearly_step entries rerun metrics.walk_forward with step_quarters=1. Subsets: all = every strategy config; full_history = first start <= 2002-01-01; dynamic_full_history = full_history without buy-and-hold or static mixes.",
+  "CA": {
+   "all": {
+    "n_configs": 1424,
+    "walk_forward_10_5": {
+     "oos_mean": 0.0423,
+     "oos_beat": 1,
+     "is_mean": 0.0381,
+     "avg_config_oos_mean": -0.0125,
+     "mean_oos_rank_pct": 0.9874
+    },
+    "walk_forward_5_3": {
+     "oos_mean": 0.0196,
+     "oos_beat": 1,
+     "is_mean": 0.0455,
+     "avg_config_oos_mean": -0.0118
+    },
+    "walk_forward_10_5_yearly_step": {
+     "oos_mean": 0.0229,
+     "oos_beat": 0.6667,
+     "avg_config_oos_mean": -0.0182
+    },
+    "walk_forward_5_3_yearly_step": {
+     "oos_mean": 0.0034,
+     "oos_beat": 0.5789,
+     "avg_config_oos_mean": -0.018
+    },
+    "pbo": {
+     "pbo": 0.2664,
+     "is_best_mean": 0.0731,
+     "oos_of_is_best_mean": -0.0116,
+     "oos_of_is_best_p_pos": 0.486
+    },
+    "dsr_best": {
+     "dsr": 0.0018,
+     "psr": 0.9742,
+     "sr_annual": 0.6061
+    },
+    "best_by_monthly_mean": "A_static|SPMO",
+    "walk_forward_choices_10_5_yearly": "C_pairmom ML (2010), SVSG (2011), static IWS (2012), NAESX (2013), SIZE3 menu (2014), then QQQ every year 2015-2021"
+   },
+   "full_history": {
+    "n_configs": 898,
+    "walk_forward_10_5": {
+     "oos_mean": 0.0423,
+     "oos_beat": 1
+    },
+    "walk_forward_5_3": {
+     "oos_mean": 0.0196,
+     "oos_beat": 1
+    },
+    "walk_forward_10_5_yearly_step": {
+     "oos_mean": 0.0229,
+     "oos_beat": 0.6667
+    },
+    "walk_forward_5_3_yearly_step": {
+     "oos_mean": 0.0181,
+     "oos_beat": 0.7368
+    },
+    "pbo": {
+     "pbo": 0.183,
+     "oos_of_is_best_mean": 0.01
+    },
+    "dsr_best": {
+     "dsr": 0.0211
+    },
+    "best_by_monthly_mean": "A_static|QQQ"
+   },
+   "dynamic_full_history": {
+    "n_configs": 772,
+    "walk_forward_10_5": {
+     "oos_mean": -0.0213,
+     "oos_beat": 0,
+     "is_mean": 0.0231,
+     "avg_config_oos_mean": -0.0115
+    },
+    "walk_forward_5_3": {
+     "oos_mean": 0.0056,
+     "oos_beat": 0.5
+    },
+    "walk_forward_10_5_yearly_step": {
+     "oos_mean": -0.0163,
+     "oos_beat": 0,
+     "is_mean": 0.0311,
+     "avg_config_oos_mean": -0.0173
+    },
+    "walk_forward_5_3_yearly_step": {
+     "oos_mean": -0.0056,
+     "oos_beat": 0.3158
+    },
+    "pbo": {
+     "pbo": 0.339,
+     "oos_of_is_best_mean": -0.0048
+    },
+    "dsr_best": {
+     "dsr": 0.0081
+    },
+    "best_by_monthly_mean": "C_pairmom|SVLG|lb126|sk21|Q|tax1",
+    "note": "walk-forward picked the CA standout in 2019 (OOS -1.02 pp/yr) and its growth-vs-SPY sibling in 2021 (OOS -1.85 pp/yr)"
+   },
+   "long_screen_grid_all": {
+    "n_configs": 53,
+    "walk_forward_10_5_yearly_step": {
+     "oos_mean": -0.0009,
+     "oos_beat": 0.5385
+    },
+    "walk_forward_5_3_yearly_step": {
+     "oos_mean": -0.0124,
+     "oos_beat": 0.2424
+    },
+    "pbo": 0.5956,
+    "dsr_best": 0.0947,
+    "best_by_monthly_mean": "LC_pairmom|VG_MF|lb252|sk21|Q|tax1"
+   }
+  },
+  "NONE": {
+   "all": {
+    "n_configs": 815,
+    "walk_forward_10_5": {
+     "oos_mean": 0.051,
+     "oos_beat": 1,
+     "is_mean": 0.0477,
+     "avg_config_oos_mean": -0.0032
+    },
+    "walk_forward_5_3": {
+     "oos_mean": 0.0112,
+     "oos_beat": 0.75
+    },
+    "walk_forward_10_5_yearly_step": {
+     "oos_mean": 0.0269,
+     "oos_beat": 0.75,
+     "avg_config_oos_mean": -0.0122
+    },
+    "walk_forward_5_3_yearly_step": {
+     "oos_mean": 0.0063,
+     "oos_beat": 0.5789
+    },
+    "pbo": {
+     "pbo": 0.401,
+     "oos_of_is_best_mean": -0.0154
+    },
+    "dsr_best": {
+     "dsr": 0.3356,
+     "psr": 0.987
+    },
+    "best_by_monthly_mean": "A_static|QQQ"
+   },
+   "full_history": {
+    "n_configs": 502,
+    "walk_forward_10_5_yearly_step": {
+     "oos_mean": 0.0269,
+     "oos_beat": 0.75
+    },
+    "walk_forward_5_3_yearly_step": {
+     "oos_mean": 0.0132,
+     "oos_beat": 0.6842
+    },
+    "pbo": {
+     "pbo": 0.4048
+    },
+    "dsr_best": {
+     "dsr": 0.3755
+    },
+    "best_by_monthly_mean": "A_static|QQQ"
+   },
+   "dynamic_full_history": {
+    "n_configs": 400,
+    "walk_forward_10_5": {
+     "oos_mean": -0.0158,
+     "oos_beat": 0.3333
+    },
+    "walk_forward_5_3": {
+     "oos_mean": -0.0087,
+     "oos_beat": 0.25
+    },
+    "walk_forward_10_5_yearly_step": {
+     "oos_mean": -0.0118,
+     "oos_beat": 0.3333,
+     "avg_config_oos_mean": -0.0099
+    },
+    "walk_forward_5_3_yearly_step": {
+     "oos_mean": -0.0043,
+     "oos_beat": 0.5263
+    },
+    "pbo": {
+     "pbo": 0.5652,
+     "oos_of_is_best_mean": -0.0084
+    },
+    "dsr_best": {
+     "dsr": 0.2602
+    },
+    "best_by_monthly_mean": "C_pairmom|SVLG|lb126|sk21|Q|std"
+   },
+   "long_screen_grid_all": {
+    "n_configs": 31,
+    "walk_forward_10_5_yearly_step": {
+     "oos_mean": 0.0118,
+     "oos_beat": 0.7308
+    },
+    "walk_forward_5_3_yearly_step": {
+     "oos_mean": -0.0123,
+     "oos_beat": 0.4242
+    },
+    "pbo": 0.8618,
+    "dsr_best": 0.5418,
+    "best_by_monthly_mean": "LN6_vghm|VG_MF|lb252|sk21|M|h0.06|std"
+   }
+  }
+ },
+ "hindsight_checks": "PROTOCOL 5.3 checks, all run with the user's engine.\n(1) Launch-window control (HS): IWF scored only on each late fund's windows clears criteria 1-3 in CA every time. VUG window +1.84 / boot_p 0.082 (VUG +1.60 / 0.096); MGK window +2.03 / 0.037; IWY +2.19 / 0.073; SPMO +2.58 / 0.091. IWF from its own 2000-07 launch fails (+1.21, full -0.33, boot_p 0.53). The late-launch passes are the window.\n(2) Random single ETFs from BROAD_EQUITY_POOL_2003, bought and held (N2, CA, 24 draws): 0/24 pass; median score -0.36; best draws SOXX, QQQ, IWF, IVW.\n(3) The CA standout rule on 24 random pairs from the 2003 equity pool (HP2 quarterly, HP3 monthly, CA): 1/24 and 2/24 pass, only pairs with a growth/tech leg (IUSG/SPYV, IJR/QQQ); medians -0.69 and -0.72 pp. Removing the star (growth replaced by SPY, IWD vs SPY) gives -0.11 (screen CA); mid-cap V/G (IWS/IWP) gives -0.53.\n(4) Plain rules on the same 24 random pairs (HP, NONE): value/growth 12-1 rule 0/24 pass, median -2.11 (VG_R +1.76 would rank 2nd of 25); 3-month size rule 0/24, median -0.58 (MDY/SPY +2.28 would rank 2nd). SVLG 6-1 rule (HP4, NONE): 1/24 pass (IJR/QQQ), median -1.59.\n(5) Other index families (ROB1, NONE): large-cap V/G pairs are positive but none passes (SPYV/SPYG +0.51, IUSV/IUSG +0.47, RPV/RPG +0.93, VTV/VUG +1.36); mid and small V/G pairs are negative (IWS/IWP -0.37, IJS/IJT -1.27, IWN/IWO -2.09). Size: mid vs large positive with 10y beat 63-69% (IJH/IVV +1.98, MDY/IVV +1.94); IJR/MDY -1.68.\n(6) Pre-2000 holdout (long_screen, plus long for 9 twins). It contradicts the ETF-era size switches: ML_MF ho5 -2.1 pp (NONE) and -5.2 (CA); SL_MF -3.4 and -5.3. It supports value/growth momentum in NONE (ho5 +3.8 pp, 100%) but not in CA, where the twins fail (VG_MF std +0.19, boot_p 0.78; hysteresis twin +0.61, boot_p 0.22). Growth (VIGRX) won in 1993-2000 (+2.1 pp/yr), lost in 2000-10 (-1.8), and won after 2010; small (NAESX) lost 8.1 pp/yr in 1986-2000.\nHindsight flags: every CA pass in this family is long large-cap growth after 2008 (late-launch growth funds, mega-cap MGC, momentum SPMO, or a value/growth switch frozen in growth since 2008-09). The FACTOR-ETF menu (QUAL/USMV/MTUM/VLUE/SIZE, from 2015) passes only in NONE and only over 2015-2026.",
+ "concerns": [
+  "Every CA pass depends on the 2007-2026 growth regime continuing. The family offers nothing that diversifies the incumbent's frozen growth/tech exposure.",
+  "The CA standout's statistics come from 1-5 tax-driven switches per start date, so the effective sample is tiny. Its bootstrap p (0.040) treats 26 years of monthly excess as informative, but the outcome is essentially one decision: be in value until 2008, then in growth.",
+  "Tax-managed execution makes a rotation behave like a static tilt fixed by the start date. Starts in value years stay frozen in value: 2013 start -2.9 pp/yr, 2014 -2.6. A user starting today inherits whatever style currently leads.",
+  "The ETF-era value/growth signals use VIVAX/VIGRX (S&P/Barra, then MSCI, then CRSP) as proxies for Russell 1000 IWD/IWF. Signals use 1-day-lagged proxy closes, and the 1-day execution-lag test matches (+1.22), but index-family differences change paths: the long twin's 2010-20 window differs from the ETF version.",
+  "The full protocol's first start for IWD/IWF configs is 2000-07-01 versus 2001-01-01 on screen, and that changes conclusions (VG_R std NONE full excess +1.51 on screen vs +0.50 on full; the quarterly hysteresis boot_p moves from 0.017 to 0.199). Screen-only passes are fragile.",
+  "1,416 planned configs were not run because of the battery throttle: unpruned mean-reversion, ratio-trend, low-vol, composite, season and macro grids, factor-momentum tax variants, the full long-history grid, and lt5 execution. The pruned representatives were all negative or far from passing, but coverage is incomplete.",
+  "NONE results for mutual-fund timing (NAESX/VFINX season, long-history pairs) ignore Vanguard's frequent-trading restrictions.",
+  "The engine taxes distributions as deferred gains. That slightly understates growth tilts versus SPY in CA (realism: VUG +1.40 becomes +1.52) and flatters dividend/value tilts, which lose anyway."
+ ],
+ "untested_ideas": [
+  "An ensemble of independent style timers held side by side (e.g. value/growth + size + small-value/large-growth), drafted as additions_draft.py. Not added because editing factor_style.py would invalidate about 2,250 cached records; it could be evaluated as separate sub-accounts.",
+  "Value/growth hysteresis switch with an explicit periodic 'unfreeze' rule, e.g. realize long-term gains up to a budget only when the hysteresis gap exceeds a larger threshold, to test whether the CA edge survives without tax freezing.",
+  "Factor ETFs with pre-2013 history via proxies (e.g. MTUM/QUAL/USMV index back-tests are not in the data). The FACTOR menu is only testable from 2015.",
+  "Industry-neutral or sector-neutral value/growth (the V/G result is dominated by tech weight); would need sector-level style data.",
+  "Tax-loss harvesting overlays on a static growth tilt (IWF to VUG or SCHG substitutes): likely small deferral value; belongs to the tax_rotation family.",
+  "Running the full verify.battery (costs 0/15/35 bps, sub-periods, deflated Sharpe) on the CA standout. Offsets, lag, realism and sub-periods were run; cost sensitivity was not (13 trades in 26 years, so costs are immaterial)."
+ ],
+ "lab_bugs": [
+  "metrics.walk_forward steps step_quarters protocol *starts*, not quarters. On the yearly 'screen' and 'long_screen' protocols the default of 4 gives one decision every 4 years: only 3 decisions for 10y/5y on screen (T = 2012, 2016, 2020; 2010 is skipped by alignment). report.diagnostics inherits this, so its walk-forward on screened grids is very coarse. Suggest step_quarters=1 for yearly protocols, or stepping by date.",
+  "realism.record (used by realism.adjusted and verify.battery) runs backtests without core.cpu_slot, bypassing the machine-wide slot limit and the battery throttle. This session wrapped its own calls in a slot.",
+  "sweep.run_one starts its 'elapsed' timer before acquiring the CPU slot, so cached 'elapsed' measures queueing plus compute, which misleads compute budgeting.",
+  "Not a bug, but costly: tax-execution configs are behaviourally identical to their standard twins in NONE (no tax lots) but have different cache keys. Running both regimes duplicates work and inflates NONE config counts in report.diagnostics (PBO/DSR n_trials). A guard or documentation note in sweep/report would help."
+ ]
+}

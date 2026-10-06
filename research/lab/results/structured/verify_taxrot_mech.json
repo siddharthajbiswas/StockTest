@@ -1,0 +1,417 @@
+{
+ "key": "taxrot_mech",
+ "results_md": "/Users/siddhartha/dev/StockTest/research/lab/results/verify_taxrot_mech.md\n\nVerdict: KX3 fails, KX1 fails. The mechanics are clean; the headline numbers are not robust.\n\n1. Code and trade-log audit (tax_rotation.ws / tax_rotation.rank): no bug that inflates the result.\n- keep-in-top-2N, no-trim, worst-ranked-first gain spending and LT-only all match the label when re-derived independently from instrumented runs (2000-01, 2007-07 and 2015-04 starts).\n- Trades go only through ctx.order. Proportional buys never exceed cash, and the engine capped no buy.\n- Predicted gains equal engine-booked gains (to 1e-12).\n- No wash sale is possible at an S/Q cadence: 0 of 99 loss lots were rebought within +-30 days.\n- No look-ahead: with all price data clipped at 2003-02-14, 2012-01-04 and 2020-03-20, every earlier order is identical.\n- One deviation, shared with the site's TaxManagedCombo: the budget-limited partial sale is sized as qty*room/gain (the average gain) while the engine sells FIFO lots. The 1% budget was overshot in 18 of 25 years (up to 1.32x).\n- Negative cash never occurs in KX3; in KX1 it is rare and below 0.6% of PV.\n- Dust: 40% of KX3's trades are top-ups below 0.5% of PV. These are harmless because costs are proportional.\n\n2. Battery, CA:\n- Lag 1: score +1.09, full +1.53, boot_p 0.053 (passes).\n- Costs (score): 0 bps +1.02, 15 bps +0.96, 35 bps +0.88.\n- Stricter tax accounting: +0.03 to +0.06 pp.\n- Sub-periods: 2000-10 +2.93, 2010-20 +0.89, 2020-26 -0.40.\n- DSR at 12,000 trials: 0.038 (FED 0.048).\n- 26 weekly rebalance offsets: score mean +0.94 [+0.65, +1.27], all positive; full mean +1.18 (median +1.00) [+0.48, +2.42]. The default date ranks 3rd of 26 on full_excess. boot_p <= 0.10 at 12/26 offsets; criteria 1-3 pass at 9/26.\n\n3. Exact FIFO budget (the label-faithful fix): the score is unchanged (+0.95), but at the default date full_excess drops from +1.84 to +0.31 and boot_p rises from 0.011 to 0.40.\n- The paths split at one 2004 partial sale. The reported path rotated into QQQ in 2009 and ends 2026 with a 46% higher terminal value.\n- Averaged over offsets the fix is neutral, so the headline is path luck.\n\n4. Versus the incumbent (same battery):\n- Across offsets, KX3's score is better (+0.94 vs +0.61; 10y beat rate 0.88 vs 0.68), but its full-period excess is identical (+1.18 vs +1.18). The incumbent passes criteria 1-3 at 0/13 offsets.\n- Paired monthly difference: +0.28 pp/yr, p = 0.38. KX3 is worse in 78% of 20-year windows.\n\n5. Risk: the frozen 2026 books are 56-82% growth/tech, with 76-87% of value as unrealized gain. A replay of the 2000-02 bust loses 56-71% vs SPY -47.5%, and a 1% budget cannot de-risk.\n\nKX1 is weaker across offsets: score mean +0.76, 4/13 pass. DSR 0.051.",
+ "verdicts": [
+  {
+   "candidate": "KX3: 378-0 momentum, top 5, semiannual, 1% budget, keep-in-top-2N + no-trim + worst-ranked-first gain spending (WS, proportional buys)",
+   "verdict": "fail",
+   "reasons": [
+    "Mechanics are clean. The label semantics re-derive exactly from instrumented trade logs. Trades go only through ctx.order, no buy exceeds cash, predicted gains equal booked gains, there are 0 wash sales (impossible at S cadence), and the data-truncation test shows no look-ahead at 3 cut dates.",
+    "The headline full-period result is path luck. Sizing the budget-limited partial sale exactly on FIFO lots (label-faithful) leaves the score at +0.95, but full_excess falls from +1.84 to +0.31 and boot_p rises from 0.011 to 0.40 at the default date. One 2004 partial sale sends the 2000-start path to a QQQ-light book worth 31% less in 2026.",
+    "Rebalance timing: over 26 weekly offsets the default date ranks 3rd on full_excess (offset median +1.00). boot_p <= 0.10 at only 12/26 offsets, and criteria 1-3 hold at only 9/26. The score is robust (mean +0.94, all offsets positive).",
+    "Deflated Sharpe at 12,000 trials is 0.038 in CA and 0.048 in FED. It is below 0.5 even at 100 effective trials (PSR alone 0.988).",
+    "No statistically detectable improvement over the site preset. Paired monthly difference +0.28 pp/yr, p = 0.38. The offset-averaged full_excess is identical (+1.18 vs +1.18). KX3 is worse in 78% of 20-year windows. The 10y beat rate gain (0.88 vs 0.68) is real.",
+    "Era: the 2020-26 sub-period is -0.40 pp, and 5y windows starting 2020/2021 lose 3.2 / 4.8 pp/yr. The pre-2000 long-history holdout is negative (full -0.34, ho10 -0.23). The round-1 hindsight failure (QQQ/XLK removal, random menus) stands.",
+    "Survives execution realism: lag 1 (CA +1.09 / +1.53, boot 0.053, passes 1-3), costs 0-35 bps (score +1.02 to +0.88), annual-distribution tax (+0.03 to +0.06 pp), skipping trades below 0.5-1% of PV (+1.01).",
+    "Untested concentration: the 2026 book is QQQ 33% / XLK 23% (2015-start book: XLK 39% / QQQ 27% / IWF 16%), with 76-87% unrealized gains. A replay of 2000-02 loses 56-71% vs SPY -47.5%, and a 1% budget cannot de-risk."
+   ],
+   "bugs_found": [
+    "Budget-limited partial gain sale is sized as qty*room/gain (average gain per share) while the engine realizes FIFO (oldest, lowest-basis lots first). Realized gains overshoot the 1% budget in 18 of 25 years (max 1.32x; e.g. room $1,358 -> realized $2,445 on 2010-01-04). Shared with the site's TaxManagedCombo. Fixed in verify_taxrot_mech.ws_x exact_budget=true; the score is unchanged but the default-date full_excess goes +1.84 -> +0.31.",
+    "Not a bug, design note: 'held' in keep-in-top-2N includes residual positions left by budget-limited partial exits, so such a name is kept and topped back up to 1/N while it ranks 6-10 (75 kept-while-ranked-6-10 events over 54 rebalances).",
+    "Engine convention, immaterial here: last year's tax is deducted from cash on the first January trading day before the strategy runs, so cash can go negative (interest-free). It never happens for KX3; KX1 2015 start: 371 days, min -0.54% of PV.",
+    "Lab note: verify.battery silently skips offsets/lag for custom kinds; verify_taxrot_mech.ws_x provides offset_days/lag for tax_rotation.ws configs."
+   ],
+   "key_numbers": {
+    "CA": {
+     "score": 0.0099,
+     "full_excess": 0.0184,
+     "ex10_beat": 0.8955,
+     "ex15_beat": 0.8511,
+     "ex20_beat": 0.963,
+     "boot_p": 0.011,
+     "max_dd": -0.5366,
+     "bench_max_dd": -0.5519,
+     "after_tax_IR": 0.42,
+     "dsr_n12000": 0.038,
+     "dsr_n100": 0.36
+    },
+    "FED": {
+     "score": 0.011,
+     "full_excess": 0.0194,
+     "ex10_beat": 0.8955,
+     "ex15_beat": 0.8723,
+     "ex20_beat": 1,
+     "boot_p": 0.006,
+     "max_dd": -0.5366,
+     "dsr_n12000": 0.048
+    },
+    "offsets_CA_26_weekly": {
+     "score_mean": 0.0094,
+     "score_min": 0.0065,
+     "score_max": 0.0127,
+     "full_mean": 0.0118,
+     "full_median": 0.01,
+     "full_min": 0.0048,
+     "full_max": 0.0242,
+     "ex10_beat_mean": 0.88,
+     "ex15_beat_mean": 0.88,
+     "boot_p_mean": 0.123,
+     "pass13": "9/26",
+     "default_rank_full": "3/26"
+    },
+    "offsets_NONE_7": {
+     "score_mean": 0.0106,
+     "full_mean": 0.0162,
+     "pass13": "2/7"
+    },
+    "lag1": {
+     "CA": {
+      "score": 0.0109,
+      "full_excess": 0.0153,
+      "ex10_beat": 0.9104,
+      "ex15_beat": 0.8723,
+      "boot_p": 0.053
+     },
+     "FED": {
+      "score": 0.0122,
+      "full_excess": 0.0164,
+      "boot_p": 0.04
+     }
+    },
+    "costs_CA_score": {
+     "0bps": 0.0102,
+     "5bps": 0.0099,
+     "15bps": 0.0096,
+     "35bps": 0.0088
+    },
+    "costs_CA_full": {
+     "0bps": 0.0182,
+     "15bps": 0.0046,
+     "35bps": 0.0097
+    },
+    "realism_CA_engine_to_strict": {
+     "2000": [
+      0.0184,
+      0.019
+     ],
+     "2005": [
+      0.009,
+      0.0093
+     ],
+     "2010": [
+      0.0095,
+      0.01
+     ],
+     "2015": [
+      0.0199,
+      0.02
+     ]
+    },
+    "subperiods_CA": {
+     "2000-2010": 0.0293,
+     "2010-2020": 0.0089,
+     "2020-2026": -0.004
+    },
+    "long_protocol_CA": {
+     "score": 0.0096,
+     "full_excess": -0.0034,
+     "ho5_mean": -0.0012,
+     "ho10_mean": -0.0023,
+     "ho10_beat": 0.24
+    },
+    "exact_budget_CA": {
+     "score": 0.0095,
+     "full_excess": 0.0031,
+     "boot_p": 0.4
+    },
+    "vs_incumbent_paired_monthly": {
+     "diff_pp_yr": 0.0028,
+     "p": 0.38,
+     "20y_windows_better_share": 0.22
+    }
+   },
+   "best_variant_cfg": {
+    "kind": "verify_taxrot_mech.ws_x",
+    "signal": "tax_rotation.rank",
+    "params": {
+     "menu": [
+      "SPY",
+      "QQQ",
+      "DIA",
+      "MDY",
+      "IWM",
+      "IJR",
+      "EFA",
+      "EEM",
+      "IWD",
+      "IWF",
+      "RSP",
+      "XLB",
+      "XLC",
+      "XLE",
+      "XLF",
+      "XLI",
+      "XLK",
+      "XLP",
+      "XLRE",
+      "XLU",
+      "XLV",
+      "XLY"
+     ],
+     "score": "ret",
+     "lookback": 378,
+     "skip": 0,
+     "top_n": 5,
+     "hold_buffer": 5
+    },
+    "rebalance": "S",
+    "execution": "tax",
+    "gain_budget": 0.01,
+    "wash_days": 31,
+    "buy_order": "prop",
+    "trim": false,
+    "gain_order": "rank",
+    "exact_budget": true
+   },
+   "best_variant_numbers": {
+    "note": "Label-faithful fix (exact FIFO budget), NOT an improvement: these are the honest default-date numbers; the offset-average equals the original's.",
+    "CA": {
+     "score": 0.0095,
+     "full_excess": 0.0031,
+     "ex10_beat": 0.8955,
+     "ex15_beat": 0.8511,
+     "ex20_beat": 0.8148,
+     "boot_p": 0.4,
+     "max_dd": -0.5426,
+     "bench_max_dd": -0.5519,
+     "pass13": false
+    },
+    "FED": {
+     "score": 0.0107,
+     "full_excess": 0.0038,
+     "ex10_beat": 0.8955,
+     "ex15_beat": 0.8511,
+     "ex20_beat": 0.8889,
+     "boot_p": 0.37,
+     "max_dd": -0.5426
+    },
+    "offsets_CA_7": {
+     "score_mean": 0.0093,
+     "score_min": 0.0074,
+     "full_mean": 0.0083,
+     "full_min": 0.0029,
+     "pass13": "1/7",
+     "original_same_offsets": {
+      "score_mean": 0.0094,
+      "full_mean": 0.0115,
+      "pass13": "2/7"
+     }
+    },
+    "lag1_CA": {
+     "score": 0.0106,
+     "full_excess": 0.0154,
+     "boot_p": 0.053
+    }
+   }
+  },
+  {
+   "candidate": "KX1: incumbent signal (252-21 momentum, top 5, quarterly) with keep-in-top-2N + no-trim + worst-ranked-first, long-term gains only, 2% budget (WS)",
+   "verdict": "fail",
+   "reasons": [
+    "Mechanics are clean (same audit as KX3). The 2 short-term-gain lots realized despite st_gains=false sit inside net-loss exits, so this is not a violation. No wash sales (0 of 60 loss lots rebought), no look-ahead (truncation test), no buys beyond cash.",
+    "Rebalance timing: over 13 weekly offsets the score mean is +0.76 [+0.38, +1.13] and the full mean +1.14 (median +0.97) [+0.23, +2.85]. The default date ranks 3rd on full_excess. ex10_beat falls to 0.63 and ex15_beat to 0.66 at some offsets; boot_p <= 0.10 at 4/13; criteria 1-3 hold at only 4/13.",
+    "Deflated Sharpe at 12,000 trials is 0.051 in CA and 0.065 in FED.",
+    "No statistically detectable improvement over the incumbent: paired monthly difference +0.25 pp/yr, p = 0.39. On the 2010-2026 part of the 2000-start path KX1 trails the incumbent by 1.0 pp/yr.",
+    "Era: 2020-26 sub-period -0.64 pp; 5y windows starting 2020/2021 lose 3.4 / 3.2 pp/yr. 15-year-start realism from 2015 is -0.12 pp. Long-history holdout is negative (full -0.54, ho10 -0.28), and the round-1 hindsight failure stands.",
+    "Survives execution realism: lag 1 (CA +1.02 / +1.83, boot 0.020; FED +1.15 / +1.96), costs to 35 bps (score +0.74), exact FIFO budget (+0.92 / +1.76, boot 0.015). The full-period number is path-sensitive: skipping trades below 0.5% of PV moves full_excess to +2.50."
+   ],
+   "bugs_found": [
+    "Same partial-sale sizing approximation as KX3 (shared with the site's TaxManagedCombo): the 2% budget was overshot in 16 of 26 years (max 1.21x; room $4,957 -> realized $6,499 on 2014-01-02). The exact-budget fix leaves KX1 essentially unchanged (default date +0.92 / +1.76; 7-offset mean +0.78 / +0.94 vs original +0.78 / +0.95).",
+    "Engine negative-cash artifact (January tax settlement with no sale): 2015-04 start 371 of 2,829 days, min -0.54% of PV. Worth under 0.01 pp/yr."
+   ],
+   "key_numbers": {
+    "CA": {
+     "score": 0.0093,
+     "full_excess": 0.0182,
+     "ex10_beat": 0.9104,
+     "ex15_beat": 0.8936,
+     "ex20_beat": 0.963,
+     "boot_p": 0.011,
+     "max_dd": -0.5658,
+     "bench_max_dd": -0.5519,
+     "after_tax_IR": 0.45,
+     "dsr_n12000": 0.051,
+     "dsr_n100": 0.41
+    },
+    "FED": {
+     "score": 0.0105,
+     "full_excess": 0.0196,
+     "ex10_beat": 0.9254,
+     "ex15_beat": 0.9149,
+     "ex20_beat": 1,
+     "boot_p": 0.009,
+     "max_dd": -0.5631,
+     "dsr_n12000": 0.065
+    },
+    "offsets_CA_13_weekly": {
+     "score_mean": 0.0076,
+     "score_min": 0.0038,
+     "score_max": 0.0113,
+     "full_mean": 0.0114,
+     "full_median": 0.0097,
+     "full_min": 0.0023,
+     "full_max": 0.0285,
+     "ex10_beat_mean": 0.82,
+     "ex15_beat_mean": 0.82,
+     "boot_p_mean": 0.158,
+     "pass13": "4/13",
+     "default_rank_full": "3/13"
+    },
+    "offsets_NONE_7": {
+     "score_mean": 0.0094,
+     "full_mean": 0.0177,
+     "pass13": "0/7"
+    },
+    "lag1": {
+     "CA": {
+      "score": 0.0102,
+      "full_excess": 0.0183,
+      "ex10_beat": 0.8806,
+      "ex15_beat": 0.9362,
+      "boot_p": 0.02
+     },
+     "FED": {
+      "score": 0.0115,
+      "full_excess": 0.0196,
+      "boot_p": 0.018
+     }
+    },
+    "costs_CA_score": {
+     "0bps": 0.0097,
+     "5bps": 0.0093,
+     "15bps": 0.0086,
+     "35bps": 0.0074
+    },
+    "realism_CA_engine_to_strict": {
+     "2000": [
+      0.0182,
+      0.0186
+     ],
+     "2005": [
+      0.0124,
+      0.0127
+     ],
+     "2010": [
+      0.0112,
+      0.0118
+     ],
+     "2015": [
+      -0.0013,
+      -0.0012
+     ]
+    },
+    "subperiods_CA": {
+     "2000-2010": 0.0357,
+     "2010-2020": 0.0074,
+     "2020-2026": -0.0064
+    },
+    "long_protocol_CA": {
+     "score": 0.0068,
+     "full_excess": -0.0054,
+     "ho5_mean": -0.003,
+     "ho10_mean": -0.0028,
+     "ho10_beat": 0.47
+    },
+    "vs_incumbent_paired_monthly": {
+     "diff_pp_yr": 0.0025,
+     "p": 0.39
+    }
+   },
+   "best_variant_cfg": {
+    "kind": "verify_taxrot_mech.ws_x",
+    "signal": "tax_rotation.rank",
+    "params": {
+     "menu": [
+      "SPY",
+      "QQQ",
+      "DIA",
+      "MDY",
+      "IWM",
+      "IJR",
+      "EFA",
+      "EEM",
+      "IWD",
+      "IWF",
+      "RSP",
+      "XLB",
+      "XLC",
+      "XLE",
+      "XLF",
+      "XLI",
+      "XLK",
+      "XLP",
+      "XLRE",
+      "XLU",
+      "XLV",
+      "XLY"
+     ],
+     "score": "ret",
+     "lookback": 252,
+     "skip": 21,
+     "top_n": 5,
+     "hold_buffer": 5
+    },
+    "rebalance": "Q",
+    "execution": "tax",
+    "gain_budget": 0.02,
+    "wash_days": 31,
+    "buy_order": "prop",
+    "st_gains": false,
+    "trim": false,
+    "gain_order": "rank",
+    "exact_budget": true
+   },
+   "best_variant_numbers": {
+    "note": "Label-faithful fix (exact FIFO budget); equivalent to the original on average, not an improvement.",
+    "CA": {
+     "score": 0.0092,
+     "full_excess": 0.0176,
+     "ex10_beat": 0.8955,
+     "ex15_beat": 0.9149,
+     "ex20_beat": 0.963,
+     "boot_p": 0.015,
+     "max_dd": -0.5659,
+     "bench_max_dd": -0.5519,
+     "pass13": true
+    },
+    "FED": {
+     "score": 0.0104,
+     "full_excess": 0.019,
+     "ex10_beat": 0.9104,
+     "ex15_beat": 0.9149,
+     "ex20_beat": 0.963,
+     "boot_p": 0.011
+    },
+    "offsets_CA_7": {
+     "score_mean": 0.0078,
+     "score_min": 0.0038,
+     "full_mean": 0.0094,
+     "full_min": -0.0007,
+     "pass13": "2/7"
+    },
+    "lag1_CA": {
+     "score": 0.0099,
+     "full_excess": 0.0185,
+     "boot_p": 0.016
+    }
+   }
+  }
+ ],
+ "summary": "I tried to break KX3 and KX1 on mechanics, bugs and execution realism. Both fail the good-confidence bar, and neither is recommendable as beating SPY after tax with good confidence.\n\n**What held:**\n- **The code does what the label says.** Keep-in-top-2N, no-trim, worst-ranked-first gain spending and long-term-only re-derive exactly from instrumented trade logs. Trades go only through ctx.order, buys never exceed cash, and predicted gains equal the gains the engine books.\n- **No wash sales and no look-ahead.** A wash sale cannot happen at these rebalance cadences (0 of 99 loss lots rebought within 30 days). Clipping all data at three dates leaves every earlier order identical.\n- **The 95-window score is robust to execution.** It survives a 1-day lag, costs up to 35 bps, annual dividend tax, skipping small trades, and all 26 weekly rebalance offsets (KX3 mean +0.94 pp/yr, never below +0.65).\n\n**What broke:**\n- **One accounting deviation, shared with the site's TaxManagedCombo.** The last budget-limited sale is sized on the position's average gain, but the engine sells oldest lots first. KX3 overshot its 1% budget in 18 of 25 years.\n- **KX3's headline is a lucky path.** Sizing that sale exactly leaves the score unchanged (+0.95) but cuts default-date full_excess from +1.84 to +0.31 and raises boot_p from 0.011 to 0.40. One partial sale in 2004 decides whether the 2000-start book ends 33% QQQ (46% more terminal wealth).\n- **The default rebalance date is near the best.** It ranks 3rd of 26 on full_excess; boot_p is at most 0.10 at only 12/26 offsets, and criteria 1-3 pass at 9/26 (KX1: 4/13).\n- **Multiple testing:** deflated Sharpe at 12,000 trials is 0.038 for KX3 and 0.051 for KX1.\n- **Not detectably better than the incumbent.** The paired difference is +0.28 pp/yr (p = 0.38), and averaged over offsets the full-period excess is identical (+1.18 vs +1.18). The real gain is a higher 10-year beat rate (0.88 vs 0.68).\n- **Recent windows and concentration.** The 2020-26 sub-period is negative, and 5-year windows starting 2020/2021 lose 3-5 pp/yr. The frozen 2026 books are 56-82% growth/tech, and replaying the 2000-02 bust on them loses 56-71% vs SPY's -47.5%.\n\nThe fixed variants (exact_budget=true in verify_taxrot_mech.ws_x) are label-faithful but not better.",
+ "open_questions": [
+  "Should the site's TaxManagedCombo (and the lab's WeightStrategy/TRStrategy) size the budget-limited partial sale on actual FIFO lots? It overshoots the gain budget by up to ~30% in many years. It is neutral on average, but it changes individual paths a lot (KX3 2000-start full_excess +1.84 vs +0.31).",
+  "For path-dependent tax-managed rules, boot_p and full_excess come from a single 2000-start path, which these tests show is chaotic (it swings by about 1 pp/yr under label-faithful accounting changes, cost changes or min-trade changes). Should the protocol's bar 3 use an offset-averaged or multi-start bootstrap instead?",
+  "Should verify.battery support offset_days/lag for custom kinds generically (e.g. by wrapping on_day), so that families such as tax_rotation.ws are not silently skipped?",
+  "Concentration risk of frozen tax-managed books (56-82% growth/tech, 76-87% unrealized gain, unsellable under a 1% budget) is not captured by historical windows. Should finalists get a forward stress test of their terminal book?"
+ ]
+}
