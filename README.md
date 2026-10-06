@@ -65,33 +65,40 @@ stocks fetches ~190 kB per ticker.
 
 ---
 
-## The answer to the question
+## What the research found
 
-StockTest asks whether a strategy can beat buy-and-hold after tax. For a taxable
-California investor, one can — but not by picking better:
+StockTest asks whether a strategy can beat buy-and-hold after tax. A search of about
+15,000 strategy configurations covered:
+- timing and trend rules;
+- tactical asset allocation and risk parity;
+- leverage;
+- seasonality and mean reversion;
+- macro signals;
+- factor tilts;
+- sector and global rotation;
+- individual stocks;
+- pure tax structures.
 
-| 1998-04 → 2026-07, California rates | after-tax CAGR | $100k becomes |
-|---|---|---|
-| **Tax-managed momentum** (`strategies/tax_managed.py`) | **8.96%** | **$1,128,670** |
-| SPY buy & hold | 7.71% | $815,589 |
+**None beats buying and holding an S&P 500 fund after California tax with good
+confidence.** The full report is [research/STRATEGY_SEARCH.md](research/STRATEGY_SEARCH.md).
 
-It beats the S&P in **100% of 20-year windows**, 86% of 15-year and 74% of
-10-year ones. The mechanism is not the signal — at zero tax the same strategy
-beats SPY by only 0.30 pp. It is that an ordinary rotation gives up **3-4
-percentage points a year** in capital-gains tax, more than any of these signals
-earns before tax, and this one gives up 0.2.
+The reason is mostly tax. Buy-and-hold defers every gain to the end. A strategy that
+realizes gains along the way has to out-earn the index before tax by more than the
+tax it pays. No signal tested did that reliably.
 
-It does that with a **realized-gain budget**: selling at a loss is always
-allowed and refills the budget, selling at a gain only up to 1% of portfolio
-value a year, and a name sold at a loss is not repurchased for 31 days. The
-result is "let winners run, cut losers" — enforced by the tax code.
+Two strategies are included as presets in the web app, as ordinary strategies to
+explore:
 
-Press **"Beat the S&P (CA)"** in the web app to run it, or read
-[research/README.md](research/README.md) for the full evidence, the controls
-(random rankings collapse to SPY; momentum without the tax rule loses), and the
-honest weaknesses — including the **+1.3 to +2.2 pp/yr of survivorship bias**
-measured in this repo's per-stock data, which is why the strategy ranks index
-funds instead of companies.
+- **Tax-managed ETF momentum (CA).** 12-1 momentum over 22 index ETFs, top 5, rebalanced
+  quarterly, traded under a yearly realized-gain budget (`strategies/tax_managed.py`).
+  Its historical lead depends on QQQ/XLK being in the menu and on the 2000s.
+- **2× S&P trend switch (CA).** Holds SSO (2× S&P 500) while SPY is more than 3% above
+  its 175-day average, and IEF (intermediate Treasuries) once it is more than 3% below.
+  It is checked every trading day at the close (the `trend_switch` timer). It is leveraged,
+  so it loses more in fast crashes, and its after-tax edge since 2010 has been about zero.
+
+The original write-up of the tax-managed preset is kept in
+[research/README.md](research/README.md).
 
 ---
 

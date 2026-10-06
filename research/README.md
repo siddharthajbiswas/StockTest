@@ -1,4 +1,12 @@
-# Beating the S&P 500 after California tax — what actually worked
+# Tax-managed momentum after California tax (September 2026 analysis)
+
+> **Superseded (October 2026).** A much larger follow-up search,
+> [STRATEGY_SEARCH.md](STRATEGY_SEARCH.md), re-tested this strategy.
+> - Its lead over SPY depends on QQQ/XLK being in the fund menu.
+> - The lead comes mostly from the 2000-2010 decade; it was flat before 2000 and has lagged since 2020.
+> - It is not a reliable way to outperform buy-and-hold.
+>
+> The analysis below is kept as the record of the original result.
 
 The question: can a stock-picking strategy, run in a **taxable California
 account**, beat simply buying and holding the S&P 500 — after capital-gains tax

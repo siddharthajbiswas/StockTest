@@ -198,7 +198,7 @@ opened at (for stop-losses).
   the `risk` tickers are long; off -> the `safe` ones. Evaluated once per date and
   shared by every ticker. Until the first evaluation succeeds (fewer than `n`
   closes) nothing is held. Built for manual mode with tickers = risk + safe, e.g.
-  SSO (2x S&P 500) + IEF (7-10y Treasuries) — the site's "Beat the S&P: 2x trend
+  SSO (2x S&P 500) + IEF (7-10y Treasuries) — the site's "2× S&P trend switch
   (CA)" preset. Same rule as `research/lab/families/verify_lev_robust.py::Trend`
   (`check="D"`, `lag=0`, `ma="sma"`). Leverage magnifies losses.
 - **Not swept:** the combo sweeps (`grid_combos.py`, `walkforward.py`, the

@@ -318,14 +318,12 @@ export default function App() {
     await runConfig(exampleCfg);
   }
   /**
-   * The one configuration in this app that clears SPY after California tax
-   * over the full history — see research/tax_managed_report.py for the
-   * evidence and strategies/tax_managed.py for why it works.
-   *
-   * 12-1 momentum over a menu of 22 large index ETFs, top 5, quarterly, with
-   * the tax-managed trading rule. The ETF menu is the point: the per-stock
-   * data in this repo only covers companies that still exist, which flatters a
-   * stock picker by 1.3-2.2 pp/yr, while these funds all still trade.
+   * Preset: tax-managed ETF momentum at California rates. 12-1 momentum over
+   * a menu of 22 large index ETFs, top 5, quarterly, traded under the
+   * tax-managed rule (a yearly realized-gain budget). The ETF menu avoids the
+   * survivorship bias of the per-stock data: every one of these funds still
+   * trades. strategies/tax_managed.py documents the rule;
+   * research/STRATEGY_SEARCH.md covers how it held up in testing.
    */
   async function runTaxManagedPreset() {
     const cfg = {
@@ -367,7 +365,7 @@ export default function App() {
   }
 
   /**
-   * The research lab's leading after-tax candidate (verified in
+   * Preset: the 2x S&P trend switch (same rule as
    * research/lab/families/verify_lev_robust.py): hold SSO, a 2x S&P 500 ETF,
    * while SPY is more than 3% above its 175-day average, and IEF
    * (intermediate Treasuries) once it is more than 3% below — evaluated every
@@ -484,15 +482,15 @@ export default function App() {
               disabled={running}
               title="12-1 momentum over 22 index ETFs, top 5, quarterly, traded under a yearly realized-gain budget — at California tax rates"
             >
-              Beat the S&amp;P (CA)
+              Tax-managed ETF momentum (CA)
             </button>
             <button
               className="btn ghost"
               onClick={runLeveragedTrendPreset}
               disabled={running}
-              title="Hold SSO (2x S&P 500) while SPY is more than 3% above its 175-day average, IEF (Treasuries) once it is more than 3% below — checked every trading day at the close, at California tax rates. Leverage magnifies losses. Research verdict: not a confident S&P-beater (see research/STRATEGY_SEARCH.md)."
+              title="Hold SSO (2x S&P 500) while SPY is more than 3% above its 175-day average, IEF (Treasuries) once it is more than 3% below — checked every trading day at the close, at California tax rates. Leverage magnifies losses."
             >
-              2× S&amp;P trend, leveraged (CA)
+              2× S&amp;P trend switch (CA)
             </button>
             <button
               className="btn"

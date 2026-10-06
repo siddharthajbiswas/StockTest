@@ -328,7 +328,7 @@ function leverageCaveat(basket) {
       "This result assumes the rule was followed every single trading day at the close, with no exceptions or delays. " +
       short +
       (lev.includes("SSO")
-        ? " In this project's research the SSO trend rule beat SPY after California tax over most past periods, but not with statistical confidence: almost all of its lead came from sidestepping 2000-02 and 2008, its after-tax edge since 2010 was about zero, and the same rule did no better than buy-and-hold on 33 other stock markets (research/STRATEGY_SEARCH.md)."
+        ? " In this project's research the SSO trend rule came out ahead of SPY after California tax in most past periods, but not reliably: almost all of its lead came from sidestepping 2000-02 and 2008, its after-tax edge since 2010 was about zero, and the same rule did no better than buy-and-hold on 33 other stock markets (research/STRATEGY_SEARCH.md)."
         : ""),
   };
 }
