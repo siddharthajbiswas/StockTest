@@ -1,26 +1,43 @@
 #!/usr/bin/env bash
-# Publish the static site to GitHub Pages on this repo (gh-pages branch).
+# Publish the static site to this repo's two hosting branches.
 #
-# Builds with BASE=/StockTest/ and force-pushes the built tree as a single
-# commit to the gh-pages branch of origin. The site is then served at
-# https://siddharthajbiswas.github.io/StockTest/ (Pages: branch gh-pages, /).
+#   gh-pages      built for /StockTest/       -> https://siddharthajbiswas.github.io/StockTest/
+#   biswas-pages  built for /sid/stocktest/   -> https://www.biswas.net/sid/stocktest/
+#                 (rahulbiswas/rahulbiswas.github.io syncs it into sid/stocktest/
+#                  hourly; see .github/workflows/sync-sid.yml there)
 #
-# Usage:  bash deploy/publish-gh-pages.sh
+# Each branch is force-pushed as a single commit of the built tree.
+#
+# Usage:  bash deploy/publish-gh-pages.sh            # both
+#         bash deploy/publish-gh-pages.sh gh-pages   # just one
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 REMOTE="$(git -C "$ROOT" remote get-url origin)"
+SHA="$(git -C "$ROOT" rev-parse --short HEAD)"
+TARGETS=("${@:-gh-pages biswas-pages}")
+read -r -a TARGETS <<< "${TARGETS[*]}"
 
-BASE=/StockTest/ bash "$ROOT/deploy/build-pages.sh"
+publish() {  # branch base
+  BASE="$2" bash "$ROOT/deploy/build-pages.sh"
+  local tmp; tmp="$(mktemp -d)"
+  cp -R "$ROOT/build/pages/." "$tmp/"
+  (
+    cd "$tmp"
+    git init -q
+    git checkout -q -b "$1"
+    git add -A
+    git commit -q -m "Deploy StockTest ($SHA) for $2"
+    git push -q -f "$REMOTE" "$1"
+  )
+  rm -rf "$tmp"
+  echo "Published $1 (base $2)."
+}
 
-TMP="$(mktemp -d)"
-trap 'rm -rf "$TMP"' EXIT
-cp -R "$ROOT/build/pages/." "$TMP/"
-cd "$TMP"
-git init -q
-git checkout -q -b gh-pages
-git add -A
-git commit -q -m "Deploy StockTest ($(git -C "$ROOT" rev-parse --short HEAD))"
-git push -q -f "$REMOTE" gh-pages
-echo "Published. GitHub Pages rebuilds in about a minute:"
-echo "  https://siddharthajbiswas.github.io/StockTest/"
+for t in "${TARGETS[@]}"; do
+  case "$t" in
+    gh-pages)     publish gh-pages /StockTest/ ;;
+    biswas-pages) publish biswas-pages /sid/stocktest/ ;;
+    *) echo "unknown target $t" >&2; exit 1 ;;
+  esac
+done

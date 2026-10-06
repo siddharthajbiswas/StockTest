@@ -1,17 +1,30 @@
 # Deploying StockTest
 
-**Current home (since 2026-10-05): GitHub Pages on this repo**, served from the
-`gh-pages` branch at <https://siddharthajbiswas.github.io/StockTest/>. To publish
-the current `main`:
+StockTest is published from this repo to two places:
+
+| URL | Branch here | Built for |
+|---|---|---|
+| <https://siddharthajbiswas.github.io/StockTest/> | `gh-pages` (GitHub Pages on this repo) | `/StockTest/` |
+| <https://www.biswas.net/sid/stocktest/> | `biswas-pages` | `/sid/stocktest/` |
+
+To publish the current `main` to both:
 
 ```bash
-bash deploy/publish-gh-pages.sh   # builds with BASE=/StockTest/, force-pushes gh-pages
+bash deploy/publish-gh-pages.sh
 ```
 
-GitHub Pages rebuilds within a minute or two. The rest of this document
-describes the build and the earlier home at biswas.net/sid/stocktest, which
-lives in the `rahulbiswas/rahulbiswas.github.io` repo and needs write access to
-that repo to update.
+That script builds both versions and force-pushes each branch. GitHub Pages
+rebuilds this repo's site within a minute or two.
+
+biswas.net is the `rahulbiswas/rahulbiswas.github.io` repo. A workflow there,
+`.github/workflows/sync-sid.yml`, runs hourly. It copies every public repo of
+github.com/siddharthajbiswas whose GitHub homepage is
+`https://biswas.net/sid/<name>/` into `sid/<name>/`, taking the `biswas-pages`
+branch when one exists. So no write access to that repo is needed; just
+publish here.
+
+The rest of this document describes the build itself and the old manual copy
+into the Pages repo.
 
 ---
 
