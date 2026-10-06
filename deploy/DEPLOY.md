@@ -1,4 +1,21 @@
-# Deploying StockTest to biswas.net/sid/stocktest
+# Deploying StockTest
+
+**Current home (since 2026-10-05): GitHub Pages on this repo**, served from the
+`gh-pages` branch at <https://siddharthajbiswas.github.io/StockTest/>. To publish
+the current `main`:
+
+```bash
+bash deploy/publish-gh-pages.sh   # builds with BASE=/StockTest/, force-pushes gh-pages
+```
+
+GitHub Pages rebuilds within a minute or two. The rest of this document
+describes the build and the earlier home at biswas.net/sid/stocktest, which
+lives in the `rahulbiswas/rahulbiswas.github.io` repo and needs write access to
+that repo to update.
+
+---
+
+## Earlier home: biswas.net/sid/stocktest
 
 StockTest is a **static site**. There is no backend, no VM, no database and no
 API. The engine is a JavaScript port of `backtester/` that runs in a Web Worker

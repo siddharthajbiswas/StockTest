@@ -9,7 +9,7 @@ buy & hold, moving-average cross, RSI, …). From 10 pickers and 10 timers that'
 to 100 strategies, each scored net of commission, slippage, and capital-gains tax,
 and always benchmarked against SPY.
 
-**[Try it live →](https://biswas.net/sid/stocktest/)** — it runs entirely in your
+**[Try it live →](https://siddharthajbiswas.github.io/StockTest/)** — it runs entirely in your
 browser. No signup, no backend, nothing leaves your machine.
 
 The **web app is the primary way to use StockTest** — no code or command line
