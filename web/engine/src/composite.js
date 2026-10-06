@@ -36,6 +36,10 @@ function periodKey(day, rebalance) {
       return `${d.getUTCFullYear()}-${Math.floor(d.getUTCMonth() / 3)}`;
     case "M":
       return `${d.getUTCFullYear()}-${d.getUTCMonth()}`;
+    case "S":
+      return `${d.getUTCFullYear()}-s${Math.floor(d.getUTCMonth() / 6)}`;
+    case "A":
+      return `${d.getUTCFullYear()}`;
     default:
       throw new Error(`unknown rebalance cadence: ${rebalance}`);
   }
@@ -58,11 +62,19 @@ export class Combo {
   members = new Set();
   entry = new Map();
   lastPeriod = null;
-  constructor(picker, timer, topN = 20, rebalance = "M") {
+  /** Optional shortlist: the picker ranks only within these names. */
+  menu = null;
+  constructor(picker, timer, topN = 20, rebalance = "M", menu = null) {
     this.picker = picker;
     this.timer = timer;
     this.topN = topN;
     this.rebalance = rebalance;
+    this.menu = menu === null || menu === undefined ? null : [...menu];
+  }
+  candidates(ctx) {
+    if (this.menu === null) return ctx.universe;
+    const tradable = new Set(ctx.universe);
+    return this.menu.filter((t) => tradable.has(t));
   }
   initialize(ctx) {
     this.picker.initialize(ctx);
@@ -76,7 +88,7 @@ export class Combo {
     const key = periodKey(ctx.day, this.rebalance);
     if (key !== this.lastPeriod) {
       this.lastPeriod = key;
-      this.basket = this.picker.select(ctx, ctx.universe, this.topN);
+      this.basket = this.picker.select(ctx, this.candidates(ctx), this.topN);
     }
     const longs = [];
     for (const ticker of this.basket) {
@@ -107,6 +119,135 @@ export class Combo {
       if (!this.entry.has(ticker)) {
         const px = ctx.price(ticker);
         if (px !== null) this.entry.set(ticker, px);
+      }
+    }
+  }
+}
+
+/**
+ * A Combo whose *execution* is governed by a realized-gain budget.
+ * Port of `TaxManagedCombo` in `backtester/composite.py` — see that docstring
+ * for why this exists. Same picker, same timer; the difference is what the
+ * portfolio is allowed to sell.
+ */
+export class TaxManagedCombo extends Combo {
+  gainBudget;
+  washDays;
+  lossSale = new Map();
+  constructor(
+    picker,
+    timer,
+    topN = 20,
+    rebalance = "M",
+    menu = null,
+    gainBudget = 0.01,
+    washDays = 31,
+  ) {
+    super(picker, timer, topN, rebalance, menu);
+    this.gainBudget = gainBudget;
+    this.washDays = washDays;
+  }
+  initialize(ctx) {
+    super.initialize(ctx);
+    this.lossSale = new Map();
+  }
+  /** [gain, allLongTerm] that selling `shares` FIFO at `netPrice` books. */
+  gainIfSold(ctx, ticker, shares, netPrice) {
+    let remaining = shares;
+    let gain = 0.0;
+    let allLt = true;
+    for (const lot of ctx.lots(ticker)) {
+      if (remaining <= 1e-12) break;
+      const take = Math.min(remaining, lot.shares);
+      gain += (netPrice - lot.costPerShare) * take;
+      if (!ctx.isLongTerm(lot.day)) allLt = false;
+      remaining -= take;
+    }
+    return [gain, allLt];
+  }
+  onDay(ctx) {
+    const key = periodKey(ctx.day, this.rebalance);
+    if (key === this.lastPeriod) return;
+    this.lastPeriod = key;
+    this.basket = this.picker.select(ctx, this.candidates(ctx), this.topN);
+
+    const longs = [];
+    for (const t of this.basket) {
+      if (!ctx.canTrade(t)) continue;
+      const entryPrice = this.entry.has(t) ? this.entry.get(t) : null;
+      if (this.timer.wantLong(ctx, t, ctx.shares(t) > 0, entryPrice))
+        longs.push(t);
+    }
+
+    const pv = ctx.portfolioValue;
+    if (pv <= 0) return;
+    const weight = longs.length > 0 ? 1.0 / longs.length : 0.0;
+
+    // Target share counts from ONE portfolio-value snapshot, so the plan does
+    // not shift underneath itself as fills come in.
+    const wanted = new Set(longs);
+    const targets = new Map();
+    const names = new Set([...wanted, ...ctx.positions.keys()]);
+    for (const t of names) {
+      const px = ctx.price(t);
+      if (px === null || px <= 0) continue;
+      targets.set(t, wanted.has(t) ? (pv * weight) / px : 0.0);
+    }
+
+    // ---- sells, rationed by the realized-gain budget
+    const [st, lt] = ctx.realizedThisYear();
+    let room = this.gainBudget * pv - (st + lt);
+
+    const candidates = [];
+    for (const [t, target] of targets) {
+      const held = ctx.shares(t);
+      if (held <= 0 || target >= held) continue;
+      const qty = held - target;
+      const px = ctx.price(t);
+      const net = px * (1.0 - ctx.slippagePct) * (1.0 - ctx.commissionPct);
+      const [gain, allLt] = this.gainIfSold(ctx, t, qty, net);
+      candidates.push({ isGain: gain > 0, isShort: !allLt, gain, t, qty });
+    }
+    // Losses first (they refill the budget), then gains smallest-first,
+    // long-term before short-term; ticker breaks ties reproducibly. Mirrors
+    // Python's tuple sort, where False sorts before True.
+    candidates.sort((a, b) => {
+      if (a.isGain !== b.isGain) return a.isGain ? 1 : -1;
+      if (a.isShort !== b.isShort) return a.isShort ? 1 : -1;
+      if (a.gain !== b.gain) return a.gain - b.gain;
+      if (a.t === b.t) return 0;
+      return a.t < b.t ? -1 : 1;
+    });
+    for (const c of candidates) {
+      let sell;
+      if (!c.isGain) sell = c.qty;
+      else if (c.gain <= room + 1e-9) sell = c.qty;
+      else if (room > 1e-9) {
+        const frac = room / c.gain;
+        if (frac <= 0.02) continue;
+        sell = c.qty * frac;
+      } else continue;
+      room -= c.gain * (sell / c.qty);
+      ctx.order(c.t, -sell);
+      if (c.gain < 0) this.lossSale.set(c.t, ctx.day);
+      if (ctx.shares(c.t) <= 0) this.entry.delete(c.t);
+    }
+
+    // ---- buys, in a fixed order so runs are reproducible
+    for (const t of [...longs].sort()) {
+      const last = this.lossSale.get(t);
+      if (last !== undefined && ctx.day - last <= this.washDays) continue;
+      const target = targets.get(t);
+      if (target === undefined) continue;
+      const delta = target - ctx.shares(t);
+      if (delta > 0) ctx.order(t, delta);
+    }
+
+    this.members = new Set(longs.filter((t) => ctx.shares(t) > 0));
+    for (const t of longs) {
+      if (!this.entry.has(t) && ctx.shares(t) > 0) {
+        const px = ctx.price(t);
+        if (px !== null) this.entry.set(t, px);
       }
     }
   }

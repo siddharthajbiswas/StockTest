@@ -103,6 +103,11 @@ export function Results({
     picker: pickerUsed,
     universeOption: universeUsed,
     period: data.period,
+    tickersUsed: mode === "manual" ? null : data.tickers_used,
+    tradeRule: data.trade_rule,
+    // Every ticker the run could hold (manual basket or menu), for the
+    // leveraged-fund caveat.
+    basket: data.tickers_used ?? [],
   });
   return (
     <div className="results-overlay" onClick={onClose}>

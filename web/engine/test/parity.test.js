@@ -31,9 +31,12 @@ import {
   makeTimer,
   membersByCalendar,
   metricsDict,
+  resultSince,
   roundTrips,
   totals,
   tradesList,
+  TaxManagedCombo,
+  UNIVERSE_EXCLUDE,
 } from "../src/index.js";
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, "..", "..", "..");
@@ -83,34 +86,42 @@ function loadUniverse() {
 function runCase(req) {
   const startDay = dayFromIso(req.start);
   const endDay = dayFromIso(req.end);
+  // Warm-up: bars before the window, untraded, clipped back out of the result.
+  const warmupDays = Number(req.warmup_days ?? 0) || 0;
+  const dataStartDay = warmupDays ? startDay - warmupDays : startDay;
+  const menu =
+    Array.isArray(req.menu) && req.menu.length > 0 ? req.menu : null;
   const isManual =
     req.tickers !== undefined && req.tickers !== null && req.tickers.length > 0;
+  const basket = isManual ? req.tickers : menu;
   const prices = new Map();
   let market;
   let tickersUsed = null;
   let topN;
-  if (isManual) {
+  if (basket !== null) {
     // _manual_market: de-dup preserving order, append SPY if absent. This
     // ordering becomes the market's column order, so it must match Python.
-    const wanted = [...new Set(req.tickers)];
+    const wanted = [...new Set(basket)];
     const withSpy = wanted.includes(BENCHMARK)
       ? wanted
       : [...wanted, BENCHMARK];
     for (const t of withSpy) {
-      const c = clipSeries(loadTicker(t), startDay, endDay);
+      const c = clipSeries(loadTicker(t), dataStartDay, endDay);
       if (c.days.length > 0) prices.set(t, c);
     }
     tickersUsed = wanted.filter((t) => prices.has(t));
     market = new MarketData(prices, null);
-    topN = Math.max(1, req.tickers.length);
+    topN = isManual ? Math.max(1, req.tickers.length) : (req.top_n ?? 15);
   } else {
-    // _universe_market: sorted(self.available), clipped.
-    const all = [...manifest.universe.tickers].sort();
+    // _universe_market: sorted(self.available - UNIVERSE_EXCLUDE), clipped.
+    const all = [...manifest.universe.tickers]
+      .filter((t) => !UNIVERSE_EXCLUDE.has(t))
+      .sort();
     const uni = loadUniverse();
     for (const t of all) {
       const s = uni.get(t);
       if (s === undefined) continue;
-      const c = clipSeries(s, startDay, endDay);
+      const c = clipSeries(s, dataStartDay, endDay);
       if (c.days.length > 0) prices.set(t, c);
     }
     let members = null;
@@ -132,28 +143,50 @@ function runCase(req) {
     : null;
   // A fresh strategy per run: Combo and the pickers carry per-run state (and
   // RandomPicker carries an RNG stream), exactly as Python's `make_strat()`.
-  const makeStrat = () =>
-    new Combo(
-      isManual
-        ? new FixedListPicker(req.tickers)
-        : makePicker(req.picker_id, req.picker_params ?? {}, fundamentals),
-      makeTimer(req.timer_id, req.timer_params ?? {}),
-      topN,
-      req.rebalance,
-    );
+  const taxManaged = (req.trade_rule ?? "standard") === "tax_managed";
+  const shortlist = !isManual && menu ? tickersUsed : null;
+  const makeStrat = () => {
+    const picker = isManual
+      ? new FixedListPicker(req.tickers)
+      : makePicker(req.picker_id, req.picker_params ?? {}, fundamentals);
+    const timer = makeTimer(req.timer_id, req.timer_params ?? {});
+    const inner = taxManaged
+      ? new TaxManagedCombo(
+          picker,
+          timer,
+          topN,
+          req.rebalance,
+          shortlist,
+          req.gain_budget ?? 0.01,
+          req.wash_days ?? 31,
+        )
+      : new Combo(picker, timer, topN, req.rebalance, shortlist);
+    if (!warmupDays) return inner;
+    return {
+      initialize: (ctx) => inner.initialize(ctx),
+      onDay: (ctx) => {
+        if (ctx.day >= startDay) inner.onDay(ctx);
+      },
+    };
+  };
+  const clip = (res) => (warmupDays ? resultSince(res, startDay) : res);
   const run = (p) =>
-    new Backtest(makeStrat(), market, {
-      cash: req.cash,
-      commissionPct: req.commission_pct,
-      slippagePct: req.slippage_pct,
-      taxPolicy: p,
-    }).run();
+    clip(
+      new Backtest(makeStrat(), market, {
+        cash: req.cash,
+        commissionPct: req.commission_pct,
+        slippagePct: req.slippage_pct,
+        taxPolicy: p,
+      }).run(),
+    );
   const net = run(policy);
   const gross = policy !== null ? run(null) : net;
   let benchmark = null;
   const spy = prices.get(BENCHMARK);
   if (spy !== undefined) {
-    const spyMarket = new MarketData(new Map([[BENCHMARK, spy]]), null);
+    // The benchmark covers the WINDOW, never the warm-up prefix.
+    const spySeries = warmupDays ? clipSeries(spy, startDay, endDay) : spy;
+    const spyMarket = new MarketData(new Map([[BENCHMARK, spySeries]]), null);
     const runSpy = (p) =>
       new Backtest(new BuyAndHold(), spyMarket, {
         cash: req.cash,
@@ -176,8 +209,8 @@ function runCase(req) {
       bm.beats_spy_after_tax = net.afterTaxCagr > spyNet.afterTaxCagr;
     }
     bm.curve = {
-      pretax: alignTotals(spyGross, market.calendar),
-      aftertax: alignTotals(spyNet, market.calendar),
+      pretax: alignTotals(spyGross, net.equity.days),
+      aftertax: alignTotals(spyNet, net.equity.days),
     };
     benchmark = bm;
   }
@@ -190,12 +223,13 @@ function runCase(req) {
   metrics.tax_drag_cagr = gross.cagr - net.afterTaxCagr;
   metrics.win_rate = winRate;
   metrics.n_round_trips = rt.length;
-  const days = market.calendar;
+  const days = net.equity.days;
   return {
     mode: isManual ? "manual" : "picker",
     picker_id: isManual ? null : req.picker_id,
     timer_id: req.timer_id,
-    universe: isManual ? "all" : (req.universe ?? "all"),
+    universe: isManual || menu ? "all" : (req.universe ?? "all"),
+    trade_rule: taxManaged ? "tax_managed" : "standard",
     period: { start: isoDay(days[0]), end: isoDay(days[days.length - 1]) },
     tickers_used: tickersUsed,
     metrics,

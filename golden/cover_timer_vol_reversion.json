@@ -5520,6 +5520,7 @@
     ],
     "tickers_used": null,
     "timer_id": "vol_reversion",
+    "trade_rule": "standard",
     "trades": [
       {
         "commission": 25.0125,

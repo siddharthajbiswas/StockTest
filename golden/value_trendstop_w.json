@@ -11140,6 +11140,7 @@
     ],
     "tickers_used": null,
     "timer_id": "trend_stop",
+    "trade_rule": "standard",
     "trades": [
       {
         "commission": 6.253125,

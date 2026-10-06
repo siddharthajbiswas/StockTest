@@ -15,7 +15,7 @@ Typical use:
     result.summary()
 """
 
-from .composite import Combo, Picker, Timer
+from .composite import Combo, Picker, TaxManagedCombo, Timer
 from .data import load_prices
 from .engine import Backtest
 from .market import MarketData
@@ -31,6 +31,7 @@ __all__ = [
     "Picker",
     "Result",
     "Strategy",
+    "TaxManagedCombo",
     "TaxPolicy",
     "Timer",
     "load_prices",

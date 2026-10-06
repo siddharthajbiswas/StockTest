@@ -18,6 +18,46 @@ export function isoOfDay(day) {
   return new Date(day * MS_PER_DAY).toISOString().slice(0, 10);
 }
 
+/**
+ * `res` restricted to the window starting at `sinceDay`. Port of
+ * `Result.since` in `backtester/result.py`.
+ *
+ * For a run given extra history purely to warm up its indicators: the engine
+ * needs the earlier bars, but the scorecard should cover only the requested
+ * window. Valid exactly when nothing traded before `sinceDay`, so the sliced
+ * curve still starts at the original cash and no tax has been paid yet.
+ */
+export function resultSince(res, sinceDay) {
+  const days = res.equity.days;
+  let i = 0;
+  while (i < days.length && days[i] < sinceDay) i++;
+  if (i >= days.length)
+    throw new Error(`no trading days on or after day ${sinceDay}`);
+  for (const t of res.trades) {
+    if (t.day < sinceDay)
+      throw new Error(
+        "resultSince() needs a window with no trades before it; " +
+          "the warm-up period must be untraded.",
+      );
+  }
+  const equity = {
+    days: days.slice(i),
+    cash: res.equity.cash.slice(i),
+    holdings: res.equity.holdings.slice(i),
+    total: res.equity.total.slice(i),
+  };
+  return new Result(
+    equity,
+    res.trades,
+    // Unchanged: nothing traded before the window, so the portfolio is still
+    // exactly the original cash on its first morning. equity.total[0] is that
+    // day's CLOSE, already net of the day's costs.
+    res.startingCash,
+    res.taxesPaid,
+    res.terminalTax,
+  );
+}
+
 export class Result {
   equity;
   trades;

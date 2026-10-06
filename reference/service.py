@@ -24,8 +24,15 @@ _ROOT = Path(__file__).resolve().parents[1]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-from backtester import Backtest, Combo, Picker, TaxPolicy  # noqa: E402
-from backtester.data import load_prices  # noqa: E402
+from backtester import (  # noqa: E402
+    Backtest,
+    Combo,
+    Picker,
+    Strategy,
+    TaxManagedCombo,
+    TaxPolicy,
+)
+from backtester.data import UNIVERSE_EXCLUDE, load_prices  # noqa: E402
 from grid_combos import benchmark_spy, build_market  # noqa: E402
 from strategies.pickers import FUNDAMENTALS_PATH, PICKERS  # noqa: E402
 from strategies.timers import TIMERS  # noqa: E402
@@ -52,6 +59,33 @@ class UnknownTickersError(Exception):
 
 class InvalidStrategyError(Exception):
     """Raised for an unknown picker/timer id or bad strategy parameters."""
+
+
+class WarmUpGate(Strategy):
+    """Wraps a strategy so it does nothing before `start`.
+
+    Paired with a market that begins earlier, this is how a request gets a
+    *warm* signal without the warm-up period polluting the scorecard: the inner
+    strategy can see the extra bars through `ctx.history`, but it cannot trade
+    on them, so the portfolio is still untouched cash on the first day of the
+    window. `Result.since(start)` then reports the window alone.
+
+    Without this, a 12-month-lookback strategy asked for "2010 to 2020" spends
+    its first year in cash with nothing to rank, while the benchmark is
+    compounding — a handicap that comes from the harness, not the strategy.
+    """
+
+    def __init__(self, inner: Strategy, start):
+        self.inner = inner
+        self.start = pd.Timestamp(start)
+
+    def initialize(self, ctx) -> None:
+        self.inner.initialize(ctx)
+
+    def on_day(self, ctx) -> None:
+        if ctx.date < self.start:
+            return
+        self.inner.on_day(ctx)
 
 
 class FixedListPicker(Picker):
@@ -132,13 +166,17 @@ class EngineService:
                 break  # everything is pinned; stop evicting
 
     def _universe_market(self, universe: str, start, end, pin: bool = False):
-        """MarketData over the full local universe, optionally PIT-filtered."""
+        """MarketData over the full local universe, optionally PIT-filtered.
+        UNIVERSE_EXCLUDE names (e.g. the leveraged SSO) are left out: they are
+        for manual/menu mode only."""
         key = ("universe", universe, start, end)
         with self._lock:
             if key in self._cache:
                 self._cache.move_to_end(key)
                 return self._cache[key]
-            prices = self._clip_universe(sorted(self.available), start, end)
+            prices = self._clip_universe(
+                sorted(t for t in self.available if t not in UNIVERSE_EXCLUDE), start, end
+            )
             if not prices:
                 raise InvalidStrategyError("No price data in the requested date range.")
             market = build_market(prices, universe)
@@ -207,34 +245,77 @@ class EngineService:
             self._make_picker(config.picker_id, config.picker_params)
 
     # ---- shared market/strategy resolution ------------------------------
+    def _combo_class(self, req):
+        """Combo, or TaxManagedCombo when the request asks for the gain-budget
+        execution rule. Both take the same picker/timer, so every picker and
+        timer in the catalog works under either rule."""
+        if getattr(req, "trade_rule", "standard") != "tax_managed":
+            return Combo, {}
+        return TaxManagedCombo, {
+            "gain_budget": getattr(req, "gain_budget", 0.01),
+            "wash_days": getattr(req, "wash_days", 31),
+        }
+
     def _resolve(self, req):
         """Return (market, make_strat, tickers_used). `make_strat` builds a
         *fresh* strategy each call (Combo/pickers carry per-run state)."""
+        combo_cls, combo_kw = self._combo_class(req)
+        menu = getattr(req, "menu", None)
+        # Warm-up: load bars before the window so indicators are already warm on
+        # its first day, and gate every strategy so nothing trades until then.
+        warmup_days = int(getattr(req, "warmup_days", 0) or 0)
+        data_start = req.start
+        if warmup_days and req.start:
+            data_start = (
+                pd.Timestamp(req.start) - pd.Timedelta(days=warmup_days)
+            ).date().isoformat()
+        gate = (lambda s: WarmUpGate(s, req.start)) if data_start != req.start else (lambda s: s)
         if req.is_manual:
             missing = [t for t in req.tickers if t not in self.available]
             if missing:
                 raise UnknownTickersError(missing)
-            market, tickers_used = self._manual_market(req.tickers, req.start, req.end)
+            market, tickers_used = self._manual_market(req.tickers, data_start, req.end)
             top_n = max(1, len(req.tickers))
 
             def make_strat():
-                return Combo(
+                return gate(combo_cls(
                     FixedListPicker(req.tickers),
                     self._make_timer(req.timer_id, req.timer_params),
                     top_n=top_n,
                     rebalance=req.rebalance,
-                )
-        else:
-            market = self._universe_market(req.universe, req.start, req.end)
-            tickers_used = None
+                    **combo_kw,
+                ))
+        elif menu:
+            # A shortlist behaves exactly like the full universe with the picker
+            # filtered to `menu` — but building the market from just those names
+            # is far cheaper, and in the browser it downloads a handful of
+            # per-ticker files instead of the 13 MB universe bundle.
+            missing = [t for t in menu if t not in self.available]
+            if missing:
+                raise UnknownTickersError(missing)
+            market, tickers_used = self._manual_market(menu, data_start, req.end)
 
             def make_strat():
-                return Combo(
+                return gate(combo_cls(
                     self._make_picker(req.picker_id, req.picker_params),
                     self._make_timer(req.timer_id, req.timer_params),
                     top_n=req.top_n,
                     rebalance=req.rebalance,
-                )
+                    menu=tickers_used,
+                    **combo_kw,
+                ))
+        else:
+            market = self._universe_market(req.universe, data_start, req.end)
+            tickers_used = None
+
+            def make_strat():
+                return gate(combo_cls(
+                    self._make_picker(req.picker_id, req.picker_params),
+                    self._make_timer(req.timer_id, req.timer_params),
+                    top_n=req.top_n,
+                    rebalance=req.rebalance,
+                    **combo_kw,
+                ))
 
         return market, make_strat, tickers_used
 
@@ -252,7 +333,14 @@ class EngineService:
             commission_pct=req.commission_pct, slippage_pct=req.slippage_pct,
             tax_policy=net_policy,
         ).run()
-        return res.equity["total"]
+        return self._clip_warmup(res, req).equity["total"]
+
+    @staticmethod
+    def _clip_warmup(res, req):
+        """Drop the warm-up prefix so the scorecard covers only the window."""
+        if not getattr(req, "warmup_days", 0) or not req.start:
+            return res
+        return res.since(req.start)
 
     # ---- the core run ----------------------------------------------------
     def run_backtest(self, req) -> dict:
@@ -276,8 +364,8 @@ class EngineService:
         # The "net" run is what the user actually experiences (taxes on if
         # requested). The "gross" run (taxes off) gives the honest pre-tax line —
         # the MarketData layout is cached, so this second pass is just the sim.
-        net_res = run(net_policy)
-        gross_res = run(None) if net_policy is not None else net_res
+        net_res = self._clip_warmup(run(net_policy), req)
+        gross_res = self._clip_warmup(run(None), req) if net_policy is not None else net_res
 
         dates = net_res.equity.index
         equity_curve = {
@@ -323,7 +411,8 @@ class EngineService:
             "mode": "manual" if req.is_manual else "picker",
             "picker_id": None if req.is_manual else req.picker_id,
             "timer_id": req.timer_id,
-            "universe": "all" if req.is_manual else req.universe,
+            "universe": "all" if (req.is_manual or getattr(req, "menu", None)) else req.universe,
+            "trade_rule": getattr(req, "trade_rule", "standard"),
             "period": {
                 "start": dates[0].date().isoformat(),
                 "end": dates[-1].date().isoformat(),

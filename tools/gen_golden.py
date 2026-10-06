@@ -140,6 +140,53 @@ CASES: list[dict] = [
                     rebalance="M", start="2016-01-01", end="2021-12-31",
                     universe="all", tax=TAX_ON, **COSTS),
     },
+    {
+        "id": "tax_managed_etf_menu",
+        "why": "The TaxManagedCombo execution rule on the ETF menu — the "
+               "recommended configuration of strategies/tax_managed.py. Covers "
+               "four paths at once that no other golden touches: the realized-"
+               "gain budget (losses free, gains rationed and part-filled), the "
+               "31-day wash-sale repurchase block, the `menu` shortlist, and "
+               "12-1 momentum (lookback with a skip). California rates.",
+        "portable": True,
+        "req": dict(picker_id="momentum", picker_params={"lookback": 252, "skip": 21},
+                    timer_id="buy_hold", timer_params={}, top_n=5,
+                    rebalance="Q", start="2005-01-01", end="2015-12-31",
+                    warmup_days=450,
+                    menu=["SPY", "QQQ", "DIA", "MDY", "IWM", "IJR", "EFA", "EEM",
+                          "IWD", "IWF", "RSP", "XLB", "XLC", "XLE", "XLF", "XLI",
+                          "XLK", "XLP", "XLRE", "XLU", "XLV", "XLY"],
+                    trade_rule="tax_managed", gain_budget=0.01, wash_days=31,
+                    universe="all",
+                    tax={"enabled": True, "short_term_rate": 0.481,
+                         "long_term_rate": 0.281, "long_term_days": 365},
+                    **COSTS),
+    },
+    {
+        "id": "tax_managed_budget_zero",
+        "why": "gain_budget=0 — the branch where a gain sale is refused "
+               "outright rather than part-filled, so the portfolio can only "
+               "rotate out of positions it can sell at a loss. Semi-annual "
+               "cadence covers the 'S' period key the base Combo gained.",
+        "portable": True,
+        "req": dict(picker_id="momentum", picker_params={"lookback": 126},
+                    timer_id="ma_cross", timer_params={"fast": 50, "slow": 200},
+                    top_n=8, rebalance="S", start="2006-01-01", end="2013-12-31",
+                    universe="sp500-pit", trade_rule="tax_managed",
+                    gain_budget=0.0, wash_days=31, tax=TAX_ON, **COSTS),
+    },
+    {
+        "id": "warmup_clip",
+        "why": "warmup_days on an ordinary Combo: extra history is loaded, "
+               "nothing trades in it, and Result.since() clips it out of the "
+               "curve and metrics. Pins that the warm-up window leaves the "
+               "scorecard starting at exactly the requested cash.",
+        "portable": True,
+        "req": dict(picker_id="momentum", picker_params={"lookback": 252},
+                    timer_id="buy_hold", timer_params={}, top_n=10,
+                    rebalance="M", start="2012-01-01", end="2016-12-31",
+                    warmup_days=400, universe="all", tax=TAX_ON, **COSTS),
+    },
 ]
 
 # ---------------------------------------------------------------------------
@@ -200,6 +247,25 @@ for _picker_id in [
                     timer_params={}, top_n=10, rebalance="M",
                     tax=TAX_ON, **_WINDOW, **COSTS),
     })
+
+CASES.append({
+    "id": "manual_trendswitch_sso_ief",
+    "why": "The trend_switch timer as the site's 2x preset runs it: SSO (2x S&P "
+           "500) while SPY is more than 3% above its 175-day SMA, IEF once it is "
+           "more than 3% below, evaluated daily at the close with hysteresis. "
+           "Pins the once-per-date state shared across both basket names, string "
+           "timer params, the undecided-until-warm state, a 400-day warm-up and "
+           "California rates over 2007-2026 (2008, 2020 and 2022 included).",
+    "portable": True,
+    "req": dict(tickers=["SSO", "IEF"], timer_id="trend_switch",
+                timer_params={"signal": "SPY", "n": 175, "band": 0.03,
+                              "risk": "SSO", "safe": "IEF"},
+                rebalance="M", start="2007-01-01", end="2026-07-01",
+                warmup_days=400,
+                tax={"enabled": True, "short_term_rate": 0.481,
+                     "long_term_rate": 0.281, "long_term_days": 365},
+                **COSTS),
+})
 
 
 # ---------------------------------------------------------------------------

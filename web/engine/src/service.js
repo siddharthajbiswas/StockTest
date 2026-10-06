@@ -15,7 +15,7 @@
  *     cache has nothing to protect.
  */
 import { Backtest } from "./engine.js";
-import { Combo } from "./composite.js";
+import { Combo, TaxManagedCombo } from "./composite.js";
 import { MarketData } from "./market.js";
 import { makeTaxPolicy } from "./tax.js";
 import { makePicker, FixedListPicker } from "./pickers.js";
@@ -29,7 +29,7 @@ import {
   decodeTicker,
   decodeUniverse,
 } from "./data.js";
-import { membersByCalendar } from "./universe.js";
+import { UNIVERSE_EXCLUDE, membersByCalendar } from "./universe.js";
 import {
   alignTotals,
   metricsDict,
@@ -37,7 +37,7 @@ import {
   totals,
   tradesList,
 } from "./serialize.js";
-import { isoOfDay } from "./result.js";
+import { isoOfDay, resultSince } from "./result.js";
 import { runAllCurves } from "./walkforward.js";
 import { runValidation } from "./validation.js";
 const BENCHMARK = "SPY";
@@ -64,6 +64,24 @@ const DEFAULT_TAX = {
   long_term_rate: 0.15,
   long_term_days: 365,
 };
+/**
+ * Wraps a strategy so it does nothing before `startDay`. Port of `WarmUpGate`
+ * in `reference/service.py` — see that docstring for why warm-up exists.
+ */
+class WarmUpGate {
+  constructor(inner, startDay) {
+    this.inner = inner;
+    this.startDay = startDay;
+  }
+  initialize(ctx) {
+    this.inner.initialize(ctx);
+  }
+  onDay(ctx) {
+    if (ctx.day < this.startDay) return;
+    this.inner.onDay(ctx);
+  }
+}
+
 export class EngineService {
   load;
   manifest = null;
@@ -292,6 +310,9 @@ export class EngineService {
     const uni = await this.needUniverse();
     const prices = new Map();
     for (const t of [...this.manifest.universe.tickers].sort()) {
+      // Manual/menu-only names (e.g. the leveraged SSO). The bundle already
+      // omits them; filtering here too keeps an older bundle honest.
+      if (UNIVERSE_EXCLUDE.has(t)) continue;
       const s = uni.get(t);
       if (s === undefined) continue;
       const c = clipSeries(s, startDay, endDay);
@@ -333,23 +354,44 @@ export class EngineService {
     const rebalance = req.rebalance ?? "M";
     const start = req.start ?? null;
     const end = req.end ?? null;
+    // Warm-up: load bars before the window so indicators are warm on its first
+    // day. Nothing trades in them and they are clipped back out below, so a
+    // long-lookback strategy is not handicapped by spending the start of the
+    // window in cash with nothing to rank.
+    const warmupDays = Number(req.warmup_days ?? 0) || 0;
+    const sinceDay = start === null ? null : dayFromIso(start);
+    const dataStart =
+      warmupDays && start !== null
+        ? isoOfDay(dayFromIso(start) - warmupDays)
+        : start;
+    const menu = Array.isArray(req.menu) && req.menu.length > 0 ? req.menu : null;
     let market;
     let prices;
     let tickersUsed = null;
     let topN;
     if (isManual) {
-      const m = await this.manualMarket(req.tickers, start, end);
+      const m = await this.manualMarket(req.tickers, dataStart, end);
       market = m.market;
       prices = m.prices;
       tickersUsed = m.tickersUsed;
       topN = Math.max(1, req.tickers.length);
+    } else if (menu) {
+      // A shortlist behaves exactly like the full universe with the picker
+      // filtered to `menu`, but building the market from just those names
+      // downloads a handful of per-ticker files instead of the 13 MB bundle.
+      const m = await this.manualMarket(menu, dataStart, end);
+      market = m.market;
+      prices = m.prices;
+      tickersUsed = m.tickersUsed;
+      topN = req.top_n ?? 15;
     } else {
-      const m = await this.universeMarket(req.universe ?? "all", start, end);
+      const m = await this.universeMarket(req.universe ?? "all", dataStart, end);
       market = m.market;
       prices = m.prices;
       topN = req.top_n ?? 15;
     }
     const fundamentals = isManual ? null : await this.needFundamentals();
+    const taxManaged = (req.trade_rule ?? "standard") === "tax_managed";
     const policy = tax.enabled
       ? makeTaxPolicy(
           tax.short_term_rate,
@@ -357,28 +399,49 @@ export class EngineService {
           tax.long_term_days,
         )
       : null;
-    const makeStrat = () =>
-      new Combo(
-        isManual
-          ? new FixedListPicker(req.tickers)
-          : makePicker(req.picker_id, req.picker_params ?? {}, fundamentals),
-        makeTimer(req.timer_id, req.timer_params ?? {}),
-        topN,
-        rebalance,
-      );
+    const makeStrat = () => {
+      const picker = isManual
+        ? new FixedListPicker(req.tickers)
+        : makePicker(req.picker_id, req.picker_params ?? {}, fundamentals);
+      const timer = makeTimer(req.timer_id, req.timer_params ?? {});
+      const shortlist = !isManual && menu ? tickersUsed : null;
+      const inner = taxManaged
+        ? new TaxManagedCombo(
+            picker,
+            timer,
+            topN,
+            rebalance,
+            shortlist,
+            req.gain_budget ?? 0.01,
+            req.wash_days ?? 31,
+          )
+        : new Combo(picker, timer, topN, rebalance, shortlist);
+      return warmupDays && sinceDay !== null
+        ? new WarmUpGate(inner, sinceDay)
+        : inner;
+    };
+    const clip = (res) =>
+      warmupDays && sinceDay !== null ? resultSince(res, sinceDay) : res;
     const run = (p) =>
-      new Backtest(makeStrat(), market, {
-        cash,
-        commissionPct,
-        slippagePct,
-        taxPolicy: p,
-      }).run();
+      clip(
+        new Backtest(makeStrat(), market, {
+          cash,
+          commissionPct,
+          slippagePct,
+          taxPolicy: p,
+        }).run(),
+      );
     const net = run(policy);
     const gross = policy !== null ? run(null) : net;
     let benchmark = null;
     const spy = prices.get(BENCHMARK);
     if (spy !== undefined) {
-      const spyMarket = new MarketData(new Map([[BENCHMARK, spy]]), null);
+      // The benchmark is measured over the WINDOW, never the warm-up prefix.
+      const spySeries =
+        warmupDays && sinceDay !== null
+          ? clipSeries(spy, sinceDay, end === null ? Infinity : dayFromIso(end))
+          : spy;
+      const spyMarket = new MarketData(new Map([[BENCHMARK, spySeries]]), null);
       const runSpy = (p) =>
         new Backtest(new BuyAndHold(), spyMarket, {
           cash,
@@ -402,8 +465,8 @@ export class EngineService {
         benchmark.beats_spy_after_tax = net.afterTaxCagr > spyNet.afterTaxCagr;
       }
       benchmark.curve = {
-        pretax: alignTotals(spyGross, market.calendar),
-        aftertax: alignTotals(spyNet, market.calendar),
+        pretax: alignTotals(spyGross, net.equity.days),
+        aftertax: alignTotals(spyNet, net.equity.days),
       };
     }
     const { rt, winRate } = roundTrips(net.trades);
@@ -415,12 +478,13 @@ export class EngineService {
     metrics.tax_drag_cagr = gross.cagr - net.afterTaxCagr;
     metrics.win_rate = winRate;
     metrics.n_round_trips = rt.length;
-    const days = market.calendar;
+    const days = net.equity.days;
     return {
       mode: isManual ? "manual" : "picker",
       picker_id: isManual ? null : req.picker_id,
       timer_id: req.timer_id,
-      universe: isManual ? "all" : (req.universe ?? "all"),
+      universe: isManual || menu ? "all" : (req.universe ?? "all"),
+      trade_rule: taxManaged ? "tax_managed" : "standard",
       period: {
         start: isoOfDay(days[0]),
         end: isoOfDay(days[days.length - 1]),
@@ -442,6 +506,7 @@ export class EngineService {
     const tax = req.tax ?? DEFAULT_TAX;
     const isManual = req.tickers != null && req.tickers.length > 0;
     const fundamentals = isManual ? null : await this.needFundamentals();
+    const taxManaged = (req.trade_rule ?? "standard") === "tax_managed";
     const policy = tax.enabled
       ? makeTaxPolicy(
           tax.short_term_rate,
@@ -449,15 +514,28 @@ export class EngineService {
           tax.long_term_days,
         )
       : null;
+    const picker = isManual
+      ? new FixedListPicker(req.tickers)
+      : makePicker(req.picker_id, req.picker_params ?? {}, fundamentals);
+    const timer = makeTimer(req.timer_id, req.timer_params ?? {});
+    const menu =
+      !isManual && Array.isArray(req.menu) && req.menu.length > 0
+        ? req.menu
+        : null;
+    // The validator must re-run the SAME strategy the user configured — trade
+    // rule included, since it is the dominant term in an after-tax result.
     return new Backtest(
-      new Combo(
-        isManual
-          ? new FixedListPicker(req.tickers)
-          : makePicker(req.picker_id, req.picker_params ?? {}, fundamentals),
-        makeTimer(req.timer_id, req.timer_params ?? {}),
-        topN,
-        req.rebalance ?? "M",
-      ),
+      taxManaged
+        ? new TaxManagedCombo(
+            picker,
+            timer,
+            topN,
+            req.rebalance ?? "M",
+            menu,
+            req.gain_budget ?? 0.01,
+            req.wash_days ?? 31,
+          )
+        : new Combo(picker, timer, topN, req.rebalance ?? "M", menu),
       market,
       {
         cash: 100_000.0,

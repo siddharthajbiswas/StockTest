@@ -8456,6 +8456,7 @@
     ],
     "tickers_used": null,
     "timer_id": "dual_momentum",
+    "trade_rule": "standard",
     "trades": [
       {
         "commission": 5.0025,

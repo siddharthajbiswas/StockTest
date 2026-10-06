@@ -9611,6 +9611,7 @@
     ],
     "tickers_used": null,
     "timer_id": "turtle",
+    "trade_rule": "standard",
     "trades": [
       {
         "commission": 49.97501249375312,

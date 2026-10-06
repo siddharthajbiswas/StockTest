@@ -13,12 +13,29 @@ FIELDS = ["Open", "High", "Low", "Close", "Volume"]
 # tradable universe (e.g. the fundamentals snapshot written by fetch_fundamentals).
 NON_PRICE_FILES = {"fundamentals", "sp500_constituents", "company_names"}
 
+# Tickers with price data on disk that are NOT part of the stock-picking
+# universes ("all" and "sp500-pit"). They stay loadable by name — manual mode,
+# a picker's `menu`, ticker search — but no picker can choose them from the
+# universe, and adding them changed no existing universe result.
+#   SSO  2x S&P 500 (daily reset) — leverage is a choice to make explicitly,
+#        never something a momentum ranking should drift into.
+#   IEF  7-10y Treasuries — the trend-switch preset's safe asset.
+# Honored identically by reference/service.py (universe markets), walkforward.py
+# and grid_combos.py (universe sweeps), tools/build_web_data.py (universe.bin
+# and its manifest) and web/engine/src/universe.js (the browser service).
+UNIVERSE_EXCLUDE = frozenset({"SSO", "IEF"})
+
 
 def available_tickers(data_dir: Path | str = DATA_DIR) -> list[str]:
     """Every ticker that has a price CSV on disk, sorted."""
     return sorted(
         p.stem for p in Path(data_dir).glob("*.csv") if p.stem not in NON_PRICE_FILES
     )
+
+
+def universe_tickers(data_dir: Path | str = DATA_DIR) -> list[str]:
+    """The stock-picking universe: `available_tickers` minus UNIVERSE_EXCLUDE."""
+    return [t for t in available_tickers(data_dir) if t not in UNIVERSE_EXCLUDE]
 
 
 def load_prices(

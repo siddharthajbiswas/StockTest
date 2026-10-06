@@ -139,3 +139,101 @@ def test_exactly_one_mode_is_enforced(svc):
         BacktestRequest(picker_id="momentum", tickers=["AAPL"], timer_id="buy_hold")
     with pytest.raises(ValueError):
         BacktestRequest(timer_id="buy_hold")
+
+
+# ---------------------------------------------------------------------------
+# trend_switch timer + the manual-only tickers it trades (SSO, IEF)
+# ---------------------------------------------------------------------------
+class _FakeCtx:
+    """Minimal Context: SPY closes by day index; None = no SPY bar that day."""
+
+    def __init__(self, spy):
+        self.spy = spy
+        self.date = None
+
+    def price(self, ticker, field="Close"):
+        if ticker != "SPY":
+            return None
+        return self.spy[self.date]
+
+    def history(self, ticker, field="Close", window=None):
+        import pandas as pd
+
+        if ticker != "SPY":
+            return pd.Series(dtype=float)
+        bars = [v for v in self.spy[: self.date + 1] if v is not None]
+        start = len(bars) - window if (window and window < len(bars)) else 0
+        return pd.Series(bars[start:], dtype=float)
+
+
+def test_trend_switch_state_machine():
+    """Same scenario and answers as web/engine/test/trendswitch.test.js: an
+    undecided start (nothing held), the first evaluation at margin 0 (safe),
+    hysteresis at +/-band, and a no-data day that keeps the state."""
+    from strategies.timers import TrendSwitchTimer
+
+    spy = [100, 100, 100, 120, 110, 90, None, 96]
+    expect = [None, None, False, True, True, False, False, False]
+    ctx = _FakeCtx(spy)
+    t = TrendSwitchTimer(signal="SPY", n=3, band=0.1, risk="SSO", safe="IEF")
+    t.initialize(ctx)
+    for d, want in enumerate(expect):
+        ctx.date = d
+        got = [t.want_long(ctx, k, held=False, entry_price=None) for k in ("SSO", "IEF", "SPY")]
+        assert got[2] is False, f"day {d}: a ticker in neither list"
+        assert got[:2] == ([False, False] if want is None else [want, not want]), f"day {d}"
+
+
+def test_trend_switch_evaluates_once_per_date():
+    from strategies.timers import TrendSwitchTimer
+
+    spy = [100, 100, 100, 100]
+    ctx = _FakeCtx(spy)
+    t = TrendSwitchTimer(n=3, band=0.1)
+    t.initialize(ctx)
+    for d in range(3):
+        ctx.date = d
+        t.want_long(ctx, "SSO", held=False, entry_price=None)
+    assert t._state is False
+    ctx.date = 3
+    spy[3] = 150
+    assert t.want_long(ctx, "SSO", held=False, entry_price=None) is True
+    spy[3] = 50  # same date again: must not re-evaluate
+    assert t.want_long(ctx, "IEF", held=False, entry_price=None) is False
+
+
+def test_trend_switch_parses_string_params():
+    from strategies.timers import TrendSwitchTimer
+
+    t = TrendSwitchTimer(signal=" spy ", n="175", band="0.03", risk=" sso, qld ,SSO,,", safe=["ief"])
+    assert (t.signal, t.n, t.band, t.risk, t.safe) == ("SPY", 175, 0.03, ("SSO", "QLD"), ("IEF",))
+
+
+def test_manual_only_tickers_stay_out_of_the_universe(svc):
+    """SSO/IEF are on disk for manual/menu mode, but no picker may choose them:
+    they are excluded from both universe markets."""
+    from backtester.data import UNIVERSE_EXCLUDE
+
+    assert {"SSO", "IEF"} <= UNIVERSE_EXCLUDE <= svc.available
+    for universe in ("all", "sp500-pit"):
+        market = svc._universe_market(universe, "2010-01-01", "2010-12-31")
+        assert not UNIVERSE_EXCLUDE & set(market.tickers), universe
+    out = svc.run_backtest(BacktestRequest(
+        tickers=["SSO", "IEF"], timer_id="trend_switch",
+        timer_params={"signal": "SPY", "n": 175, "band": 0.03, "risk": "SSO", "safe": "IEF"},
+        start="2019-01-01", end="2020-12-31", warmup_days=400,
+    ))
+    assert out["tickers_used"] == ["SSO", "IEF"]
+    # One name held at a time: every trade day either opens the basket or swaps it.
+    held = {t["ticker"] for t in out["trades"]}
+    assert held == {"SSO", "IEF"}
+
+
+def test_sweeps_skip_manual_only_timers():
+    """The combo sweeps (and the validator built on them) pair every timer with
+    a picker; trend_switch would only sit in cash there."""
+    from strategies.timers import MANUAL_ONLY_TIMERS, SWEEP_TIMERS, TIMERS
+
+    assert "trend_switch" in TIMERS and "trend_switch" in MANUAL_ONLY_TIMERS
+    assert list(SWEEP_TIMERS) == [k for k in TIMERS if k != "trend_switch"]
+    assert len(SWEEP_TIMERS) == 10

@@ -1,4 +1,4 @@
-"""The 10 trading/timing strategies, each as a small `Timer`.
+"""The 11 trading/timing strategies, each as a small `Timer`.
 
 A timer answers one question per name per day: given the price history so far,
 do we want to be long *right now*? It never picks which stocks to consider —
@@ -220,7 +220,110 @@ class TrendStopTimer(Timer):
         return px > ma
 
 
-# Registry the grid runner sweeps over. Keys are stable short names.
+def _ticker_list(value) -> tuple[str, ...]:
+    """"SSO, qld" (or a list) -> ("SSO", "QLD"): stripped, upper-cased, de-duplicated,
+    in order. Mirrored exactly by `tickerList` in web/engine/src/timers.js."""
+    if value is None:
+        parts = []
+    elif isinstance(value, (list, tuple)):
+        parts = list(value)
+    else:
+        parts = str(value).split(",")
+    out: list[str] = []
+    for p in parts:
+        t = str(p).strip().upper()
+        if t and t not in out:
+            out.append(t)
+    return tuple(out)
+
+
+class TrendSwitchTimer(Timer):
+    """Switch between a risk basket and a safe basket on ONE trend signal.
+
+    Built for MANUAL mode with tickers = risk + safe, e.g. a 2x S&P 500 ETF
+    (SSO) and an intermediate Treasury ETF (IEF). Every trading day, on that
+    day's close:
+
+        margin = signal_close_today / mean(last n signal closes, today included) - 1
+
+    The first time the margin can be computed, state = (margin > 0). After that
+    the rule has hysteresis: state becomes True once margin > +band, False once
+    margin < -band, and is otherwise unchanged. While the state is True the
+    `risk` tickers are wanted long and the `safe` ones flat; while it is False,
+    the reverse (a ticker listed in both is wanted in both states). Any other
+    ticker is never wanted. Several risk (or safe) tickers are equal-weighted by
+    Combo, like any basket.
+
+    The state belongs to the signal, not to a ticker, so it is evaluated at most
+    once per trading date — on the first `want_long` call that day — and shared
+    by every ticker asked about on that date. (Combo only asks about basket names
+    that trade today, so a day on which none of them trades is not evaluated.)
+
+    Not enough data: until the first successful evaluation (fewer than `n`
+    signal closes so far, or no signal close today) the state is undecided
+    (None) and `want_long` is False for EVERY ticker — the portfolio waits in
+    cash rather than guessing. Once decided, a later day without a signal close
+    or without `n` closes keeps the previous state.
+
+    `signal` must be in the market to be read: SPY always is (the site adds it
+    for the benchmark); any other signal must be one of the basket tickers.
+
+    Leverage magnifies losses: a 2x daily-reset fund falls about twice as far
+    as the index on a bad day, before a rule evaluated at the close can react.
+
+    Same rule as research/lab/families/verify_lev_robust.py::Trend with
+    check="D", lag=0, ma="sma".
+    """
+
+    name = "trend_switch"
+
+    def __init__(
+        self,
+        signal: str = "SPY",
+        n: int = 175,
+        band: float = 0.03,
+        risk: str = "SSO",
+        safe: str = "IEF",
+    ):
+        self.signal = str("SPY" if signal is None else signal).strip().upper()
+        self.n = max(1, int(n))
+        self.band = float(band)
+        self.risk = _ticker_list("SSO" if risk is None else risk)
+        self.safe = _ticker_list("IEF" if safe is None else safe)
+        self._state: bool | None = None
+        self._last_date = None
+
+    def initialize(self, ctx) -> None:
+        self._state = None
+        self._last_date = None
+
+    def _update(self, ctx) -> None:
+        """Evaluate the rule on today's close — at most once per trading date."""
+        if self._last_date == ctx.date:
+            return
+        self._last_date = ctx.date
+        px = ctx.price(self.signal)
+        ma = sma(_closes(ctx, self.signal, self.n), self.n)
+        if px is None or ma is None or not ma > 0:
+            return  # not enough data: keep the previous state (None = undecided)
+        margin = px / ma - 1.0
+        if self._state is None:
+            self._state = margin > 0.0
+        elif margin > self.band:
+            self._state = True
+        elif margin < -self.band:
+            self._state = False
+
+    def want_long(self, ctx, ticker, *, held, entry_price) -> bool:
+        self._update(ctx)
+        if self._state is None:
+            return False
+        if self._state:
+            return ticker in self.risk
+        return ticker in self.safe
+
+
+# Registry of every timer. Keys are stable short names.
 TIMERS: dict[str, type[Timer]] = {
     "buy_hold": BuyHoldTimer,
     "ma_cross": MaCrossTimer,
@@ -232,4 +335,16 @@ TIMERS: dict[str, type[Timer]] = {
     "turtle": TurtleBreakoutTimer,
     "vol_reversion": VolReversionTimer,
     "trend_stop": TrendStopTimer,
+    "trend_switch": TrendSwitchTimer,
+}
+
+# Timers that only make sense on a hand-picked basket (manual mode): they decide
+# per *named* ticker, so paired with a picker they would just sit in cash.
+MANUAL_ONLY_TIMERS = frozenset({"trend_switch"})
+
+# What the combo sweeps (grid_combos.py, walkforward.py and the out-of-sample
+# validator built on it) iterate over, in registry order. Mirrored by TIMER_IDS
+# in web/engine/src/walkforward.js.
+SWEEP_TIMERS: dict[str, type[Timer]] = {
+    k: v for k, v in TIMERS.items() if k not in MANUAL_ONLY_TIMERS
 }

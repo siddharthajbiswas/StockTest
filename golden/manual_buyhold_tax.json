@@ -7655,6 +7655,7 @@
       "KO"
     ],
     "timer_id": "buy_hold",
+    "trade_rule": "standard",
     "trades": [
       {
         "commission": 10.005,

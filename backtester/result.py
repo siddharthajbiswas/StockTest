@@ -79,6 +79,39 @@ class Result:
         peak = curve.cummax()
         return float((curve / peak - 1.0).min())
 
+    def since(self, date) -> "Result":
+        """This result restricted to the window starting at `date`.
+
+        For a run that was given extra history purely to warm up its indicators:
+        the engine needs bars before the window, but the *scorecard* should only
+        cover the window the user asked about. Valid exactly when nothing traded
+        before `date` — the portfolio is still all cash there, so the sliced
+        curve starts at the original starting cash and no tax has been paid yet.
+        Raises if that precondition does not hold, rather than quietly reporting
+        a mis-scaled return.
+        """
+        date = pd.Timestamp(date)
+        equity = self.equity[self.equity.index >= date]
+        if equity.empty:
+            raise ValueError(f"no trading days on or after {date.date()}")
+        if not self.trades.empty and (self.trades.index < date).any():
+            raise ValueError(
+                "Result.since() needs a window with no trades before it; "
+                "the warm-up period must be untraded."
+            )
+        return Result(
+            equity=equity,
+            trades=self.trades,
+            # Unchanged: nothing traded before `date`, so the portfolio is still
+            # exactly the original cash on the window's first morning. Taking
+            # equity[0] instead would use the first day's CLOSE — already net of
+            # that day's commission and slippage — and quietly report the
+            # strategy's entry costs as a smaller starting balance.
+            starting_cash=self.starting_cash,
+            taxes_paid=self.taxes_paid,
+            terminal_tax=self.terminal_tax,
+        )
+
     # ---- reporting -------------------------------------------------------
     def summary(self) -> None:
         n_trades = 0 if self.trades.empty else len(self.trades)

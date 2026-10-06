@@ -44,9 +44,10 @@ import numpy as np
 import pandas as pd
 
 from backtester import Backtest, Combo, MarketData, TaxPolicy, load_prices
+from backtester.data import universe_tickers
 from strategies.buy_and_hold import BuyAndHold
 from strategies.pickers import PICKERS, PRICE_ONLY_PICKERS
-from strategies.timers import TIMERS
+from strategies.timers import SWEEP_TIMERS, TIMERS
 from grid_combos import build_market
 
 # ---- shared run config, set once, reused by every worker -----------------
@@ -108,17 +109,19 @@ def window_return(dates, totals, start, end) -> float:
 
 # ---- run all combos once, capture curves ---------------------------------
 def run_all_curves(args):
-    prices = load_prices(args.tickers, start=args.start, end=args.end)
+    # No explicit list = the stock-picking universe (UNIVERSE_EXCLUDE left out).
+    tickers = args.tickers or universe_tickers()
+    prices = load_prices(tickers, start=args.start, end=args.end)
     dates = None
     combos = list(itertools.product(
         [p for p in PICKERS if not args.price_only or p in PRICE_ONLY_PICKERS],
-        list(TIMERS),
+        list(SWEEP_TIMERS),
     ))
     print(f"Loaded {len(prices)} tickers; running {len(combos)} combos once "
           f"(net-of-everything, universe={args.universe}) on {args.jobs} core(s)...")
 
     curves: dict[tuple[str, str], np.ndarray] = {}
-    init = (args.tickers, args.start, args.end, args.universe, args.cash,
+    init = (tickers, args.start, args.end, args.universe, args.cash,
             args.commission_pct, args.slippage_pct, args.st_rate, args.lt_rate)
     t0 = time.time()
     if args.jobs == 1:
@@ -133,7 +136,7 @@ def run_all_curves(args):
             for pn, tn, tot in ex.map(_run_curve, combos, chunksize=1):
                 curves[(pn, tn)] = tot
         # Rebuild the calendar in the parent (cheap) for slicing.
-        dates = build_market(load_prices(args.tickers, start=args.start, end=args.end),
+        dates = build_market(load_prices(tickers, start=args.start, end=args.end),
                              args.universe).calendar
 
     # SPY buy&hold on the same calendar, net-of-everything.

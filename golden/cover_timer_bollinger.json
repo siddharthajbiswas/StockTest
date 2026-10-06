@@ -7169,6 +7169,7 @@
     ],
     "tickers_used": null,
     "timer_id": "bollinger",
+    "trade_rule": "standard",
     "trades": [
       {
         "commission": 49.97501249375312,

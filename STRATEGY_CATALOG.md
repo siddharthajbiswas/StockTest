@@ -111,7 +111,7 @@ raise `FileNotFoundError` at `initialize` if the snapshot is missing.
 
 ---
 
-## 2. The 10 Timers
+## 2. The 11 Timers
 
 File: `strategies/timers.py`. Registry: `TIMERS: dict[str, type[Timer]]`. All
 timers are **price-only**. Each implements
@@ -185,6 +185,26 @@ opened at (for stop-losses).
   its `ma_window`-day moving average, **but bail immediately** if the position
   falls more than `stop` (default 8%) below the price you entered at — regardless
   of the trend. The stop-loss caps the damage on any single name.
+
+### 2.11 `trend_switch` — `TrendSwitchTimer` (manual mode only)
+- **Parameters:** `signal: str = "SPY"`, `n: int = 175`, `band: float = 0.03`,
+  `risk: str = "SSO"`, `safe: str = "IEF"` (`risk`/`safe` are comma-separated
+  ticker lists, equal-weighted)
+- **Logic:** One trend signal switches the whole basket between a risk side and
+  a safe side. Every trading day, on the close:
+  `margin = signal_close / mean(last n signal closes, today included) - 1`.
+  The first evaluation sets `state = margin > 0`; afterwards the state turns
+  on above `+band`, off below `-band`, and is otherwise kept (hysteresis). On ->
+  the `risk` tickers are long; off -> the `safe` ones. Evaluated once per date and
+  shared by every ticker. Until the first evaluation succeeds (fewer than `n`
+  closes) nothing is held. Built for manual mode with tickers = risk + safe, e.g.
+  SSO (2x S&P 500) + IEF (7-10y Treasuries) — the site's "Beat the S&P: 2x trend
+  (CA)" preset. Same rule as `research/lab/families/verify_lev_robust.py::Trend`
+  (`check="D"`, `lag=0`, `ma="sma"`). Leverage magnifies losses.
+- **Not swept:** the combo sweeps (`grid_combos.py`, `walkforward.py`, the
+  out-of-sample validator) iterate `SWEEP_TIMERS` — every timer except the
+  manual-only ones in `MANUAL_ONLY_TIMERS` — since a picker's basket never
+  contains its named tickers.
 
 ---
 
@@ -349,6 +369,8 @@ convenience wrapper both `grid_combos.py` and `walkforward.py` use:
 # grid_combos.build_market
 build_market(prices: dict[str, pd.DataFrame], universe: str) -> MarketData
 #   universe = "all"        -> MarketData(prices)                  (every ticker with data)
+#   Callers pass universe_tickers(): data/ minus backtester.data.UNIVERSE_EXCLUDE
+#   (SSO, IEF — loadable by name in manual/menu mode, never pickable).
 #   universe = "sp500-pit"  -> point-in-time S&P 500 membership filter applied
 ```
 

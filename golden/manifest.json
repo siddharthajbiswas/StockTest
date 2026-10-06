@@ -7,7 +7,7 @@
       "n_days": 1511,
       "n_trades": 5,
       "portable": true,
-      "sha256": "e4d3823bb51fa646d74d24467a06092564837a9bb12c3198cbdd435418e8fcd6",
+      "sha256": "6d4c36db529206739a4b69b9de7700faa25fe5c58b7e6d6446d84367deba79d5",
       "total_tax": 41553.73362749719,
       "why": "Baseline. Minimal churn, so the terminal liquidation tax on unrealized long-term gains dominates \u2014 isolates that path."
     },
@@ -18,7 +18,7 @@
       "n_days": 1511,
       "n_trades": 5,
       "portable": true,
-      "sha256": "0b5c570324d08d0fa26c91e6ba8b227a8e913bde3534f43f3449b92e5ce16405",
+      "sha256": "e7cbd09cb398ede3fbd2dae90520d91507ec96065e136215dfed5d8db1738aa7",
       "total_tax": null,
       "why": "Same run with taxes off. Diffing it against manual_buyhold_tax isolates the entire tax engine; pretax and aftertax must agree."
     },
@@ -29,7 +29,7 @@
       "n_days": 1511,
       "n_trades": 116,
       "portable": true,
-      "sha256": "a51dbe5afcb6939c91a138daabd74fa991435f85a0f3b42d395a0a8f194d099c",
+      "sha256": "1df7a54392246245f0971eecfd96da39d93a556375fd6c6dbe00647900424105",
       "total_tax": 37688.78601499505,
       "why": "High churn: in-and-out repeatedly, so realized short- vs long-term gains and the January annual settlement both fire."
     },
@@ -40,7 +40,7 @@
       "n_days": 1008,
       "n_trades": 84,
       "portable": true,
-      "sha256": "8d3b41c05769545a20b1ea41ea81260927fc72efe3d4ce9749be94a2e329c3bb",
+      "sha256": "87200ffa5c46de3759b38826be5ef53118acc0c89342fc7d41b016807beb8d04",
       "total_tax": 2825.0032672845164,
       "why": "Spans 2008. Net-loss years exercise the loss carryforward and the losses-against-short-term-gains-first netting order."
     },
@@ -51,7 +51,7 @@
       "n_days": 1511,
       "n_trades": 1374,
       "portable": true,
-      "sha256": "2229f6e5c9ea1797ef4d18b94ccd13586fc6240bf9b5c5b3e47053d9ebc3ba62",
+      "sha256": "9021f24c986c7052edf15cf190a95fd59b0600ba918307480029ff772656b441",
       "total_tax": 123778.21111343181,
       "why": "Picker mode: monthly rebalance ranking, equal-weight basket rewrites, and the order_target_percent sizing path."
     },
@@ -62,7 +62,7 @@
       "n_days": 1511,
       "n_trades": 1417,
       "portable": true,
-      "sha256": "007e2b2332646e5a86bf9ead06b41e0a723c2889a065dd55d4bc822a42efaaaa",
+      "sha256": "29bcf39ac88d5c3b84af128c1a89722483315576a9efd1e9218cdd6c3bcf64cf",
       "total_tax": 44365.630247641646,
       "why": "Point-in-time S&P 500 universe \u2014 membership changes by date, the trickiest data-layout path to port."
     },
@@ -73,7 +73,7 @@
       "n_days": 1511,
       "n_trades": 177,
       "portable": true,
-      "sha256": "164c812bd7c00e7ccd62a89436667391fff101e55b84a987cfacd26e7ceb8381",
+      "sha256": "69ed2003705d7cbc5cb720209dccebe10169b0f5a86693c6644ad680cb5dcd52",
       "total_tax": 126967.79491425012,
       "why": "Different picker+timer math (relative strength, RSI hysteresis) and the quarterly rebalance cadence."
     },
@@ -84,7 +84,7 @@
       "n_days": 757,
       "n_trades": 736,
       "portable": true,
-      "sha256": "9dab74c643efa78dfb242e0e9eef109412f97d606297de4fdc410e07f146d3a7",
+      "sha256": "cb1fe6603dd74fc72ff5dbebee088aee1131b33aeff6051298dc199efd194545",
       "total_tax": 3763.5441471150657,
       "why": "Fundamental picker (snapshot lookup + look-ahead-flagged) and a timer that depends on entry_price, plus weekly cadence."
     },
@@ -95,20 +95,53 @@
       "n_days": 505,
       "n_trades": 3497,
       "portable": true,
-      "sha256": "66c0b5bd7b4dfd4a6dd3d924b2068a90dfe0f6138c8fac1c502a7a40ed911300",
+      "sha256": "821b9f268453cc86877532bc78296bd416ef806ea1d2578c048e8ddaf7d04bdb",
       "total_tax": 25953.31334970675,
       "why": "Daily rebalance across the COVID crash \u2014 max churn against a violent drawdown; stresses cash/no-leverage clamping."
     },
     {
       "file": "random_seeded.json",
-      "final_value": 191091.42586496373,
+      "final_value": 185582.51266019576,
       "id": "random_seeded",
       "n_days": 1511,
-      "n_trades": 1481,
+      "n_trades": 1445,
       "portable": true,
-      "sha256": "83b6fbba2bd32cc7f54ccdd897c6cec40176c54fc91749813601bff7e70beaa8",
-      "total_tax": 42345.55913831394,
+      "sha256": "1753f8478833d540048f02841feacf9c421fcd707796218304301cc5d0d2f213",
+      "total_tax": 37544.437349504355,
       "why": "RandomPicker(seed=42), which draws from random.Random.sample (Mersenne Twister). Phase 0 flagged this as unportable; Phase 3 made it portable by reimplementing MT19937, getrandbits, _randbelow and sample in web/engine/src/mt19937.ts, so the TS engine reproduces the stream exactly."
+    },
+    {
+      "file": "tax_managed_etf_menu.json",
+      "final_value": 282958.06905285036,
+      "id": "tax_managed_etf_menu",
+      "n_days": 2769,
+      "n_trades": 143,
+      "portable": true,
+      "sha256": "8b6c48b9f52848a05c89a4d1b6dad6fad72cbaedacd7dc363aafd0c82c1fac9f",
+      "total_tax": 53121.56513164111,
+      "why": "The TaxManagedCombo execution rule on the ETF menu \u2014 the recommended configuration of strategies/tax_managed.py. Covers four paths at once that no other golden touches: the realized-gain budget (losses free, gains rationed and part-filled), the 31-day wash-sale repurchase block, the `menu` shortlist, and 12-1 momentum (lookback with a skip). California rates."
+    },
+    {
+      "file": "tax_managed_budget_zero.json",
+      "final_value": 152141.36538656705,
+      "id": "tax_managed_budget_zero",
+      "n_days": 2013,
+      "n_trades": 76,
+      "portable": true,
+      "sha256": "b4c884d6a07f5efeb1cbe755d5de521b9dc75a242d7bf504b0575504fa40d90a",
+      "total_tax": 7821.20480798506,
+      "why": "gain_budget=0 \u2014 the branch where a gain sale is refused outright rather than part-filled, so the portfolio can only rotate out of positions it can sell at a loss. Semi-annual cadence covers the 'S' period key the base Combo gained."
+    },
+    {
+      "file": "warmup_clip.json",
+      "final_value": 252747.0970599647,
+      "id": "warmup_clip",
+      "n_days": 1258,
+      "n_trades": 767,
+      "portable": true,
+      "sha256": "c132d286f5e7f616e05f846ffe8466005b7999954f2fdebe84b5c50a918a973e",
+      "total_tax": 55991.930128890184,
+      "why": "warmup_days on an ordinary Combo: extra history is loaded, nothing trades in it, and Result.since() clips it out of the curve and metrics. Pins that the warm-up window leaves the scorecard starting at exactly the requested cash."
     },
     {
       "file": "cover_timer_macd.json",
@@ -117,7 +150,7 @@
       "n_days": 757,
       "n_trades": 1604,
       "portable": true,
-      "sha256": "abe0027ddb4ffaa94244281db1bf53324520518988ee4bb3d98c32a02de55aff",
+      "sha256": "0025944a8e621f9b539432b05c8c6db17a2c3f8ece1b8ebe20ab714b80b3d415",
       "total_tax": 37108.47793797154,
       "why": "Component coverage for the macd timer, which no other golden exercises."
     },
@@ -128,7 +161,7 @@
       "n_days": 757,
       "n_trades": 392,
       "portable": true,
-      "sha256": "050c8fc9b9ed37ee7b1c9b534ff8a680f46acd0b4ef17bbf546b86cfc5b87bfa",
+      "sha256": "cc39b563b3691639e6f2a17e5eef1e495f7d5122a42ad82c97ae850c797354b6",
       "total_tax": 48339.22480281942,
       "why": "Component coverage for the bollinger timer, which no other golden exercises."
     },
@@ -139,7 +172,7 @@
       "n_days": 757,
       "n_trades": 523,
       "portable": true,
-      "sha256": "16161a9c6b56880dfe99d18346ef7b96b2ecb66edc8c55a5d7838515f85a6ea5",
+      "sha256": "d71a34a690149926c0e8a4d2b9990e936f4c19b7de3f349ffb3bb2f8d5663ae0",
       "total_tax": 43385.7309919525,
       "why": "Component coverage for the momentum12 timer, which no other golden exercises."
     },
@@ -150,7 +183,7 @@
       "n_days": 757,
       "n_trades": 546,
       "portable": true,
-      "sha256": "cc13f071df6ab93b660969f095c4234b50fbd5504c135da693f8dc602f94cb38",
+      "sha256": "2db218a57f7eb4a53d8ba35994f61c0206532cdd240dd1f93bb2df74ac588b40",
       "total_tax": 44221.550995805446,
       "why": "Component coverage for the dual_momentum timer, which no other golden exercises."
     },
@@ -161,7 +194,7 @@
       "n_days": 757,
       "n_trades": 621,
       "portable": true,
-      "sha256": "9b42065cc802f26c1b4a430371271dbcc5eb833d1ac13361a164ce43bb5a5ce2",
+      "sha256": "2e34b0cd6546e038d4cbed92823e8fec880c565a5bbe86edd2cba2ea78323670",
       "total_tax": 54448.433543076724,
       "why": "Component coverage for the turtle timer, which no other golden exercises."
     },
@@ -172,7 +205,7 @@
       "n_days": 757,
       "n_trades": 186,
       "portable": true,
-      "sha256": "589ced34941fce7857a0a3b994c472b8816f6afcae2be39b28d5c8729a10a5e1",
+      "sha256": "afebc17106869873717cad5d6dbc16ad0ec3501de2c5b33411bdf88b4b172a7b",
       "total_tax": 17358.621397457544,
       "why": "Component coverage for the vol_reversion timer, which no other golden exercises."
     },
@@ -183,7 +216,7 @@
       "n_days": 757,
       "n_trades": 556,
       "portable": true,
-      "sha256": "fc43edfbd7038ca279fa023357aea3aa660ddf4476964b7ed10ca5f52b2251df",
+      "sha256": "94797303f2069eedc7361a4b7b80bd282f947088483e233cdb62482be169aba9",
       "total_tax": 10716.242167659244,
       "why": "Deliberately pushes the top-n cutoff PAST the first tie divergence. dividendYield has 110 tie groups and pandas' default quicksort orders them differently from a stable sort starting at rank 11, so top_n=10 hides the problem and top_n=25 exposes it. This case exists to keep tie ordering pinned."
     },
@@ -194,7 +227,7 @@
       "n_days": 757,
       "n_trades": 10,
       "portable": true,
-      "sha256": "7f5ca0530452e874c4b926f98e551e951982c17a9d341d1dbeb04d7c7de22acd",
+      "sha256": "fd4684dfe435591fce6a372c1b1954436d118182ea73cd903b3e34008d2bb1c4",
       "total_tax": 7177.160847757859,
       "why": "Component coverage for the price_to_book picker, which no other golden exercises. Fundamental snapshot ranking \u2014 see the note about non-stable tie ordering."
     },
@@ -205,7 +238,7 @@
       "n_days": 757,
       "n_trades": 10,
       "portable": true,
-      "sha256": "4ea160ee3fcca9e2ea6193be55bd07f70b0a56d438a7395e5574bf5b0665391a",
+      "sha256": "17ad7d0b243aedf8ca061a7eb5e0d0bd51e47b4d4f9b3a67779c4f4824fd8ca2",
       "total_tax": 29788.333967683393,
       "why": "Component coverage for the small_cap picker, which no other golden exercises. Fundamental snapshot ranking \u2014 see the note about non-stable tie ordering."
     },
@@ -216,7 +249,7 @@
       "n_days": 757,
       "n_trades": 21,
       "portable": true,
-      "sha256": "3d1dc076aba01abde8f419e8cd9e254f7e5383b9b9d8314b591e55562da792d4",
+      "sha256": "60a8d2f168b316768a696668dc3f40ed653f7dcf21d4c41f56e316703943157e",
       "total_tax": 21218.445609932918,
       "why": "Component coverage for the quality_roe picker, which no other golden exercises. Fundamental snapshot ranking \u2014 see the note about non-stable tie ordering."
     },
@@ -227,7 +260,7 @@
       "n_days": 757,
       "n_trades": 10,
       "portable": true,
-      "sha256": "27b9e0f589666d3e2b9d3d3d4f30c20167ff76a5f9eb3582c5ad23ed700f6dcb",
+      "sha256": "492e9082dec7b8db5ddff83974ac5d9b664a120c7a0bdf0a8506233d6f09a3ba",
       "total_tax": 55020.64340055886,
       "why": "Component coverage for the growth_revenue picker, which no other golden exercises. Fundamental snapshot ranking \u2014 see the note about non-stable tie ordering."
     },
@@ -238,7 +271,7 @@
       "n_days": 757,
       "n_trades": 173,
       "portable": true,
-      "sha256": "fa5ff5ac17f2a443acac3cb3acb94739e83ec6c0490b0909c7b7c4f2ce1e6f87",
+      "sha256": "4e8e0f9408494b40dc394f3b0fd1fe37ba9e935ba532b4a273b3b0d448d32798",
       "total_tax": 10255.732866824801,
       "why": "Component coverage for the high_dividend picker, which no other golden exercises. Fundamental snapshot ranking \u2014 see the note about non-stable tie ordering."
     },
@@ -249,19 +282,30 @@
       "n_days": 757,
       "n_trades": 34,
       "portable": true,
-      "sha256": "fe85155aca54141c293597559d2f8f936db50afe90ce2d8ed9979be616552ac4",
+      "sha256": "8a39fc3b2fb410a04faa9d31c309e17afc69c8a83d87233b1ceda1d77db0b9f1",
       "total_tax": 13415.75447756902,
       "why": "Component coverage for the earnings_surprise picker, which no other golden exercises. Fundamental snapshot ranking \u2014 see the note about non-stable tie ordering."
+    },
+    {
+      "file": "manual_trendswitch_sso_ief.json",
+      "final_value": 1221121.029614579,
+      "id": "manual_trendswitch_sso_ief",
+      "n_days": 4904,
+      "n_trades": 49,
+      "portable": true,
+      "sha256": "7cda5f846325a18c1e908398e23d1d79dbd412c93ec0e7178162e5c8feb2c01e",
+      "total_tax": 499661.824276288,
+      "why": "The trend_switch timer as the site's 2x preset runs it: SSO (2x S&P 500) while SPY is more than 3% above its 175-day SMA, IEF once it is more than 3% below, evaluated daily at the close with hysteresis. Pins the once-per-date state shared across both basket names, string timer params, the undecided-until-warm state, a 400-day warm-up and California rates over 2007-2026 (2008, 2020 and 2022 included)."
     }
   ],
   "data": {
-    "combined_sha256": "80f3cb2e7ca03b304d17df3b1058d5008d60746f04f32669ff4e156e7cf8fd6d",
+    "combined_sha256": "510326fb1ec60d425ade562e9c7da5bdaeb2b0202b28555bf2f744f55b486e6a",
     "fundamentals_sha256": "31a183f850159600d3c114cc1d879ce5034cc51455ae276c994603bc525ce9c5",
-    "n_files": 530
+    "n_files": 540
   },
   "entry_point": "reference/service.py::EngineService.run_backtest",
   "env": {
-    "git_commit": "b87bfd13e9e36d1f114f0604f99dfbd28acec254",
+    "git_commit": "e510d49e3909d3d8022461f49ea32ffe698ee26f",
     "git_dirty": true,
     "numpy": "2.5.1",
     "pandas": "3.0.5",

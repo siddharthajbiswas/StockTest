@@ -274,6 +274,29 @@ TIMER_CATALOG: list[dict] = [
             _param("stop", "float", 0.08, "Hard stop-loss as a fraction below entry (0.08 = 8%)."),
         ],
     },
+    {
+        "id": "trend_switch",
+        "name": "Trend Switch (2x / bonds)",
+        "description": (
+            "Meant for picking your own stocks with a leveraged S&P 500 ETF plus a "
+            "bond ETF in the basket (e.g. SSO + IEF). Every day at the close it "
+            "compares SPY with its 175-day average: once SPY is more than `band` "
+            "above it, hold the risk ETF; once it is more than `band` below, switch "
+            "to the bond ETF; in between, keep what you hold. Leverage magnifies "
+            "losses — a 2x fund falls about twice as far as the index on a bad day."
+        ),
+        "params": [
+            _param("signal", "str", "SPY",
+                   "Ticker whose trend decides the switch — SPY, or one of your basket tickers."),
+            _param("n", "int", 175, "Moving-average window in trading days (today's close included)."),
+            _param("band", "float", 0.03,
+                   "Switch to risk above +band, to safe below −band (0.03 = 3%); in between, hold."),
+            _param("risk", "str", "SSO",
+                   "Comma-separated tickers held while the trend is up (equal weight). Add them to your basket."),
+            _param("safe", "str", "IEF",
+                   "Comma-separated tickers held while the trend is down (equal weight). Add them to your basket."),
+        ],
+    },
 ]
 
 # ----------------------------------------------------------------------------

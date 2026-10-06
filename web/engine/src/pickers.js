@@ -41,21 +41,31 @@ export class FixedListPicker {
   }
 }
 
-/** Trend following: buy the strongest trailing-return names (default 6mo). */
+/**
+ * Trend following: buy the strongest trailing-return names (default 6mo).
+ *
+ * `skip` drops the most recent `skip` bars from the window, so lookback=252
+ * with skip=21 is the classic "12-1" momentum: the trailing year excluding the
+ * latest month, which avoids the short-horizon reversal that contaminates a
+ * window ending today. skip=0 is the plain trailing return.
+ */
 export class MomentumPicker {
   lookback;
+  skip;
   name = "momentum";
-  constructor(lookback = 126) {
+  constructor(lookback = 126, skip = 0) {
     this.lookback = lookback;
+    this.skip = skip;
   }
   initialize(_ctx) {}
   select(ctx, universe, n) {
     const scored = [];
+    const need = this.lookback + this.skip + 1;
     for (const t of universe) {
-      const r = totalReturn(
-        ctx.history(t, "Close", this.lookback + 1),
-        this.lookback,
-      );
+      let closes = ctx.history(t, "Close", need);
+      if (closes.length < need) continue;
+      if (this.skip) closes = closes.slice(0, closes.length - this.skip);
+      const r = totalReturn(closes, this.lookback);
       if (r !== null) scored.push({ s: r, t });
     }
     scored.sort(byScoreDescTickerDesc);
@@ -227,7 +237,7 @@ export function makePicker(id, params = {}, fundamentals = null) {
   const num = (k, d) => (params[k] === undefined ? d : Number(params[k]));
   switch (id) {
     case "momentum":
-      return new MomentumPicker(num("lookback", 126));
+      return new MomentumPicker(num("lookback", 126), num("skip", 0));
     case "relative_strength":
       return new RelativeStrengthPicker(
         String(params.benchmark ?? "SPY"),

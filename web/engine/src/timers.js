@@ -1,5 +1,5 @@
 /**
- * The 10 timing strategies. Port of `strategies/timers.py`.
+ * The 11 timing strategies. Port of `strategies/timers.py`.
  *
  * A timer answers one question per name per day: given price history so far, do
  * we want to be long *right now*? Several use hysteresis (different entry vs
@@ -243,6 +243,84 @@ export class TrendStopTimer {
   }
 }
 
+/**
+ * `"SSO, qld"` (or an array) -> `["SSO", "QLD"]`: trimmed, upper-cased,
+ * de-duplicated, in order. Port of `_ticker_list` in `strategies/timers.py`.
+ */
+function tickerList(value) {
+  const parts =
+    value === null || value === undefined
+      ? []
+      : Array.isArray(value)
+        ? value
+        : String(value).split(",");
+  const out = [];
+  for (const p of parts) {
+    const t = String(p).trim().toUpperCase();
+    if (t && !out.includes(t)) out.push(t);
+  }
+  return out;
+}
+
+/**
+ * Switch between a risk basket and a safe basket on ONE trend signal.
+ * Port of `TrendSwitchTimer` — see its docstring for the full contract.
+ *
+ * Each trading day, on that day's close:
+ *   margin = signal close today / mean(last n signal closes, today included) - 1
+ * First successful evaluation: state = margin > 0. Afterwards: true once
+ * margin > +band, false once margin < -band, otherwise unchanged. state true ->
+ * the `risk` tickers are wanted, false -> the `safe` ones; anything else never.
+ *
+ * PARITY NOTES
+ *  * The state is per signal, so it is evaluated at most once per trading day
+ *    (the first wantLong call) and shared by every ticker asked that day.
+ *  * Undecided (null) until the first evaluation succeeds — fewer than n closes
+ *    or no signal close today — and wantLong is then false for EVERY ticker
+ *    (the portfolio waits in cash). A later day without data keeps the state.
+ *  * The mean goes through `sma` -> `nmean` (NumPy pairwise summation), and
+ *    the margin is `px / ma - 1.0` in that order, exactly as Python computes it.
+ */
+export class TrendSwitchTimer {
+  signal;
+  n;
+  band;
+  risk;
+  safe;
+  state = null;
+  lastDay = null;
+  name = "trend_switch";
+  constructor(signal = "SPY", n = 175, band = 0.03, risk = "SSO", safe = "IEF") {
+    this.signal = String(signal ?? "SPY").trim().toUpperCase();
+    this.n = Math.max(1, Math.trunc(Number(n)));
+    this.band = Number(band);
+    this.risk = tickerList(risk ?? "SSO");
+    this.safe = tickerList(safe ?? "IEF");
+  }
+  initialize(_ctx) {
+    this.state = null;
+    this.lastDay = null;
+  }
+  /** Evaluate the rule on today's close — at most once per trading day. */
+  update(ctx) {
+    if (this.lastDay === ctx.day) return;
+    this.lastDay = ctx.day;
+    const px = ctx.price(this.signal);
+    const ma = sma(closes(ctx, this.signal, this.n), this.n);
+    // Not enough data: keep the previous state (null = undecided).
+    if (px === null || ma === null || !(ma > 0)) return;
+    const margin = px / ma - 1.0;
+    if (this.state === null) this.state = margin > 0.0;
+    else if (margin > this.band) this.state = true;
+    else if (margin < -this.band) this.state = false;
+  }
+  wantLong(ctx, ticker, _held, _entry) {
+    this.update(ctx);
+    if (this.state === null) return false;
+    return this.state ? this.risk.includes(ticker) : this.safe.includes(ticker);
+  }
+}
+
 /** Registry mirroring `strategies/timers.py::TIMERS`. */
 export function makeTimer(id, p = {}) {
   const num = (k, d) => (p[k] === undefined ? d : Number(p[k]));
@@ -281,6 +359,14 @@ export function makeTimer(id, p = {}) {
       );
     case "trend_stop":
       return new TrendStopTimer(num("ma_window", 200), num("stop", 0.08));
+    case "trend_switch":
+      return new TrendSwitchTimer(
+        p.signal ?? "SPY",
+        num("n", 175),
+        num("band", 0.03),
+        p.risk ?? "SSO",
+        p.safe ?? "IEF",
+      );
     default:
       throw new Error(`Unknown timer_id ${id}`);
   }

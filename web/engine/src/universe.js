@@ -17,6 +17,14 @@ import { searchsortedRight } from "./numeric.js";
 import { dayFromIso } from "./data.js";
 
 /**
+ * Tickers that ship per-ticker files (manual/menu mode, search) but are NOT in
+ * the stock-picking universe. Mirrors `backtester/data.py::UNIVERSE_EXCLUDE`;
+ * tools/build_web_data.py leaves them out of universe.bin and records the list
+ * as `manifest.universe_exclude`, which a unit test holds equal to this set.
+ */
+export const UNIVERSE_EXCLUDE = new Set(["IEF", "SSO"]);
+
+/**
  * Align membership to `calendar`: for each day, the members as of that day
  * (the most recent snapshot on or before it). Days before the first snapshot
  * get an empty set, matching Python's `p < 0` branch.

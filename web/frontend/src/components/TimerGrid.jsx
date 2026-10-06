@@ -2,7 +2,7 @@ import { useState } from "react";
 import { TIMER_DETAIL } from "../content";
 import { StrategyDetail } from "./StrategyDetail";
 
-/** Card grid of the 10 timers — same visual pattern as the picker grid, and the
+/** Card grid of the timers — same visual pattern as the picker grid, and the
  *  same div-with-role treatment so the "Learn more" button can live inside. */
 export function TimerGrid({ timers, selected, onSelect }) {
   const [detailId, setDetailId] = useState(null);

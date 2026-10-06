@@ -33,17 +33,31 @@ FUNDAMENTALS_PATH = Path(__file__).resolve().parent.parent / "data" / "fundament
 
 
 class MomentumPicker(Picker):
-    """Trend following: buy the strongest trailing-return names (default 6mo)."""
+    """Trend following: buy the strongest trailing-return names (default 6mo).
+
+    `skip` drops the most recent `skip` bars from the window, so lookback=252
+    with skip=21 is the classic "12-1" momentum of the academic literature:
+    the trailing year excluding the latest month, which avoids the short-horizon
+    reversal that contaminates a window ending today. skip=0 (the default) keeps
+    the plain trailing return this project has always used.
+    """
 
     name = "momentum"
 
-    def __init__(self, lookback: int = 126):
+    def __init__(self, lookback: int = 126, skip: int = 0):
         self.lookback = lookback
+        self.skip = skip
 
     def select(self, ctx: Context, universe: list[str], n: int) -> list[str]:
+        need = self.lookback + self.skip + 1
         scored: list[tuple[float, str]] = []
         for t in universe:
-            r = total_return(ctx.history(t, "Close", self.lookback + 1), self.lookback)
+            closes = ctx.history(t, "Close", need)
+            if len(closes) < need:
+                continue
+            if self.skip:
+                closes = closes.iloc[: len(closes) - self.skip]
+            r = total_return(closes, self.lookback)
             if r is not None:
                 scored.append((r, t))
         scored.sort(reverse=True)              # highest momentum first

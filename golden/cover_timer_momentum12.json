@@ -8115,6 +8115,7 @@
     ],
     "tickers_used": null,
     "timer_id": "momentum12",
+    "trade_rule": "standard",
     "trades": [
       {
         "commission": 5.0025,

@@ -21,6 +21,7 @@ import sys
 from pathlib import Path
 
 from backtester import Backtest, Strategy, load_prices
+from backtester.data import universe_tickers
 
 
 def load_strategy(path: str) -> Strategy:
@@ -46,7 +47,7 @@ def load_strategy(path: str) -> Strategy:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--strategy", required=True, help="Path to the algorithm .py file.")
-    ap.add_argument("--tickers", nargs="+", help="Tickers to trade (default: all in data/).")
+    ap.add_argument("--tickers", nargs="+", help="Tickers to trade (default: all in data/ except UNIVERSE_EXCLUDE).")
     ap.add_argument("--start", help="Start date YYYY-MM-DD.")
     ap.add_argument("--end", help="End date YYYY-MM-DD.")
     ap.add_argument("--cash", type=float, default=100_000.0, help="Starting cash.")
@@ -59,7 +60,7 @@ def main() -> int:
     args = ap.parse_args()
 
     strategy = load_strategy(args.strategy)
-    prices = load_prices(args.tickers, start=args.start, end=args.end)
+    prices = load_prices(args.tickers or universe_tickers(), start=args.start, end=args.end)
     print(f"Loaded {len(prices)} tickers. Running {type(strategy).__name__}...\n")
 
     bt = Backtest(

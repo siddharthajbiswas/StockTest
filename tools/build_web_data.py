@@ -85,7 +85,7 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from backtester.data import DATA_DIR, FIELDS, available_tickers  # noqa: E402
+from backtester.data import DATA_DIR, FIELDS, UNIVERSE_EXCLUDE, available_tickers  # noqa: E402
 from backtester.universe import CONSTITUENTS_PATH, _normalize  # noqa: E402
 
 OUT = ROOT / "build" / "webdata"
@@ -245,9 +245,13 @@ def build(verify: bool) -> int:
     uni_mask: list[bytes] = []
     total_cells = 0
 
+    # Every ticker gets a per-ticker file (manual/menu mode, search), but
+    # UNIVERSE_EXCLUDE names stay out of universe.bin — the stock-picking
+    # universe — exactly as reference/service.py leaves them out of its
+    # universe markets.
+    uni_tickers = [t for t in tickers if t not in UNIVERSE_EXCLUDE]
     for t in tickers:
         first, n, arrs, tradable = ticker_arrays(frames[t], calendar)
-        total_cells += n
 
         ids = bytes(_FIELD_ID[f] for f in TICKER_FIELDS)
         body = b"".join(arrs[f].tobytes() for f in TICKER_FIELDS)
@@ -265,12 +269,15 @@ def build(verify: bool) -> int:
             "end": idx[-1].date().isoformat(),
         }
 
+        if t in UNIVERSE_EXCLUDE:
+            continue
+        total_cells += n
         table.append((first, n))
         uni_close.append(arrs["Close"].tobytes())
         uni_mask.append(pack_bits(tradable))
 
     # ---- universe bundle (Close + tradability only) ----
-    head = (b"STKU" + struct.pack("<III", FORMAT_VERSION, len(tickers), len(calendar))
+    head = (b"STKU" + struct.pack("<III", FORMAT_VERSION, len(uni_tickers), len(calendar))
             + b"".join(struct.pack("<II", f, n) for f, n in table))
     uni = head + b"".join(uni_close) + b"".join(uni_mask)
     uni_info = write(OUT / "universe.bin", uni, also_gzip=True)
@@ -334,9 +341,12 @@ def build(verify: bool) -> int:
             "See precision_report.json.",
         ],
         "ticker_fields": TICKER_FIELDS,
+        # Per-ticker files exist for these, but they are not in universe.bin.
+        # web/engine/src/universe.js::UNIVERSE_EXCLUDE must match (unit-tested).
+        "universe_exclude": sorted(UNIVERSE_EXCLUDE),
         "calendar": {**cal_info, "n": int(len(calendar)),
                      "start": str(calendar[0])[:10], "end": str(calendar[-1])[:10]},
-        "universe": {**uni_info, "tickers": tickers, "n_tickers": len(tickers),
+        "universe": {**uni_info, "tickers": uni_tickers, "n_tickers": len(uni_tickers),
                      "total_cells": total_cells,
                      "layout": "header, (first,n) table, close float32 concat, "
                                "tradable bitmask concat (byte-aligned per ticker)"},
@@ -432,13 +442,17 @@ def verify_roundtrip(tickers, frames, calendar, per_ticker) -> int:
         errs.append("calendar values differ")
 
     worst_rel = 0.0
-    for i, t in enumerate(tickers):
+    uni_index = {t: i for i, t in enumerate(t for t in tickers if t not in UNIVERSE_EXCLUDE)}
+    if len(uni_index) != len(table):
+        errs.append(f"universe.bin has {len(table)} tickers, expected {len(uni_index)}")
+    for t in tickers:
+        i = uni_index.get(t)
         version, first, n, arrs, bits = read_ticker(OUT / "tickers" / f"{t}.bin")
         df = frames[t]
         pos = calendar.searchsorted(df.index.values)
         rel = pos - first
 
-        if (first, n) != table[i]:
+        if i is not None and (first, n) != table[i]:
             errs.append(f"{t}: universe table {(table[i])} != per-ticker {(first, n)}")
 
         # Prices must equal float32(source) EXACTLY at every real bar.
@@ -471,11 +485,13 @@ def verify_roundtrip(tickers, frames, calendar, per_ticker) -> int:
         if not np.array_equal(bits, exp_tr):
             errs.append(f"{t}: tradable mask mismatch ({int((bits != exp_tr).sum())} cells)")
 
-        # The universe bundle must agree with the per-ticker file bit for bit.
-        if not np.array_equal(uni_closes[i].view(np.uint32), arrs["Close"].view(np.uint32)):
-            errs.append(f"{t}: universe close != per-ticker close")
-        if not np.array_equal(uni_masks[i], bits):
-            errs.append(f"{t}: universe mask != per-ticker mask")
+        # The universe bundle must agree with the per-ticker file bit for bit
+        # (UNIVERSE_EXCLUDE names have no universe entry to compare).
+        if i is not None:
+            if not np.array_equal(uni_closes[i].view(np.uint32), arrs["Close"].view(np.uint32)):
+                errs.append(f"{t}: universe close != per-ticker close")
+            if not np.array_equal(uni_masks[i], bits):
+                errs.append(f"{t}: universe mask != per-ticker mask")
 
     print(f"  worst price relative error vs float64 source: {worst_rel:.3e}")
     if errs:

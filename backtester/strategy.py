@@ -61,6 +61,44 @@ class Context:
         """
         return self._engine.history(ticker, field, window)
 
+    # ---- tax-lot state (only populated when a TaxPolicy is active) -------
+    def lots(self, ticker: str) -> list[tuple]:
+        """Open tax lots for `ticker` as (purchase_date, shares, cost_per_share).
+
+        Cost per share already includes commission and slippage. Empty when the
+        backtest is running without a TaxPolicy (no lots are tracked then).
+        A strategy uses this to see what a sale would *realize* before placing
+        it — which is what tax-aware trading rules are built on.
+        """
+        return [
+            (lot.date, lot.shares, lot.cost_per_share)
+            for lot in self._engine.portfolio.lots.get(ticker, [])
+        ]
+
+    def realized_this_year(self) -> tuple[float, float]:
+        """(short_term, long_term) net realized gains booked so far this year."""
+        bucket = self._engine.portfolio.realized.get(self.date.year)
+        if bucket is None:
+            return 0.0, 0.0
+        return bucket["st"], bucket["lt"]
+
+    @property
+    def slippage_pct(self) -> float:
+        """Half-spread the engine applies to fills (buys up, sells down)."""
+        return self._engine.slippage_pct
+
+    @property
+    def commission_pct(self) -> float:
+        """Commission as a fraction of trade value."""
+        return self._engine.portfolio.commission_pct
+
+    def is_long_term(self, purchase_date) -> bool:
+        """Would a sale today of a lot bought on `purchase_date` be long-term?"""
+        policy = self._engine.tax_policy
+        if policy is None:
+            return True
+        return policy.is_long_term((self.date - purchase_date).days)
+
     # ---- orders (fill at today's close) ---------------------------------
     def order(self, ticker: str, shares: float) -> None:
         """Buy (shares>0) or sell (shares<0) an absolute number of shares."""

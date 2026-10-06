@@ -18485,6 +18485,7 @@
     ],
     "tickers_used": null,
     "timer_id": "ma_cross",
+    "trade_rule": "standard",
     "trades": [
       {
         "commission": 3.335,

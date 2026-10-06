@@ -30,6 +30,7 @@ import {
   runValidation,
   spearman,
   rankdataAverage,
+  UNIVERSE_EXCLUDE,
 } from "../src/index.js";
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, "..", "..", "..");
@@ -128,6 +129,7 @@ function buildMarket(cfg, universe) {
   const prices = new Map();
   const uni = loadUniverse();
   for (const t of [...manifest.universe.tickers].sort()) {
+    if (UNIVERSE_EXCLUDE.has(t)) continue; // as EngineService.universeMarket
     const s = uni.get(t);
     if (s === undefined) continue;
     const c = clipSeries(s, startDay, endDay);

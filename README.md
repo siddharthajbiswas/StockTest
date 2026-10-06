@@ -65,6 +65,36 @@ stocks fetches ~190 kB per ticker.
 
 ---
 
+## The answer to the question
+
+StockTest asks whether a strategy can beat buy-and-hold after tax. For a taxable
+California investor, one can — but not by picking better:
+
+| 1998-04 → 2026-07, California rates | after-tax CAGR | $100k becomes |
+|---|---|---|
+| **Tax-managed momentum** (`strategies/tax_managed.py`) | **8.96%** | **$1,128,670** |
+| SPY buy & hold | 7.71% | $815,589 |
+
+It beats the S&P in **100% of 20-year windows**, 86% of 15-year and 74% of
+10-year ones. The mechanism is not the signal — at zero tax the same strategy
+beats SPY by only 0.30 pp. It is that an ordinary rotation gives up **3-4
+percentage points a year** in capital-gains tax, more than any of these signals
+earns before tax, and this one gives up 0.2.
+
+It does that with a **realized-gain budget**: selling at a loss is always
+allowed and refills the budget, selling at a gain only up to 1% of portfolio
+value a year, and a name sold at a loss is not repurchased for 31 days. The
+result is "let winners run, cut losers" — enforced by the tax code.
+
+Press **"Beat the S&P (CA)"** in the web app to run it, or read
+[research/README.md](research/README.md) for the full evidence, the controls
+(random rankings collapse to SPY; momentum without the tax rule loses), and the
+honest weaknesses — including the **+1.3 to +2.2 pp/yr of survivorship bias**
+measured in this repo's per-stock data, which is why the strategy ranks index
+funds instead of companies.
+
+---
+
 ## How it's kept correct
 
 StockTest is implemented twice. `backtester/` and `reference/` are the Python
@@ -124,6 +154,7 @@ research, and reproducible batch runs.
 
 | Tool | What it does |
 |------|--------------|
+| `research/tax_managed_report.py` | Reproduces the whole tax-managed evidence table: fixed windows, rolling 5/10/15/20-year windows, random-ranking controls, tax-bracket and cost sensitivity. |
 | `grid_combos.py` | **The full sweep:** backtests every picker × timer combo (up to 100) over a date range and ranks them against SPY on a risk-adjusted basis. |
 | `walkforward.py` | Out-of-sample validation — runs the honest holdout / walk-forward checks that the web app's "Validate" button is built on. |
 | `grid_backtest.py` | Vectorized price-only picker × timer grid over the long history. |

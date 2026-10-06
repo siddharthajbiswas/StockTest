@@ -48,3 +48,12 @@ web/backend/store/*.json
 
 # TS build cache
 *.tsbuildinfo
+
+# ---- Strategy-search lab (research/lab) ----
+# Regenerable bulk: run cache, downloaded research-only prices/distributions,
+# CPU-slot lock files, and the agents' local working directories.
+research/lab/cache/
+research/lab/data/
+research/lab/divs/
+research/lab/.slots/
+research/lab/scratch/

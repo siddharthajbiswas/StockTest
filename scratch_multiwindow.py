@@ -15,6 +15,7 @@ import numpy as np
 import pandas as pd
 
 from backtester import Backtest, load_prices
+from backtester.data import universe_tickers
 
 BUFFER_DAYS = 400          # calendar-day lookback before each window (warms SMA200/RSI)
 CASH = 100_000.0
@@ -62,7 +63,7 @@ def window_metrics(equity: pd.DataFrame, w_start: str) -> dict:
 
 def main() -> int:
     print("Loading all tickers once...", flush=True)
-    prices_full = load_prices(None)  # everything, full history
+    prices_full = load_prices(universe_tickers())  # data/ minus UNIVERSE_EXCLUDE, full history
     print(f"Loaded {len(prices_full)} tickers.\n", flush=True)
 
     rows = []

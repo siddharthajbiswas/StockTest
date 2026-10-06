@@ -64,19 +64,19 @@ test("worker serves catalog and discovery endpoints", async () => {
   try {
     const health = await c.call("init");
     assert.equal(health.status, "ok");
-    assert.equal(health.tickers_loaded, 528);
+    assert.equal(health.tickers_loaded, 537);
     assert.ok(health.data_start && health.data_end, "data range reported");
     const { pickers } = await c.call("pickers");
     const { timers } = await c.call("timers");
     const { universes } = await c.call("universes");
     assert.equal(pickers.length, 10);
-    assert.equal(timers.length, 10);
+    assert.equal(timers.length, 11);
     assert.equal(universes.length, 2);
     // The catalog is the UI's source of truth for the look-ahead warnings.
     assert.equal(pickers.filter((p) => p.look_ahead_risk).length, 7);
     const all = await c.call("tickers");
-    assert.equal(all.tickers.length, 528);
-    assert.equal(all.universe.count, 528);
+    assert.equal(all.tickers.length, 537);
+    assert.equal(all.universe.count, 537);
   } finally {
     await c.close();
   }
@@ -221,7 +221,7 @@ test("concurrent requests are routed to the right callers", async () => {
     ]);
     assert.equal(h.status, "ok");
     assert.equal(p.pickers.length, 10);
-    assert.equal(t.timers.length, 10);
+    assert.equal(t.timers.length, 11);
     assert.equal(s.results[0].symbol, "AAPL");
   } finally {
     await c.close();

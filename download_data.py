@@ -30,6 +30,14 @@ EXTRA_TICKERS = [
     "SPY", "QQQ", "DIA", "IWM", "VTI", "VOO", "VEA", "VWO", "AGG", "TLT",
     "GLD", "SLV", "USO", "XLK", "XLF", "XLE", "XLV", "XLY", "XLP", "XLI",
     "XLU", "XLB", "XLRE", "XLC", "ARKK",
+    # Size / style / region index funds. These complete the survivorship-free
+    # menu that strategies/tax_managed.py ranks over — see its docstring for why
+    # that menu is ETFs rather than single stocks.
+    "MDY", "IJR", "RSP", "IWD", "IWF", "EFA", "EEM",
+    # The 2x trend-switch preset (timer "trend_switch"): a 2x S&P 500 ETF and
+    # intermediate Treasuries. Manual/menu mode only — both are listed in
+    # backtester.data.UNIVERSE_EXCLUDE, so stock pickers never see them.
+    "SSO", "IEF",
 ]
 
 # Fallback if Wikipedia is unreachable — a solid mega/large-cap set.

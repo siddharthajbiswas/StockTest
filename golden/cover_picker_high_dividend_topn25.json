@@ -7111,6 +7111,7 @@
     ],
     "tickers_used": null,
     "timer_id": "buy_hold",
+    "trade_rule": "standard",
     "trades": [
       {
         "commission": 2.001,

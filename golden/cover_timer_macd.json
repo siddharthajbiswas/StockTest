@@ -18423,6 +18423,7 @@
     ],
     "tickers_used": null,
     "timer_id": "macd",
+    "trade_rule": "standard",
     "trades": [
       {
         "commission": 12.50625,

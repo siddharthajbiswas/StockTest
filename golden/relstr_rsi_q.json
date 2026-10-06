@@ -9092,6 +9092,7 @@
     ],
     "tickers_used": null,
     "timer_id": "rsi",
+    "trade_rule": "standard",
     "trades": [
       {
         "commission": 49.97501249375312,

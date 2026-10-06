@@ -28,10 +28,15 @@ class StrategyConfig(BaseModel):
     timer_id: str
     timer_params: dict[str, Any] = Field(default_factory=dict)
     top_n: int = Field(15, ge=1, le=200)
-    rebalance: Literal["D", "W", "M", "Q"] = "M"
+    rebalance: Literal["D", "W", "M", "Q", "S", "A"] = "M"
+    menu: list[str] | None = None
+    trade_rule: Literal["standard", "tax_managed"] = "standard"
+    gain_budget: float = Field(0.01, ge=0, le=1)
+    wash_days: int = Field(31, ge=0, le=90)
     universe: Literal["all", "sp500-pit"] = "all"
     start: str | None = None
     end: str | None = None
+    warmup_days: int = Field(0, ge=0, le=2000)
     commission_pct: float = Field(0.0005, ge=0)
     slippage_pct: float = Field(0.0005, ge=0)
     tax: TaxSettings = Field(default_factory=TaxSettings)
@@ -82,12 +87,50 @@ class BacktestRequest(BaseModel):
 
     # --- portfolio / cadence ---
     top_n: int = Field(15, ge=1, le=200, description="Names held (AI mode).")
-    rebalance: Literal["D", "W", "M", "Q"] = "M"
+    rebalance: Literal["D", "W", "M", "Q", "S", "A"] = "M"
     cash: float = Field(100_000.0, gt=0)
+    menu: list[str] | None = Field(
+        None,
+        description="AI-picker mode: restrict the picker to this shortlist "
+                    "instead of the whole universe (e.g. an ETF menu).",
+    )
+
+    # --- how the portfolio is allowed to trade toward the target ---
+    trade_rule: Literal["standard", "tax_managed"] = Field(
+        "standard",
+        description=(
+            "'standard' rewrites weights whenever the basket changes. "
+            "'tax_managed' rations sales by a realized-gain budget: losses are "
+            "always harvestable, gains only up to `gain_budget` of portfolio "
+            "value per year. For a taxable account this is usually worth more "
+            "than the choice of signal."
+        ),
+    )
+    gain_budget: float = Field(
+        0.01, ge=0, le=1,
+        description="tax_managed only: cap on the year's NET realized gain, as "
+                    "a fraction of portfolio value. 0 = never take a net gain.",
+    )
+    wash_days: int = Field(
+        31, ge=0, le=90,
+        description="tax_managed only: days a name sold at a loss is barred "
+                    "from repurchase, so the loss is not a wash sale.",
+    )
+
 
     # --- date range (inclusive, YYYY-MM-DD); None = full available history ---
     start: str | None = None
     end: str | None = None
+    warmup_days: int = Field(
+        0, ge=0, le=2000,
+        description=(
+            "Calendar days of extra price history loaded BEFORE `start` purely "
+            "to warm up indicators. Nothing trades during it and it is clipped "
+            "out of the reported curve and metrics, so a long-lookback strategy "
+            "is not handicapped by spending the first months of the window in "
+            "cash with nothing to rank. 0 (the default) keeps the old behaviour."
+        ),
+    )
 
     # --- universe & costs ---
     universe: Literal["all", "sp500-pit"] = "all"
@@ -195,7 +238,8 @@ class BacktestResponse(BaseModel):
     timer_id: str
     universe: str
     period: dict[str, str]
-    tickers_used: list[str] | None = None  # manual mode: the basket actually run
+    tickers_used: list[str] | None = None  # manual/menu mode: the basket actually run
+    trade_rule: Literal["standard", "tax_managed"] = "standard"
     metrics: Metrics
     equity_curve: EquityCurve
     trades: list[TradeRecord]

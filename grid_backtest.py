@@ -19,7 +19,7 @@ import sys
 import numpy as np
 import pandas as pd
 
-from backtester.data import load_prices
+from backtester.data import load_prices, universe_tickers
 
 MEAS_START = "2000-01-01"     # measurement window start
 BUFFER_START = "1998-01-01"   # load earlier so 252-day indicators are warm at 2000
@@ -30,7 +30,8 @@ SEED = 42
 
 # ---------------------------------------------------------------- data loading
 def load_matrices():
-    prices = load_prices(None, start=BUFFER_START, end=END)
+    # The stock-picking universe: data/ minus UNIVERSE_EXCLUDE (SSO, IEF).
+    prices = load_prices(universe_tickers(), start=BUFFER_START, end=END)
     close = pd.DataFrame({t: df["Close"] for t, df in prices.items()}).sort_index()
     high = pd.DataFrame({t: df["High"] for t, df in prices.items()}).reindex_like(close)
     low = pd.DataFrame({t: df["Low"] for t, df in prices.items()}).reindex_like(close)

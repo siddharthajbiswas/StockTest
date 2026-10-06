@@ -12,6 +12,7 @@ export function SettingsPanel({
   dataRange,
 }) {
   const activeUniverse = universeOptions.find((u) => u.id === config.universe);
+  const shortlist = Array.isArray(config.menu) && config.menu.length > 0;
   const dataMin = dataRange?.start;
   const dataMax = dataRange?.end;
   // Whether the rates in force are the ones the helper currently computes, so
@@ -177,28 +178,53 @@ export function SettingsPanel({
         <div className="body">
           {mode === "ai" && (
             <>
-              <div className="field">
-                <label>
-                  Stock universe{" "}
-                  <InfoTip text="Which stocks the strategy may buy on each day." />
-                </label>
-                <select
-                  className="input"
-                  value={config.universe}
-                  onChange={(e) => update({ universe: e.target.value })}
-                >
-                  {universeOptions.map((u) => (
-                    <option key={u.id} value={u.id}>
-                      {u.name}
-                    </option>
-                  ))}
-                </select>
-                {activeUniverse && (
-                  <div className="caveat" style={{ marginTop: 10 }}>
-                    {activeUniverse.bias_caveat}
+              {/* A shortlist overrides the universe entirely — showing the
+                  universe picker (and its survivorship caveat) next to one
+                  would describe a setting that has no effect on the run. */}
+              {shortlist ? (
+                <div className="field">
+                  <label>
+                    Shortlist{" "}
+                    <InfoTip text="The strategy ranks only these tickers, so the stock-universe setting does not apply. Clear it to rank the whole universe again." />
+                  </label>
+                  <div className="caveat" style={{ marginTop: 0 }}>
+                    Ranking {config.menu.length} tickers:{" "}
+                    {config.menu.join(", ")}
+                    <br />
+                    <button
+                      type="button"
+                      className="btn ghost"
+                      style={{ marginTop: 8 }}
+                      onClick={() => update({ menu: null })}
+                    >
+                      Clear shortlist
+                    </button>
                   </div>
-                )}
-              </div>
+                </div>
+              ) : (
+                <div className="field">
+                  <label>
+                    Stock universe{" "}
+                    <InfoTip text="Which stocks the strategy may buy on each day." />
+                  </label>
+                  <select
+                    className="input"
+                    value={config.universe}
+                    onChange={(e) => update({ universe: e.target.value })}
+                  >
+                    {universeOptions.map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {u.name}
+                      </option>
+                    ))}
+                  </select>
+                  {activeUniverse && (
+                    <div className="caveat" style={{ marginTop: 10 }}>
+                      {activeUniverse.bias_caveat}
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className="row">
                 <div className="field">
@@ -225,11 +251,80 @@ export function SettingsPanel({
                     <option value="W">Weekly</option>
                     <option value="M">Monthly</option>
                     <option value="Q">Quarterly</option>
+                    <option value="S">Semi-annual</option>
+                    <option value="A">Annual</option>
                   </select>
                 </div>
               </div>
             </>
           )}
+
+          {/* Trading rule — how the portfolio is allowed to reach its target. */}
+          <div className="row">
+            <div className="field">
+              <label htmlFor="traderule">
+                Trading rule
+                <InfoTip
+                  label="What a trading rule does"
+                  text="The picker and timer decide what you want to hold. This decides what you are allowed to sell to get there — in a taxable account, usually the bigger number. Tax-managed rations sales against a yearly realized-gain budget: selling at a loss is always allowed and refills the budget, selling at a gain only up to the budget, smallest gains and long-term first. A name sold at a loss is not repurchased for 31 days, so the loss is not a wash sale. The effect is to let winners run and cut losers, because the tax code makes that the cheap move."
+                />
+              </label>
+              <select
+                id="traderule"
+                className="input"
+                value={config.tradeRule}
+                onChange={(e) => update({ tradeRule: e.target.value })}
+              >
+                <option value="standard">Standard (rebalance freely)</option>
+                <option value="tax_managed">Tax-managed (gain budget)</option>
+              </select>
+            </div>
+            {config.tradeRule === "tax_managed" && (
+              <div className="field">
+                <label htmlFor="gainbudget">
+                  Yearly gain budget (% of portfolio)
+                  <InfoTip
+                    label="Gain budget"
+                    text="The most net capital gain the strategy may realize in a year, as a share of portfolio value. 0% means it never ends a year with a net realized gain — maximally tax-efficient, but with nothing underwater to harvest it can end up stuck holding whatever it first bought. A small budget (1%) keeps it able to rotate through a long bull run. Above about 2% the tax drag starts to outweigh the extra freedom."
+                  />
+                </label>
+                <input
+                  id="gainbudget"
+                  type="number"
+                  className="input"
+                  min={0}
+                  max={100}
+                  step={0.5}
+                  value={config.gainBudgetPct}
+                  onChange={(e) =>
+                    update({ gainBudgetPct: Number(e.target.value) })
+                  }
+                />
+              </div>
+            )}
+          </div>
+
+          <div className="row">
+            <div className="field">
+              <label htmlFor="warmup">
+                Signal warm-up (days)
+                <InfoTip
+                  label="Why warm-up matters"
+                  text="A strategy that ranks on a 12-month window has nothing to rank on the first day of a backtest. Without warm-up it sits in cash for a year while the S&P compounds — a handicap from the harness, not the strategy. This loads that much extra price history BEFORE the start date. Nothing trades in it and it is clipped back out of the chart and the metrics, so the scorecard still covers exactly the window you asked for. Set it a little above your longest lookback; 450 days covers a 12-month signal."
+                />
+              </label>
+              <input
+                id="warmup"
+                type="number"
+                className="input"
+                min={0}
+                max={2000}
+                step={50}
+                value={config.warmupDays}
+                onChange={(e) => update({ warmupDays: Number(e.target.value) })}
+              />
+            </div>
+          </div>
 
           <div className="row">
             <div className="field">

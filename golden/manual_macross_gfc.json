@@ -5859,6 +5859,7 @@
       "KO"
     ],
     "timer_id": "ma_cross",
+    "trade_rule": "standard",
     "trades": [
       {
         "commission": 12.506249999999998,

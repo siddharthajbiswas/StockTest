@@ -248,6 +248,15 @@ export const TIMER_DETAIL = {
       "A fixed percentage stop ignores how volatile the stock actually is: too tight for a volatile name and you are stopped out by noise, too loose for a calm one and it never triggers. Stops also convert paper losses into realized ones, and lock in the sale at the worst moment.",
     wiki: WIKI("Stop-loss order", "Stop-loss_order"),
   },
+  trend_switch: {
+    summary:
+      "Holds a leveraged S&P 500 fund while SPY is in an uptrend and switches to Treasury bonds when it isn't — checked every trading day at the close.",
+    rationale:
+      "Leveraged funds earn their keep in calm, rising markets and do their damage in long declines. A slow trend filter tries to keep the leverage only for the first kind: once SPY is more than the band above its 175-day average, hold the 2× fund; once it is more than the band below, hold intermediate Treasuries, which have often risen when stocks fell. The band stops the rule flip-flopping while SPY hovers near its average.",
+    weakness:
+      "Leverage magnifies losses, and the rule only reacts at the close — a sudden crash hits a 2× fund twice as hard before it can switch. In a choppy, sideways market it whipsaws, and every switch is a taxable sale. Bonds are not a guaranteed hedge: in 2022 stocks and Treasuries fell together, and this rule's deepest drawdown came then. And no leveraged ETF existed before mid-2006, so the test has seen only a few bear markets — and this exact setting was chosen from many tried on that same history.",
+    wiki: WIKI("Trend following", "Trend_following"),
+  },
 };
 const RANK = { good: 0, low: 1, moderate: 2, high: 3 };
 export function overallTrust(items) {
@@ -275,8 +284,58 @@ function yearsBetween(start, end) {
  * flag) and the universe option that was used (with its `bias_caveat` text),
  * both straight from the shipped strategy catalog (build/webdata/catalog.json).
  */
+/**
+ * Broad index ETFs — the corner of this dataset with no survivorship problem,
+ * since each of these funds still trades. Mirrors DEFAULT_MENU in
+ * strategies/tax_managed.py plus the other funds shipped in data/.
+ */
+const INDEX_FUNDS = new Set([
+  "SPY", "QQQ", "DIA", "MDY", "IWM", "IJR", "EFA", "EEM", "IWD", "IWF", "RSP",
+  "VTI", "VOO", "VEA", "VWO", "AGG", "TLT", "IEF", "GLD", "SLV", "USO", "ARKK",
+  "XLB", "XLC", "XLE", "XLF", "XLI", "XLK", "XLP", "XLRE", "XLU", "XLV", "XLY",
+]);
+
+/**
+ * Daily-reset leveraged and inverse ETFs -> their daily multiple of the index.
+ * Only SSO ships in data/ today; the others are listed so the warning still
+ * fires if one is ever added. No leveraged ETF traded before June 2006.
+ */
+const LEVERAGED_ETFS = new Map(Object.entries({
+  SSO: 2, QLD: 2, DDM: 2, MVV: 2, UWM: 2, UBT: 2,
+  UPRO: 3, SPXL: 3, TQQQ: 3, UDOW: 3, TNA: 3, TMF: 3, TYD: 3,
+  SDS: -2, QID: -2, SPXU: -3, SPXS: -3, SQQQ: -3, TZA: -3,
+}));
+
+/** The honest caveats for a leveraged fund in the basket, or null if none. */
+function leverageCaveat(basket) {
+  const lev = (basket ?? []).filter((t) => LEVERAGED_ETFS.has(t));
+  if (lev.length === 0) return null;
+  const maxX = Math.max(...lev.map((t) => Math.abs(LEVERAGED_ETFS.get(t))));
+  const first = lev[0];
+  const m = LEVERAGED_ETFS.get(first);
+  const x = Math.abs(m);
+  const names = lev.join(", ");
+  const short =
+    lev.includes("SSO")
+      ? "SSO only began trading in June 2006, so no backtest can hold it earlier — a window that starts before then sits in cash or the safe asset until it exists — and the test has seen only a few bear markets."
+      : "No leveraged ETF traded before mid-2006, so the test has seen only a few bear markets.";
+  return {
+    level: maxX >= 3 ? "high" : "moderate",
+    title: `${names} ${lev.length === 1 ? "is a leveraged fund" : "are leveraged funds"} — losses are magnified too`,
+    body:
+      `${first} resets every day to ${m < 0 ? "−" : ""}${x}× the index's daily move. That magnifies losses as much as gains: on a day the index moves 10% the wrong way, a ${x}× fund loses about ${10 * x}%, and a rule checked at the close can only react afterwards. ` +
+      "Daily-reset funds also decay in choppy, sideways markets — the index can end flat while the fund ends down. " +
+      "This result assumes the rule was followed every single trading day at the close, with no exceptions or delays. " +
+      short +
+      (lev.includes("SSO")
+        ? " In this project's research the SSO trend rule beat SPY after California tax over most past periods, but not with statistical confidence: almost all of its lead came from sidestepping 2000-02 and 2008, its after-tax edge since 2010 was about zero, and the same rule did no better than buy-and-hold on 33 other stock markets (research/STRATEGY_SEARCH.md)."
+        : ""),
+  };
+}
+
 export function assessTrust(args) {
-  const { mode, picker, universeOption, period } = args;
+  const { mode, picker, universeOption, period, tickersUsed, tradeRule, basket } =
+    args;
   const items = [];
   const span = yearsBetween(period.start, period.end);
   // 1. Look-ahead risk from the picker's data source.
@@ -301,12 +360,41 @@ export function assessTrust(args) {
     }
   }
   // 2. Universe bias — pull the caveat text straight from the universe metadata.
-  if (mode === "manual") {
-    items.push({
-      level: "moderate",
-      title: "You picked from today's well-known survivors",
-      body: "The ~530 selectable stocks are companies that are prominent enough to still have data today. Firms that went bankrupt or were delisted aren't here, so hand-picking familiar names tends to look better than investing blindly would have.",
-    });
+  // A shortlist of index funds is the one case with no survivorship problem to
+  // warn about, so it must not inherit the full-dataset caveat below.
+  const shortlist = mode !== "manual" && tickersUsed && tickersUsed.length > 0;
+  if (shortlist) {
+    const allFunds = tickersUsed.every((t) => INDEX_FUNDS.has(t));
+    items.push(
+      allFunds
+        ? {
+            level: "good",
+            title: "A shortlist of index funds — no survivorship bias",
+            body: `The strategy ranked ${tickersUsed.length} broad index ETFs rather than individual companies. Every one of them still trades today and was buyable on the day the backtest says so, so unlike the per-stock data there are no quietly-missing losers inflating the result.`,
+          }
+        : {
+            level: "moderate",
+            title: "You ranked a shortlist you chose yourself",
+            body: `The strategy only ever considered the ${tickersUsed.length} tickers on your shortlist. If you assembled that list knowing how these names turned out, the result flatters itself no matter how the ranking works.`,
+          },
+    );
+  } else if (mode === "manual") {
+    const funds =
+      (basket ?? []).length > 0 &&
+      basket.every((t) => INDEX_FUNDS.has(t) || LEVERAGED_ETFS.has(t));
+    items.push(
+      funds
+        ? {
+            level: "moderate",
+            title: "You chose these funds with hindsight",
+            body: "Every fund in your basket still trades, so the prices carry no survivorship bias. But you picked the funds (and any rule settings) knowing how this period turned out, and a combination tuned on the same history it is tested on tends to look better than it will going forward.",
+          }
+        : {
+            level: "moderate",
+            title: "You picked from today's well-known survivors",
+            body: "The ~530 selectable stocks are companies that are prominent enough to still have data today. Firms that went bankrupt or were delisted aren't here, so hand-picking familiar names tends to look better than investing blindly would have.",
+          },
+    );
   } else if (universeOption) {
     if (universeOption.id === "sp500-pit") {
       items.push({
@@ -322,7 +410,18 @@ export function assessTrust(args) {
       });
     }
   }
-  // 3. Always-on reminder about what "after-tax" assumes.
+  // 3. The trading rule, when it is doing the heavy lifting.
+  if (tradeRule === "tax_managed") {
+    items.push({
+      level: "moderate",
+      title: "Most of this edge is the trading rule, not the signal",
+      body: "The tax-managed rule rations sales against a yearly realized-gain budget, which cuts the tax drag by roughly 3 points a year. Run the same combo with the standard rule to see how little the ranking is worth on its own — and remember this only helps in a taxable account. In an IRA or 401(k) there is nothing to defer.",
+    });
+  }
+  // 4. Leveraged funds anywhere in the basket (manual or a picker's menu).
+  const leverage = leverageCaveat(basket);
+  if (leverage) items.push(leverage);
+  // 5. Always-on reminder about what "after-tax" assumes.
   items.push({
     level: "low",
     title: "After-tax numbers assume you sell everything at the end",
